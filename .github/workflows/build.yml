@@ -38,7 +38,7 @@ jobs:
       - name: Abhängigkeiten installieren
         run: python -m pip install -r requirements-dev.txt
       - name: Automatisierte Tests
-        run: python -m pytest -q
+        run: python scripts/run_tests.py
       - name: Eigenständig startbares Paket erstellen
         run: python scripts/build.py
       - name: Gebautes Programm mit Solver und Oberfläche prüfen
