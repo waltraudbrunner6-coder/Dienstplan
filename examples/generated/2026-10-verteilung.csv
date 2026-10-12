@@ -1,0 +1,49 @@
+﻿Person;Schichttyp;Einsätze im Monat;Stunden im Monat;Fairer Anteil Einsätze;Abweichung Einsätze;Fairer Anteil Stunden;Abweichung Stunden;Besondere Einsätze Historie;Fairer Anteil Historie;Besondere Stunden Historie;Fairer Stundenanteil Historie;Besondere Abweichung einschließlich Historie;Besondere Stundenabweichung einschließlich Historie
+Anna Beispiel;Frühdienst;6;48,00;6,53;-0,53;52,21;-4,21;0;0,00;0,00;0,00;0,00;0,00
+Ben Muster;Frühdienst;7;56,00;6,53;0,47;52,21;3,79;0;0,00;0,00;0,00;0,00;0,00
+Clara Test;Frühdienst;5;40,00;5,87;-0,87;46,99;-6,99;0;0,00;0,00;0,00;0,00;0,00
+David Demo;Frühdienst;6;48,00;5,87;0,13;46,99;1,01;0;0,00;0,00;0,00;0,00;0,00
+Eva Beispiel;Frühdienst;5;40,00;5,22;-0,22;41,77;-1,77;0;0,00;0,00;0,00;0,00;0,00
+Felix Muster;Frühdienst;5;40,00;5,22;-0,22;41,77;-1,77;0;0,00;0,00;0,00;0,00;0,00
+Greta Test;Frühdienst;5;40,00;4,89;0,11;39,16;0,84;0;0,00;0,00;0,00;0,00;0,00
+Hannes Demo;Frühdienst;5;40,00;4,89;0,11;39,16;0,84;0;0,00;0,00;0,00;0,00;0,00
+Ida Beispiel;Frühdienst;5;40,00;4,57;0,43;36,55;3,45;0;0,00;0,00;0,00;0,00;0,00
+Jonas Muster;Frühdienst;5;40,00;4,57;0,43;36,55;3,45;0;0,00;0,00;0,00;0,00;0,00
+Klara Test;Frühdienst;4;32,00;3,92;0,08;31,33;0,67;0;0,00;0,00;0,00;0,00;0,00
+Leon Demo;Frühdienst;4;32,00;3,92;0,08;31,33;0,67;0;0,00;0,00;0,00;0,00;0,00
+Anna Beispiel;Spätdienst;6;48,00;6,53;-0,53;52,21;-4,21;0;0,00;0,00;0,00;0,00;0,00
+Ben Muster;Spätdienst;6;48,00;6,53;-0,53;52,21;-4,21;0;0,00;0,00;0,00;0,00;0,00
+Clara Test;Spätdienst;6;48,00;5,87;0,13;46,99;1,01;0;0,00;0,00;0,00;0,00;0,00
+David Demo;Spätdienst;6;48,00;5,87;0,13;46,99;1,01;0;0,00;0,00;0,00;0,00;0,00
+Eva Beispiel;Spätdienst;5;40,00;5,22;-0,22;41,77;-1,77;0;0,00;0,00;0,00;0,00;0,00
+Felix Muster;Spätdienst;5;40,00;5,22;-0,22;41,77;-1,77;0;0,00;0,00;0,00;0,00;0,00
+Greta Test;Spätdienst;5;40,00;4,89;0,11;39,16;0,84;0;0,00;0,00;0,00;0,00;0,00
+Hannes Demo;Spätdienst;5;40,00;4,89;0,11;39,16;0,84;0;0,00;0,00;0,00;0,00;0,00
+Ida Beispiel;Spätdienst;5;40,00;4,57;0,43;36,55;3,45;0;0,00;0,00;0,00;0,00;0,00
+Jonas Muster;Spätdienst;5;40,00;4,57;0,43;36,55;3,45;0;0,00;0,00;0,00;0,00;0,00
+Klara Test;Spätdienst;4;32,00;3,92;0,08;31,33;0,67;0;0,00;0,00;0,00;0,00;0,00
+Leon Demo;Spätdienst;4;32,00;3,92;0,08;31,33;0,67;0;0,00;0,00;0,00;0,00;0,00
+Anna Beispiel;Nachtdienst;6;48,00;6,53;-0,53;52,21;-4,21;0;0,00;0,00;0,00;0,00;0,00
+Ben Muster;Nachtdienst;7;56,00;6,53;0,47;52,21;3,79;0;0,00;0,00;0,00;0,00;0,00
+Clara Test;Nachtdienst;6;48,00;5,87;0,13;46,99;1,01;0;0,00;0,00;0,00;0,00;0,00
+David Demo;Nachtdienst;6;48,00;5,87;0,13;46,99;1,01;0;0,00;0,00;0,00;0,00;0,00
+Eva Beispiel;Nachtdienst;5;40,00;5,22;-0,22;41,77;-1,77;0;0,00;0,00;0,00;0,00;0,00
+Felix Muster;Nachtdienst;5;40,00;5,22;-0,22;41,77;-1,77;0;0,00;0,00;0,00;0,00;0,00
+Greta Test;Nachtdienst;5;40,00;4,89;0,11;39,16;0,84;0;0,00;0,00;0,00;0,00;0,00
+Hannes Demo;Nachtdienst;4;32,00;4,89;-0,89;39,16;-7,16;0;0,00;0,00;0,00;0,00;0,00
+Ida Beispiel;Nachtdienst;5;40,00;4,57;0,43;36,55;3,45;0;0,00;0,00;0,00;0,00;0,00
+Jonas Muster;Nachtdienst;5;40,00;4,57;0,43;36,55;3,45;0;0,00;0,00;0,00;0,00;0,00
+Klara Test;Nachtdienst;4;32,00;3,92;0,08;31,33;0,67;0;0,00;0,00;0,00;0,00;0,00
+Leon Demo;Nachtdienst;4;32,00;3,92;0,08;31,33;0,67;0;0,00;0,00;0,00;0,00;0,00
+Anna Beispiel;Besonderer Dienst;1;12,00;0,84;0,16;10,11;1,89;0;0,00;0,00;0,00;0,16;1,89
+Ben Muster;Besonderer Dienst;1;12,00;0,84;0,16;10,11;1,89;0;0,00;0,00;0,00;0,16;1,89
+Clara Test;Besonderer Dienst;1;12,00;0,76;0,24;9,09;2,91;0;0,00;0,00;0,00;0,24;2,91
+David Demo;Besonderer Dienst;1;12,00;0,76;0,24;9,09;2,91;0;0,00;0,00;0,00;0,24;2,91
+Eva Beispiel;Besonderer Dienst;1;12,00;0,67;0,33;8,08;3,92;0;0,00;0,00;0,00;0,33;3,92
+Felix Muster;Besonderer Dienst;1;12,00;0,67;0,33;8,08;3,92;0;0,00;0,00;0,00;0,33;3,92
+Greta Test;Besonderer Dienst;1;12,00;0,63;0,37;7,58;4,42;0;0,00;0,00;0,00;0,37;4,42
+Hannes Demo;Besonderer Dienst;1;12,00;0,63;0,37;7,58;4,42;0;0,00;0,00;0,00;0,37;4,42
+Ida Beispiel;Besonderer Dienst;0;0,00;0,59;-0,59;7,07;-7,07;0;0,00;0,00;0,00;-0,59;-7,07
+Jonas Muster;Besonderer Dienst;0;0,00;0,59;-0,59;7,07;-7,07;0;0,00;0,00;0,00;-0,59;-7,07
+Klara Test;Besonderer Dienst;0;0,00;0,51;-0,51;6,06;-6,06;0;0,00;0,00;0,00;-0,51;-6,06
+Leon Demo;Besonderer Dienst;0;0,00;0,51;-0,51;6,06;-6,06;0;0,00;0,00;0,00;-0,51;-6,06

@@ -1,0 +1,347 @@
+[
+  {
+    "monat": "2026-10",
+    "status": "feasible",
+    "offene_plaetze": 0,
+    "bedarf_stunden": 1584.0,
+    "planungsziele_stunden": 1680.8666666666666,
+    "optimalitaet_stufen": [
+      true,
+      true,
+      false
+    ],
+    "sekunden": 20.009,
+    "hinweise": [
+      "Rechnerischer Stundenvergleich: Der vollständige Bedarf von 1584.00 Mitarbeiterstunden liegt 96.87 Stunden unter den individuellen Planungszielen (1680.87 Stunden). Genaue Zielerreichung aller Personen bei voller Besetzung ist damit unmöglich.",
+      "Gültiger Entwurf ohne vollständigen Optimalitätsnachweis; Zeitlimit oder Abbruch begrenzte die Suche."
+    ],
+    "sonderverteilung": [
+      {
+        "name": "Anna Beispiel",
+        "count": 1,
+        "expected_count": 0.8421052631578947,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": 0.15789473684210525
+      },
+      {
+        "name": "Ben Muster",
+        "count": 1,
+        "expected_count": 0.8421052631578947,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": 0.15789473684210525
+      },
+      {
+        "name": "Clara Test",
+        "count": 1,
+        "expected_count": 0.7578947368421053,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": 0.24210526315789474
+      },
+      {
+        "name": "David Demo",
+        "count": 1,
+        "expected_count": 0.7578947368421053,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": 0.24210526315789474
+      },
+      {
+        "name": "Eva Beispiel",
+        "count": 1,
+        "expected_count": 0.6736842105263158,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": 0.3263157894736842
+      },
+      {
+        "name": "Felix Muster",
+        "count": 1,
+        "expected_count": 0.6736842105263158,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": 0.3263157894736842
+      },
+      {
+        "name": "Greta Test",
+        "count": 1,
+        "expected_count": 0.631578947368421,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": 0.3684210526315789
+      },
+      {
+        "name": "Hannes Demo",
+        "count": 1,
+        "expected_count": 0.631578947368421,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": 0.3684210526315789
+      },
+      {
+        "name": "Ida Beispiel",
+        "count": 0,
+        "expected_count": 0.5894736842105263,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": -0.5894736842105263
+      },
+      {
+        "name": "Jonas Muster",
+        "count": 0,
+        "expected_count": 0.5894736842105263,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": -0.5894736842105263
+      },
+      {
+        "name": "Klara Test",
+        "count": 0,
+        "expected_count": 0.5052631578947369,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": -0.5052631578947369
+      },
+      {
+        "name": "Leon Demo",
+        "count": 0,
+        "expected_count": 0.5052631578947369,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "cumulative_deviation": -0.5052631578947369
+      }
+    ]
+  },
+  {
+    "monat": "2026-11",
+    "status": "feasible",
+    "offene_plaetze": 0,
+    "bedarf_stunden": 1536.0,
+    "planungsziele_stunden": 1626.5666666666666,
+    "optimalitaet_stufen": [
+      true,
+      true,
+      false
+    ],
+    "sekunden": 20.009,
+    "hinweise": [
+      "Rechnerischer Stundenvergleich: Der vollständige Bedarf von 1536.00 Mitarbeiterstunden liegt 90.57 Stunden unter den individuellen Planungszielen (1626.57 Stunden). Genaue Zielerreichung aller Personen bei voller Besetzung ist damit unmöglich.",
+      "Gültiger Entwurf ohne vollständigen Optimalitätsnachweis; Zeitlimit oder Abbruch begrenzte die Suche."
+    ],
+    "sonderverteilung": [
+      {
+        "name": "Anna Beispiel",
+        "count": 1,
+        "expected_count": 0.8421052631578947,
+        "historical_count": 1,
+        "historical_expected": 0.8421052631578947,
+        "cumulative_deviation": 0.3157894736842105
+      },
+      {
+        "name": "Ben Muster",
+        "count": 1,
+        "expected_count": 0.8421052631578947,
+        "historical_count": 1,
+        "historical_expected": 0.8421052631578947,
+        "cumulative_deviation": 0.3157894736842105
+      },
+      {
+        "name": "Clara Test",
+        "count": 1,
+        "expected_count": 0.7578947368421053,
+        "historical_count": 1,
+        "historical_expected": 0.7578947368421053,
+        "cumulative_deviation": 0.4842105263157895
+      },
+      {
+        "name": "David Demo",
+        "count": 1,
+        "expected_count": 0.7578947368421053,
+        "historical_count": 1,
+        "historical_expected": 0.7578947368421053,
+        "cumulative_deviation": 0.4842105263157895
+      },
+      {
+        "name": "Eva Beispiel",
+        "count": 0,
+        "expected_count": 0.6736842105263158,
+        "historical_count": 1,
+        "historical_expected": 0.6736842105263158,
+        "cumulative_deviation": -0.3473684210526316
+      },
+      {
+        "name": "Felix Muster",
+        "count": 0,
+        "expected_count": 0.6736842105263158,
+        "historical_count": 1,
+        "historical_expected": 0.6736842105263158,
+        "cumulative_deviation": -0.3473684210526316
+      },
+      {
+        "name": "Greta Test",
+        "count": 0,
+        "expected_count": 0.631578947368421,
+        "historical_count": 1,
+        "historical_expected": 0.631578947368421,
+        "cumulative_deviation": -0.2631578947368421
+      },
+      {
+        "name": "Hannes Demo",
+        "count": 0,
+        "expected_count": 0.631578947368421,
+        "historical_count": 1,
+        "historical_expected": 0.631578947368421,
+        "cumulative_deviation": -0.2631578947368421
+      },
+      {
+        "name": "Ida Beispiel",
+        "count": 1,
+        "expected_count": 0.5894736842105263,
+        "historical_count": 0,
+        "historical_expected": 0.5894736842105263,
+        "cumulative_deviation": -0.17894736842105263
+      },
+      {
+        "name": "Jonas Muster",
+        "count": 1,
+        "expected_count": 0.5894736842105263,
+        "historical_count": 0,
+        "historical_expected": 0.5894736842105263,
+        "cumulative_deviation": -0.17894736842105263
+      },
+      {
+        "name": "Klara Test",
+        "count": 1,
+        "expected_count": 0.5052631578947369,
+        "historical_count": 0,
+        "historical_expected": 0.5052631578947369,
+        "cumulative_deviation": -0.010526315789473684
+      },
+      {
+        "name": "Leon Demo",
+        "count": 1,
+        "expected_count": 0.5052631578947369,
+        "historical_count": 0,
+        "historical_expected": 0.5052631578947369,
+        "cumulative_deviation": -0.010526315789473684
+      }
+    ]
+  },
+  {
+    "monat": "2026-12",
+    "status": "feasible",
+    "offene_plaetze": 0,
+    "bedarf_stunden": 1608.0,
+    "planungsziele_stunden": 1680.8666666666666,
+    "optimalitaet_stufen": [
+      true,
+      true,
+      false
+    ],
+    "sekunden": 20.018,
+    "hinweise": [
+      "Rechnerischer Stundenvergleich: Der vollständige Bedarf von 1608.00 Mitarbeiterstunden liegt 72.87 Stunden unter den individuellen Planungszielen (1680.87 Stunden). Genaue Zielerreichung aller Personen bei voller Besetzung ist damit unmöglich.",
+      "Gültiger Entwurf ohne vollständigen Optimalitätsnachweis; Zeitlimit oder Abbruch begrenzte die Suche."
+    ],
+    "sonderverteilung": [
+      {
+        "name": "Anna Beispiel",
+        "count": 1,
+        "expected_count": 1.0526315789473684,
+        "historical_count": 2,
+        "historical_expected": 1.6842105263157894,
+        "cumulative_deviation": 0.2631578947368421
+      },
+      {
+        "name": "Ben Muster",
+        "count": 1,
+        "expected_count": 1.0526315789473684,
+        "historical_count": 2,
+        "historical_expected": 1.6842105263157894,
+        "cumulative_deviation": 0.2631578947368421
+      },
+      {
+        "name": "Clara Test",
+        "count": 1,
+        "expected_count": 0.9473684210526315,
+        "historical_count": 2,
+        "historical_expected": 1.5157894736842106,
+        "cumulative_deviation": 0.5368421052631579
+      },
+      {
+        "name": "David Demo",
+        "count": 1,
+        "expected_count": 0.9473684210526315,
+        "historical_count": 2,
+        "historical_expected": 1.5157894736842106,
+        "cumulative_deviation": 0.5368421052631579
+      },
+      {
+        "name": "Eva Beispiel",
+        "count": 1,
+        "expected_count": 0.8421052631578947,
+        "historical_count": 1,
+        "historical_expected": 1.3473684210526315,
+        "cumulative_deviation": -0.18947368421052632
+      },
+      {
+        "name": "Felix Muster",
+        "count": 1,
+        "expected_count": 0.8421052631578947,
+        "historical_count": 1,
+        "historical_expected": 1.3473684210526315,
+        "cumulative_deviation": -0.18947368421052632
+      },
+      {
+        "name": "Greta Test",
+        "count": 1,
+        "expected_count": 0.7894736842105263,
+        "historical_count": 1,
+        "historical_expected": 1.263157894736842,
+        "cumulative_deviation": -0.05263157894736842
+      },
+      {
+        "name": "Hannes Demo",
+        "count": 1,
+        "expected_count": 0.7894736842105263,
+        "historical_count": 1,
+        "historical_expected": 1.263157894736842,
+        "cumulative_deviation": -0.05263157894736842
+      },
+      {
+        "name": "Ida Beispiel",
+        "count": 1,
+        "expected_count": 0.7368421052631579,
+        "historical_count": 1,
+        "historical_expected": 1.1789473684210525,
+        "cumulative_deviation": 0.08421052631578947
+      },
+      {
+        "name": "Jonas Muster",
+        "count": 1,
+        "expected_count": 0.7368421052631579,
+        "historical_count": 1,
+        "historical_expected": 1.1789473684210525,
+        "cumulative_deviation": 0.08421052631578947
+      },
+      {
+        "name": "Klara Test",
+        "count": 0,
+        "expected_count": 0.631578947368421,
+        "historical_count": 1,
+        "historical_expected": 1.0105263157894737,
+        "cumulative_deviation": -0.6421052631578947
+      },
+      {
+        "name": "Leon Demo",
+        "count": 0,
+        "expected_count": 0.631578947368421,
+        "historical_count": 1,
+        "historical_expected": 1.0105263157894737,
+        "cumulative_deviation": -0.6421052631578947
+      }
+    ]
+  }
+]
