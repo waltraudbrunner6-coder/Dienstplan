@@ -18,6 +18,8 @@ def main() -> int:
     parser.add_argument("--no-strip", action="store_true", help="Linux-Debugsymbole für Diagnose erhalten")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0,str(root))
+    from dienstplan import __version__
     output = (args.output or root / "dist").resolve()
     working = root / "build" / "desktop"
     working.mkdir(parents=True, exist_ok=True)
@@ -68,6 +70,7 @@ def main() -> int:
         with tarfile.open(archive, "w:gz", compresslevel=6) as package:
             package.add(artifact, arcname=artifact.name)
     result = {
+        "version": __version__,
         "platform": platform_name, "architecture": architecture,
         "python": platform.python_version(), "artifact": str(artifact),
         "bytes": byte_count, "mib": round(byte_count / (1024 * 1024), 2),

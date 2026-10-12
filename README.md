@@ -8,11 +8,12 @@ Im fertigen Windows-Paket `Dienstplan.exe` öffnen; auf macOS `Dienstplan.app` �
 
 1. Monat und Jahr wählen. Die Monatslänge wird automatisch berücksichtigt.
 2. Team mit Namen, Wochenstunden, Anfangssaldo und gewünschtem Endsaldo erfassen. Wochenstunden dürfen Nachkommastellen haben.
-3. Drei tägliche Schichten und die längere wöchentliche Schicht mit Wochentag konfigurieren. Standardbesetzung: zwei verschiedene Personen je Termin. Start, Ende, Pause und Besetzung gelten für den gewählten Monat.
-4. Sperren je Person manuell eintragen oder über eine CSV-Vorschau importieren.
-5. Regeln und Rechenzeit wählen und **Dienstplan erstellen** anklicken. Die Berechnung läuft im Hintergrund und ist abbrechbar.
-6. Offene Plätze, übergangene Wünsche, Stunden und Verteilung prüfen. Zuteilungen können geändert und für die nächste Berechnung fixiert werden.
-7. Monat speichern; erst bei endgültiger Prüfung für die Historie bestätigen. Tabellen können als CSV exportiert werden.
+3. Drei tägliche Schichten und die wöchentliche besondere Schicht mit Wochentag konfigurieren. Standardbesetzung: zwei verschiedene Personen je Termin. Start, Ende, Pause und Besetzung gelten für den gewählten Monat.
+4. Unter **Ausnahmetage** tägliche Dienste an einzelnen Tagen entfallen lassen; die besondere Schicht bleibt aktiv.
+5. Sperren je Person manuell eintragen oder über eine CSV-Vorschau importieren.
+6. Regeln und Rechenzeit wählen und **Dienstplan erstellen** anklicken. Die Berechnung läuft im Hintergrund und ist abbrechbar.
+7. Offene Plätze, übergangene Wünsche, Stunden und Verteilung prüfen. Zuteilungen können geändert und für die nächste Berechnung fixiert werden.
+8. Monat speichern; erst bei endgültiger Prüfung für die Historie bestätigen. Tabellen können als CSV exportiert werden.
 
 Ein bereits vorhandener Plan wird vor einer neuen Berechnung nicht unbemerkt ersetzt. Die Schichten lassen sich in einen Folgemonat kopieren; bereits gespeicherte Monate behalten ihre eigenen Einstellungen. Die Datenbank liegt standardmäßig im lokalen Anwendungsdatenordner des Betriebssystems. Über `--database DATEI` lässt sich für Entwicklung und Sicherung ein anderer Speicherort wählen. Für eine Sicherung die Anwendung schließen und die SQLite-Datei kopieren. Ein Verlust dieser Datei bedeutet den Verlust der lokalen Daten.
 
@@ -81,21 +82,46 @@ Alle Personen können alle vier Schichttypen übernehmen. Überlappungen, Priori
 
 Schichten mit Endzeit vor oder gleich der Startzeit enden am Folgetag. Unbezahlte Pausen vermindern die bezahlte Dauer. Die gesamte Schicht zählt für Monatssoll und Historie zum Monat ihres Startdatums. Sperren, Überschneidungen und Ruhezeiten berücksichtigen den tatsächlichen vollständigen Zeitraum, auch über die Monatsgrenze. Gespeicherte Zuteilungen anderer Monate werden als Randbedingungen berücksichtigt; unbekannte Schichten außerhalb der gespeicherten Daten können nicht geprüft werden. Für Tages- und ISO-Kalenderwochengrenzen werden bezahlte Minuten über Mitternacht aufgeteilt; die Pause wird rechnerisch am Schichtende abgezogen. Zeiten werden als lokale Kalenderzeiten ohne Zeitzonen-/Sommerzeitkorrektur behandelt. Daher entsteht in dieser Version bei einer Zeitumstellung keine zusätzliche oder kürzere bezahlte Stunde.
 
-Die Optimierung erfolgt in drei Stufen:
+Die besondere Schicht wird durch ihren wöchentlichen Termin bestimmt. Sie darf kürzer, gleich lang oder länger als die täglichen Dienste sein; ihre tatsächliche bezahlte Dauer zählt für Stunden und Verteilung.
 
-1. Möglichst viele Besetzungsplätze füllen.
-2. Bei nachgewiesen optimaler Besetzung möglichst wenige verschiedene Priorität-2-Einträge übergehen.
-3. Bei nachgewiesenen höheren Zielen Stundenabweichungen und faire Schichtverteilung gemeinsam verbessern.
+### Ausnahmetage
 
-Eine niedrigere Stufe darf ein nachweislich optimales höheres Ziel nicht verschlechtern. Ein ausgewogener, durch dieselben Regeln geprüfter Startvorschlag beschleunigt die dritte Suche, sofern er die bereits bewiesene Besetzung und Wunschanzahl genau beibehält. Anschließend optimiert CP-SAT die vollständige Zielfunktion. Bei einem Zeitlimit wird ein gültiges vorhandenes Ergebnis mit seinem tatsächlichen Nachweisstatus zurückgegeben. Offene Plätze bleiben sichtbar; verbindliche Regeln werden nicht dafür verletzt. „Kein Ergebnis innerhalb des Zeitlimits“ bedeutet keinen Beweis der Unlösbarkeit.
+In der Monatsansicht **Ausnahmetage** bedeutet ein Haken **entfällt**. Jede der drei täglichen Schichten ist je Datum unabhängig deaktivierbar. Mehrere Zeilen auswählen, um alle täglichen Dienste dieser Tage abzuschalten; einzelne Haken oder „Ausnahmen aufheben“ aktivieren sie wieder. Die wöchentliche besondere Schicht ist davon unberührt. Es zählt das Startdatum: eine Nacht vom 15. in den 16. bleibt bestehen, wenn die Nacht des 16. entfällt.
 
-Faire Sollanteile richten sich nach den vertraglichen Wochenstunden. Die dritte Stufe minimiert diese Summe absoluter Abweichungen:
+Entfallene Termine zählen weder zu Bedarf, offenen Plätzen noch Planung/Fairness und Wunschrelevanz. CSV-Dienstplanexporte führen sie als **ENTFÄLLT** ohne Besetzungsplatz oder Mitarbeiterstunden. Bei vorhandenen Zuteilungen zeigt die Anwendung vor der Übernahme die entfallenden Personen und Fixierungen; nach Zustimmung werden genau diese Einsätze aus dem aktuellen Entwurf entfernt. Bestätigte Monate bleiben geschützt. Ausnahmen gehören nur zum jeweiligen Monat und werden beim Übernehmen einer Vorlage in einen neuen Monat nicht mitkopiert.
 
-`10 × Zielabweichungen in Minuten + je Schichttyp Faktor × (60 × Anzahlabweichungen + Minutenabweichungen) + 8 × (60 × kumulierte besondere Anzahlabweichungen + kumulierte besondere Minutenabweichungen)`
+### Freiwünsche und Nachweisstatus
 
-Der Faktor pro Schichttyp ist 1 für tägliche und 4 für besondere Schichten. Damit zählen Anzahl und Stunden; die lange Schicht und ihr historischer Ausgleich erhalten mehr Gewicht. Die Sollanteile werden für den Solver auf Tausendstel aufgeteilt, wobei ihre Summe exakt eins bleibt; historische Sollanteile bleiben in der Speicherung ungerundete Brüche. Stundenabweichungen und Fairness werden innerhalb dieser Stufe gemeinsam gewichtet, ohne eine genaue Stundenübereinstimmung zu erzwingen. Verfügbarkeit und harte Regeln können eine Gleichverteilung verhindern.
+Alle verbindlichen Regeln bleiben hart. Danach minimiert CP-SAT streng in dieser Reihenfolge:
 
-Nur ausdrücklich bestätigte, vollständig geprüfte Monatspläne vor dem aktuellen Monat zählen zur Historie. Wochenstunden und faire Sollanteile werden mit dem jeweiligen bestätigten Monat gespeichert; spätere Vertragsänderungen verändern sie nicht. Neue Berechnungen und wiederholtes Speichern zählen keine Einsätze doppelt. Ohne Historie gilt die Verteilung des aktuellen Monats. Gleichwertige Lösungen werden mit festem Solver-Seed und einem Suchworker reproduzierbar gesucht; Änderungen an Solver-Version oder Rechenzeit können ein anderes gleichwertiges Ergebnis ergeben. Verbleibende Abweichungen werden in der Verteilungsübersicht angezeigt.
+1. Offene Besetzungsplätze.
+2. Gesamtzahl übergangener eindeutiger relevanter Priorität-2-Wünsche.
+3. Übergehungen je Gruppe: zuerst Personen mit einem relevanten Wunsch, dann mit zwei usw.
+4. Innerhalb jeder Gruppe gleicher Wunschanzahl: zuerst die größte kumulierte persönliche Belastung, anschließend die Summe der Belastungsquadrate.
+5. Größte relative persönliche Stundenabweichung.
+6. Gemeinsame quadratische Stunden- und Schichtfairness (Gewichte unten).
+
+Relevant ist ein eindeutiger P2-Eintrag, der mindestens einen **aktiven** Schichttermin überschneidet. Mehrere verletzende Dienste zählen denselben Wunsch einmal. Duplikate, P1-Sperren und Wünsche ohne aktive Überschneidung erhöhen diese Wunschanzahl nicht. Bei gleicher minimaler Gesamtzahl werden so wenige Wünsche stärker geschützt; innerhalb gleicher Anzahl trifft es möglichst nicht immer dieselben Personen. Stunden- oder Schichtverbesserungen können keine höhere Stufe verschlechtern.
+
+Die Übersicht **Freiwünsche** zeigt pro Person relevante, erfüllte und übergangene Wünsche, historische Übergehungen sowie kumulierte Belastung und fehlende Althistorie; sie hat einen eigenen CSV-Export. „Erfüllt“ bedeutet im aktuellen Plan nicht verletzt, auch bei offenen Plätzen; es ist keine Erfassung tatsächlich geleisteter Zeit.
+
+Nur bestätigte **Vormonate** zählen zur Wunschhistorie. Beim Bestätigen werden die damaligen relevanten und verletzten Wunschschlüssel eingefroren. Spätere globale Sperrenänderungen verändern bestätigte Statistiken und Konfliktmarkierungen nicht. Die kumulierte Belastung ist die Vereinigung historischer und aktueller verletzter Schlüssel: ein über Monatsgrenzen laufender Wunsch wird einmal gezählt. Erneute Planung/Speicherung desselben Monats erhöht die Historie nicht. Alte bestätigte Daten ohne Wunsch-Snapshot sind weiter ladbar, werden aber als **damals nicht erfasst** gekennzeichnet und nicht nachträglich anhand veränderlicher Blocker geschätzt. Aufheben und erneutes Bestätigen ist eine ausdrückliche neue Bestätigung des bearbeiteten Standes.
+
+Jede nachgeordnete Solverstufe hält die besten gefundenen Werte der höheren Stufen fest. Bei fehlendem Beweis darf die Suche weiter verbessern, aber das Gesamtergebnis bleibt **ohne vollständigen Optimalitätsnachweis**. Die Oberfläche nennt die nachgewiesenen Stufen. Ein vorhandener gültiger Plan ist Startpunkt und Rückfall. Geprüfte Einzelneuzuweisungen und Zweiertausche verbessern nur ein lexikografisch besseres gültiges Ergebnis und bewahren Fixierungen. Der endgültige Plan wird erneut geprüft/bewertet; Änderungen entwerten betroffene Nachweise. Bei Zeitlimit oder Abbruch bleibt der beste gefundene gültige Entwurf verfügbar; „noch kein Ergebnis“ beweist keine Unlösbarkeit.
+
+### Stunden- und Schichtfairness
+
+Für Person i ist der normierte Fehler `rᵢ = ceil(1000 × |Pᵢ − Planungszielᵢ| / max(Monatssollᵢ, 60 Minuten))`. Der Nenner bleibt das vertragliche Monatssoll, nicht das durch Salden veränderte Ziel; null und sehr kleine Sollwerte erhalten ausdrücklich einen Mindestnenner von einer Stunde. Zuerst wird `max(rᵢ)` minimiert. Dadurch unterscheiden sich ein gleichmäßig verteilter Stundenmangel und eine starke Belastung einzelner Personen, auch wenn ihre Summe absoluter Abweichungen gleich ist.
+
+Die letzte Stufe minimiert `10000 × Σrᵢ² + Schichtterme + historische Sonderdienstterme`. Faire Schichtanteile richten sich nach Wochenstunden und tatsächlich besetzten aktiven Diensten. Pro Typ/Person gilt `c = 1000 × Einsätze − Anteil × insgesamt besetzte Einsätze`, `h = ceil(|1000 × Minuten − Anteil × insgesamt besetzte Minuten| / 60)`. Bewertet wird `c² + h²`, mit Faktor **1** für tägliche und **4** für besondere Schichten. Hinzu kommen kumulierte besondere Anzahl-/Stundenquadrate mit Faktor **8**, unter Einbeziehung bestätigter früherer Monate und ihrer damaligen Wochenstunden. Ohne Sonderhistorie gilt der aktuelle Monat. Bei ausschließlich null Wochenstunden sind die Anteile gleich. Solveranteile werden durch größte Reste auf Tausendstel verteilt; die gespeicherten historischen Sollanteile bleiben exakte Brüche.
+
+Diese Ziele bevorzugen breitere Sonderdienstverteilung und weniger Stundenstreuung. Harte Grenzen, Verfügbarkeit, höhere Wunschziele und das Zeitlimit können Ungleichverteilungen erforderlich machen. Ein Worker, stabiler Seed und stabile Kennungen bestimmen die Suche; der Suchstand bei einem Zeitlimit und Änderungen der Solverversion können das Ergebnis verändern.
+
+## Reproduzierbarer Novembervergleich
+
+`python scripts/compare_planners.py --seconds 30 --output examples/comparison` berechnet den originalen Solver aus Commit `e7e0fc5` und die neue Version **seriell mit identischen Eingaben, Regeln und Zeitlimits**. Die fachliche Novemberfixture liegt in `dienstplan/fixtures.py`: zwölf Personen, je 25 Wochenstunden, Anfangs-/Wunschsaldo null, die vorgegebenen Schichten und Blockertage. Ohne Ausnahmen: **188 Plätze, 1.238 Mitarbeiterstunden Bedarf, 1.285,80 Stunden Ziele**. Frühdienst 16.11. ausgeschaltet: **186 Plätze, 1.226 Stunden**.
+
+Die ausdrücklich gewählten Testgrenzen sind **11 Stunden Ruhezeit, 12 Tagesstunden, 40 Stunden je ISO-Woche, sechs tatsächliche Arbeitstage in Folge**. Frühere externe Testgrenzen sind unbekannt; der Vergleich beansprucht keinen identischen damaligen Testaufbau. [Vorher-/Nachher-Bericht](docs/VORHER_NACHHER.md) und `examples/comparison/` enthalten Kennzahlen, Einzelstunden, Wunschübergehungen, Schichtverteilungen und tatsächliche Nachweise. Die ältere Oktober–Dezember-Demo oben dokumentiert Version 0.1; aktuelle Ergebnisse bitte neu erzeugen.
 
 ## Pakete erstellen und Prüfstand
 
@@ -109,4 +135,4 @@ Windows: `dist/Dienstplan/Dienstplan.exe`; macOS: `dist/Dienstplan.app`. Das Bui
 
 Die **tatsächliche unkomprimierte Größe** wird nach jedem Build ausgegeben und in `dist/build-report.json` gespeichert. Windows- und macOS-Größen sind erst nach deren nativen Builds bekannt. Die aktuelle Cloud-Umgebung ist Linux; native Windows-/macOS-Starttests sind darin nicht möglich. Details der geprüften Versionen, Quellen und Plattformgrenzen: [Kompatibilität](docs/KOMPATIBILITAET.md). Technische Spezifikation und Etappen: [Spezifikation](docs/SPEZIFIKATION.md).
 
-Prüfstand dieser ersten Version: **77 automatisierte Tests bestanden** (einschließlich Qt-Integration und einer vollständigen Offline-Kette mit gesperrten Python-Netzwerkverbindungen). Der eigenständig startbare Linux-x64-Build wurde funktional mit `--self-test` geprüft: CSV-Import, zwölf Personen, 188 besetzte Plätze, Stundenrechnung, SQLite-Neustart und Qt-Fenster. Gemessene Paketgröße: rund **279,5 MiB entpackt**, **108,5 MiB als TAR.GZ**; die exakten Bytewerte des jeweiligen letzten Builds stehen im Buildbericht. Die Linux-Oberfläche wurde ohne Bildschirm mit Qt offscreen geprüft. **Windows- und macOS-Pakete wurden noch nicht gebaut oder ausgeführt**; der native CI-Ablauf ist vorbereitet, aber nicht gestartet.
+Prüfstand der aktualisierten Version: **146 Tests bestanden**, Details im [Vorher-/Nachher-Bericht](docs/VORHER_NACHHER.md). Der Selbsttest des fertigen Pakets prüft jetzt zusätzlich Ausnahmetage, einen kürzeren besonderen Dienst und bestätigte Freiwunschhistorie; erwartet werden zwölf Personen und **186 besetzte Plätze**. Native Windows-/macOS-Builds und UI-Tests sind vorbereitet, wurden in dieser Linux-Umgebung aber nicht ausgeführt.

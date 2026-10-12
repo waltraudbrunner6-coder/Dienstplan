@@ -1,12 +1,9 @@
 """CP-SAT-Planung und dieselbe harte Regelprüfung für manuelle Änderungen.
 
-Ziele werden einzeln gelöst; eine Folgestufe beginnt nur nach bewiesenem Optimum.
-Stufe 3: 10 * individuelle absolute Minutenabweichung; je Schichttyp
-1 * (60 * absolute Anzahlabweichung + absolute Minutenabweichung), Sondertyp
-mit Faktor 4. Zusätzlich wird seine kumulierte historische Bilanz mit Faktor 8
-bewertet. Faire Anteile werden auf 1/1000 aufgeteilt (größte Reste, Summe = 1000).
-Alle Zielterme werden mit 1000 skaliert, ohne Zwischenrundung der Iststunden.
-Historische Fraction-Sollanteile werden erst hier auf 1/1000 gerundet.
+Strenge lexikografische Ziele und gemeinsame Auswertung mit lokaler Verbesserung.
+Eine Folgestufe hält den besten gefundenen Wert der höheren Stufen unverändert;
+bei fehlendem Beweis bleibt der Gesamtnachweis ausdrücklich offen. Die genaue
+Zielfunktion steht in optimization.py und in der deutschen Anleitung.
 
 Ein Worker und Seed 202611 sorgen bei gleicher OR-Tools-Version für stabile
 Gleichstandsentscheidungen. Bei Zeitlimit kann der Suchfortschritt variieren.
@@ -23,18 +20,14 @@ from time import monotonic
 
 from ortools.sat.python import cp_model, cp_model_helper
 
-from .hours import demand_minutes, planning_target
+from .hours import demand_minutes, planning_target, monthly_target
+from .optimization import evaluate_plan, improve_plan
 from .model import (
     Assignment, HistoryEntry, MonthData, PlanResult, ShiftOccurrence,
-    ValidationError, generate_shifts, overlaps,
+    ValidationError, WishHistoryEntry, generate_shifts, overlaps,
 )
 
 FAIR_SCALE = 1000
-HOURS_WEIGHT = 10
-REGULAR_WEIGHT = 1
-SPECIAL_WEIGHT = 4
-HISTORY_WEIGHT = 8
-COUNT_MINUTE_EQUIVALENT = 60
 
 
 def paid_segments(shift: ShiftOccurrence) -> dict[date, int]:
@@ -90,7 +83,8 @@ def preference_violations(data: MonthData, assignments: list[Assignment] | None 
     chosen = data.assignments if assignments is None else assignments
     seen = set()
     result = []
-    for b in data.blockers:
+    from .wishes import display_wishes
+    for b in display_wishes(data):
         if b.priority != 2 or b.identity in seen:
             continue
         seen.add(b.identity)
@@ -293,54 +287,6 @@ def _add_rules(model: cp_model.CpModel, data: MonthData, shifts: list[ShiftOccur
     return day_flags
 
 
-def _fair_objective(model: cp_model.CpModel, data: MonthData, shifts, x, history, hint_values=None):
-    shares = _shares(data)
-    hist = _history_totals(history)
-    terms = []
-    demand = demand_minutes(data)
-
-    def absolute(expression, bound: int, name: str):
-        value = model.new_int_var(0, max(1, bound), name)
-        model.add_abs_equality(value, expression)
-        if hint_values is not None:
-            flat = cp_model_helper.FlatIntExpr(expression)
-            hint = flat.offset + sum(coefficient * hint_values[var.index]
-                                     for var, coefficient in zip(flat.vars, flat.coeffs))
-            model.add_hint(value, abs(hint))
-        return value
-
-    for e in data.employees:
-        planned = sum(s.paid_minutes * x[(s.id, e.id)] for s in shifts)
-        goal = planning_target(e, data.year, data.month)
-        deviation = absolute(planned - goal, demand + goal, f"Stundenziel_{e.id}")
-        terms.append(HOURS_WEIGHT * FAIR_SCALE * deviation)
-    for st in data.shift_types:
-        occurrences = [s for s in shifts if s.type_id == st.id]
-        max_count = sum(s.staff_required for s in occurrences)
-        max_minutes = sum(s.staff_required * s.paid_minutes for s in occurrences)
-        total_count = sum(x[(s.id, e.id)] for s in occurrences for e in data.employees)
-        total_minutes = sum(s.paid_minutes * x[(s.id, e.id)] for s in occurrences for e in data.employees)
-        factor = SPECIAL_WEIGHT if st.special else REGULAR_WEIGHT
-        for e in data.employees:
-            mine_count = sum(x[(s.id, e.id)] for s in occurrences)
-            mine_minutes = sum(s.paid_minutes * x[(s.id, e.id)] for s in occurrences)
-            count_balance = FAIR_SCALE * mine_count - shares[e.id] * total_count
-            minute_balance = FAIR_SCALE * mine_minutes - shares[e.id] * total_minutes
-            count_dev = absolute(count_balance, FAIR_SCALE * max_count, f"Fair_Anzahl_{st.id}_{e.id}")
-            minute_dev = absolute(minute_balance, FAIR_SCALE * max_minutes, f"Fair_Minuten_{st.id}_{e.id}")
-            terms.extend((factor * COUNT_MINUTE_EQUIVALENT * count_dev, factor * minute_dev))
-            if st.special and e.id in hist:
-                old = hist[e.id]
-                count_offset = FAIR_SCALE * old.special_count - _round_fraction(old.expected_count * FAIR_SCALE)
-                minute_offset = FAIR_SCALE * old.special_minutes - _round_fraction(old.expected_minutes * FAIR_SCALE)
-                cum_count = absolute(count_balance + count_offset,
-                                     FAIR_SCALE * max_count + abs(count_offset), f"Historie_Anzahl_{e.id}")
-                cum_minute = absolute(minute_balance + minute_offset,
-                                      FAIR_SCALE * max_minutes + abs(minute_offset), f"Historie_Minuten_{e.id}")
-                terms.extend((HISTORY_WEIGHT * COUNT_MINUTE_EQUIVALENT * cum_count, HISTORY_WEIGHT * cum_minute))
-    return sum(terms)
-
-
 def _balanced_hint(data, shifts, history, boundary, fallback, deadline, cancel):
     """Zulässiger Startpunkt, danach verbessert CP-SAT die gesamte Zielfunktion.
 
@@ -395,7 +341,7 @@ def _balanced_hint(data, shifts, history, boundary, fallback, deadline, cancel):
                     score += 0.25 * (counts[(e.id, s.type_id)] + 1) / max(expected, 0.001)
                 options.append((len(wishes - breached), score, e.id, assignment, wishes))
             if not options:
-                return fallback
+                continue
             _, _, employee_id, assignment, wishes = min(options, key=lambda item: item[:3])
             chosen.append(assignment)
             by_employee[employee_id].append(assignment)
@@ -403,7 +349,7 @@ def _balanced_hint(data, shifts, history, boundary, fallback, deadline, cancel):
             minutes[employee_id] += s.paid_minutes
             counts[(employee_id, s.type_id)] += 1
             breached.update(wishes)
-    if len(chosen) != len(fallback) or len(preference_violations(data, chosen)) != len(preference_violations(data, fallback)):
+    if fallback and (len(chosen) != len(fallback) or len(preference_violations(data, chosen)) != len(preference_violations(data, fallback))):
         return fallback
     if validate_assignments(data, chosen, boundary):
         return fallback
@@ -452,18 +398,182 @@ def _result_messages(data, shifts, assignments, boundary, status, optimal_stages
         messages.append("Berechnung abgebrochen. Ein bereits gefundenes gültiges Ergebnis bleibt als Entwurf prüfbar.")
     elif status == "unknown":
         messages.append("Innerhalb des Zeitlimits wurde noch kein Ergebnis gefunden. Das beweist keine Unlösbarkeit.")
-    elif not all(optimal_stages) or len(optimal_stages) < 3:
+    elif not optimal_stages or not all(optimal_stages):
         messages.append("Gültiger Entwurf ohne vollständigen Optimalitätsnachweis; Zeitlimit oder Abbruch begrenzte die Suche.")
     else:
-        messages.append("Alle drei Optimierungsstufen sind nachweislich optimal für die dokumentierte Zielfunktion.")
+        messages.append("Alle Optimierungsstufen sind nachweislich optimal für die dokumentierte Zielfunktion.")
     return messages
+
+
+class _ObjectiveBuilder:
+    """Exakte ganzzahlige CP-Ausdrücke, dieselbe Rechnung wie der externe Scorer."""
+
+    def __init__(self, model, data, shifts, x, history, wish_history):
+        from .optimization import ObjectiveContext, stage_names
+        from .wishes import wish_key
+        self.model, self.data, self.shifts, self.x = model, data, shifts, x
+        self.context = ObjectiveContext(data, history, wish_history)
+        self.names = stage_names(data, wish_history)
+        self.hints = {}
+        self.sequence = 0
+        self.flags = {}
+        self.wish_flags = []
+        for b in self.context.wishes:
+            terms = [x[(s.id, b.employee_id)] for s in shifts
+                     if overlaps(s.start, s.end, b.start, b.end)]
+            flag = model.new_bool_var(f"Wunsch_{len(self.flags)}")
+            model.add_max_equality(flag, terms)
+            self.flags[wish_key(b)] = flag
+            self.wish_flags.append((flag, terms))
+        self.current = {e.id: sum(self.flags[k] for k in self.context.wish_keys.get(e.id, set()))
+                        for e in data.employees}
+        self.cumulative = {}
+        self.hour_norms = None
+        groups = sorted(self.context.wish_groups)
+        self.stages = [("coverage", None), ("wishes", None)]
+        self.stages.extend(("group_count", group) for group in groups)
+        for group in groups:
+            self.stages.extend((("group_max", group), ("group_square", group)))
+        self.stages.extend((("hours_max", None), ("fairness", None)))
+
+    def expression_value(self, expression):
+        if isinstance(expression, int):
+            return expression
+        flat = cp_model_helper.FlatIntExpr(expression)
+        return int(flat.offset + sum(c * self.hints[v.index] for v, c in zip(flat.vars, flat.coeffs)))
+
+    def seed(self, assignments, day_flags):
+        chosen = {(a.shift_id, a.employee_id) for a in assignments}
+        for key, variable in self.x.items():
+            self.hints[variable.index] = int(key in chosen)
+        for flag, terms in day_flags + self.wish_flags:
+            self.hints[flag.index] = max((self.hints[v.index] for v in terms), default=0)
+
+    def integer(self, low, high, label):
+        self.sequence += 1
+        return self.model.new_int_var(low, max(low, high), f"{label}_{self.sequence}")
+
+    def absolute(self, expression, bound, label):
+        var = self.integer(0, bound, label)
+        self.model.add_abs_equality(var, expression)
+        self.hints[var.index] = abs(self.expression_value(expression))
+        return var
+
+    def ceil_division(self, expression, bound, divisor, label):
+        var = self.integer(0, (bound + divisor - 1) // divisor, label)
+        self.model.add_division_equality(var, expression + divisor - 1, divisor)
+        self.hints[var.index] = (self.expression_value(expression) + divisor - 1) // divisor
+        return var
+
+    def square(self, expression, bound, label):
+        if isinstance(expression, int):
+            return expression * expression
+        var = self.integer(0, bound * bound, label)
+        self.model.add_multiplication_equality(var, [expression, expression])
+        self.hints[var.index] = self.expression_value(expression) ** 2
+        return var
+
+    def maximum(self, values, bound, label):
+        var = self.integer(0, bound, label)
+        self.model.add_max_equality(var, values)
+        self.hints[var.index] = max((self.expression_value(v) for v in values), default=0)
+        return var
+
+    def group_cumulative(self, group):
+        values = []
+        for eid in self.context.wish_groups[group]:
+            if eid not in self.cumulative:
+                historical = self.context.historical_wishes.get(eid, set())
+                expression = len(historical) + sum(self.flags[k] for k in self.context.wish_keys[eid]
+                                                   if k not in historical)
+                var = self.integer(0, len(historical) + group, f"Wunschbelastung_{eid}")
+                self.model.add(var == expression)
+                self.hints[var.index] = self.expression_value(expression)
+                self.cumulative[eid] = (var, len(historical) + group)
+            values.append(self.cumulative[eid])
+        return values
+
+    def hours(self):
+        if self.hour_norms is None:
+            self.hour_norms = []
+            max_minutes = sum(s.paid_minutes for s in self.shifts)
+            for e in self.data.employees:
+                goal = planning_target(e, self.data.year, self.data.month)
+                denominator = max(monthly_target(e, self.data.year, self.data.month), 60)
+                planned = sum(s.paid_minutes * self.x[(s.id, e.id)] for s in self.shifts)
+                bound = max(max_minutes, goal)
+                absolute = self.absolute(planned - goal, bound, f"Stundenabweichung_{e.id}")
+                normalized = self.ceil_division(1000 * absolute, 1000 * bound, denominator,
+                                                f"Normierte_Stunden_{e.id}")
+                self.hour_norms.append((normalized, (1000 * bound + denominator - 1) // denominator))
+        return self.hour_norms
+
+    def objective(self, index):
+        kind, group = self.stages[index]
+        if kind == "coverage":
+            return sum(s.staff_required for s in self.shifts) - sum(self.x.values())
+        if kind == "wishes":
+            return sum(self.flags.values())
+        if kind == "group_count":
+            return sum(self.current[eid] for eid in self.context.wish_groups[group])
+        if kind == "group_max":
+            entries = self.group_cumulative(group)
+            return self.maximum([v for v, _ in entries], max(b for _, b in entries), "Wunschmaximum")
+        if kind == "group_square":
+            return sum(self.square(v, b, "Wunschquadrate") for v, b in self.group_cumulative(group))
+        if kind == "hours_max":
+            values = self.hours()
+            return self.maximum([v for v, _ in values], max(b for _, b in values), "Stundenmaximum")
+        from .optimization import HOURS_WEIGHT, REGULAR_WEIGHT, SPECIAL_WEIGHT, HISTORY_WEIGHT, round_fraction
+        terms = [HOURS_WEIGHT * self.square(v, b, "Stundenstreuung") for v, b in self.hours()]
+        for st in self.data.shift_types:
+            occurrences = [s for s in self.shifts if s.type_id == st.id]
+            max_count = len(occurrences)
+            max_total_count = sum(s.staff_required for s in occurrences)
+            max_total_minutes = sum(s.staff_required * s.paid_minutes for s in occurrences)
+            total_count = sum(self.x[(s.id, e.id)] for s in occurrences for e in self.data.employees)
+            total_minutes = sum(s.paid_minutes * self.x[(s.id, e.id)] for s in occurrences for e in self.data.employees)
+            factor = SPECIAL_WEIGHT if st.special else REGULAR_WEIGHT
+            for e in self.data.employees:
+                share = self.context.shares[e.id]
+                count = sum(self.x[(s.id, e.id)] for s in occurrences)
+                minutes = sum(s.paid_minutes * self.x[(s.id, e.id)] for s in occurrences)
+                count_expression = 1000 * count - share * total_count
+                minute_expression = 1000 * minutes - share * total_minutes
+                count_bound = 1000 * max(max_count, max_total_count)
+                minute_bound = 1000 * max_total_minutes
+                count_abs = self.absolute(count_expression, count_bound, "Typanzahl")
+                minute_abs = self.absolute(minute_expression, minute_bound, "Typminuten")
+                minute_norm = self.ceil_division(minute_abs, minute_bound, 60, "Typstunden")
+                terms.extend((factor * self.square(count_abs, count_bound, "Typanzahlquadrate"),
+                              factor * self.square(minute_norm, (minute_bound + 59) // 60, "Typstundenquadrate")))
+                if st.special and e.id in self.context.hist:
+                    old = self.context.hist[e.id]
+                    old_count = 1000 * old.special_count - round_fraction(old.expected_count * 1000)
+                    old_minutes = 1000 * old.special_minutes - round_fraction(old.expected_minutes * 1000)
+                    cumulative_count = self.absolute(count_expression + old_count,
+                                                     count_bound + abs(old_count), "Historische_Anzahl")
+                    cumulative_minute_bound = minute_bound + abs(old_minutes)
+                    cumulative_minutes = self.absolute(minute_expression + old_minutes,
+                                                       cumulative_minute_bound, "Historische_Minuten")
+                    cumulative_hours = self.ceil_division(cumulative_minutes, cumulative_minute_bound, 60,
+                                                          "Historische_Stunden")
+                    terms.extend((HISTORY_WEIGHT * self.square(cumulative_count, count_bound + abs(old_count),
+                                                              "Historische_Anzahlquadrate"),
+                                  HISTORY_WEIGHT * self.square(cumulative_hours,
+                                                              (cumulative_minute_bound + 59) // 60,
+                                                              "Historische_Stundenquadrate")))
+        return sum(terms)
 
 
 def solve(data: MonthData, history: list[HistoryEntry] | None = None,
           boundary: list[tuple[Assignment, ShiftOccurrence]] | None = None,
-          time_limit: float = 20, cancel: Event | None = None) -> PlanResult:
-    """Optimiert einen neuen Entwurf, ohne MonthData oder gespeicherte Pläne zu ändern."""
+          time_limit: float = 20, cancel: Event | None = None,
+          wish_history: list[WishHistoryEntry] | None = None) -> PlanResult:
+    """CP-SAT + geprüfte lokale Verbesserung; überschreibt keine Monatsdaten."""
+    from .optimization import evaluate_plan, improve_plan, stage_names
     started = monotonic()
+    deadline = started + time_limit if isinstance(time_limit, (int, float)) and isfinite(time_limit) else started
     try:
         data.validate()
         if not isfinite(time_limit) or time_limit <= 0:
@@ -479,6 +589,36 @@ def solve(data: MonthData, history: list[HistoryEntry] | None = None,
     if cancel is not None and cancel.is_set():
         return PlanResult("cancelled", messages=["Berechnung vor dem Start abgebrochen."],
                           elapsed_seconds=monotonic() - started)
+    names = stage_names(data, wish_history)
+    optimal_stages = [False] * len(names)
+    assignments = []
+    best_score = None
+    improvements = 0
+
+    def consider(candidate):
+        nonlocal assignments, best_score, improvements
+        score = evaluate_plan(data, candidate, history, wish_history)
+        if best_score is None or score < best_score:
+            if best_score is not None:
+                improvements += 1
+            assignments, best_score = list(candidate), score
+            return True
+        return False
+
+    if data.assignments and not validate_assignments(data, data.assignments, boundary):
+        consider(data.assignments)
+    if monotonic() < deadline and time_limit >= 0.05:
+        greedy = _balanced_hint(data, shifts, history, boundary, [],
+                                min(deadline, started + min(0.8, time_limit * 0.06)), cancel)
+        if greedy and not validate_assignments(data, greedy, boundary):
+            consider(greedy)
+    if monotonic() >= deadline:
+        status = "feasible" if best_score is not None else "unknown"
+        if best_score is not None and coverage(data, assignments):
+            status = "incomplete"
+        return PlanResult(status, assignments, coverage(data, assignments), preference_violations(data, assignments),
+                          _result_messages(data, shifts, assignments, boundary, status, optimal_stages, False),
+                          optimal_stages, monotonic() - started, names, list(best_score or []), improvements)
     model = cp_model.CpModel()
     x = {(s.id, e.id): model.new_bool_var(f"Z_{s.id}_{e.id}") for s in shifts for e in data.employees}
     for s in shifts:
@@ -491,24 +631,9 @@ def solve(data: MonthData, history: list[HistoryEntry] | None = None,
     for a in fixed:
         model.add(x[(a.shift_id, a.employee_id)] == 1)
     day_flags = _add_rules(model, data, shifts, x, boundary)
-    wishes = []
-    wish_flags = []
-    seen = set()
-    people = {e.id for e in data.employees}
-    for b in data.blockers:
-        if b.priority != 2 or b.identity in seen or b.employee_id not in people:
-            continue
-        seen.add(b.identity)
-        matching = [x[(s.id, b.employee_id)] for s in shifts if overlaps(s.start, s.end, b.start, b.end)]
-        if matching:
-            flag = model.new_bool_var(f"Wunsch_{len(wishes)}")
-            model.add_max_equality(flag, matching)
-            wishes.append(flag)
-            wish_flags.append((flag, matching))
-    objectives = [sum(x.values()), sum(wishes)]
-    previous = {(a.shift_id, a.employee_id) for a in data.assignments}
-    for key, variable in x.items():
-        model.add_hint(variable, int(key in previous))
+    builder = _ObjectiveBuilder(model, data, shifts, x, history, wish_history)
+    builder.seed(assignments, day_flags)
+    fixed_keys = {(a.shift_id, a.employee_id) for a in fixed}
     completed = Event()
     lock = Lock()
     active = [None]
@@ -517,111 +642,180 @@ def solve(data: MonthData, history: list[HistoryEntry] | None = None,
         while not completed.wait(0.025):
             if cancel is not None and cancel.is_set():
                 with lock:
-                    solver = active[0]
-                    if solver is not None:
-                        solver.stop_search()
+                    if active[0] is not None:
+                        active[0].stop_search()
 
     watcher = Thread(target=watch, daemon=True)
     if cancel is not None:
         watcher.start()
-    assignments = []
-    optimal_stages = []
-    has_solution = False
-    fixed_keys = {(a.shift_id, a.employee_id) for a in fixed}
     model_status = None
-    reference_solver = None
+    solver_warnings = []
+    local_reserve = min(2.0, time_limit * 0.15)
+    search_deadline = deadline - local_reserve
+    group_stages = max(1, len(builder.stages) - 4)
     try:
-        for stage in range(3):
-            remaining = time_limit - (monotonic() - started)
+        for index, (kind, group) in enumerate(builder.stages):
+            remaining = search_deadline - monotonic()
             if remaining <= 0 or (cancel is not None and cancel.is_set()):
                 break
-            if stage == 2:
-                warm = _balanced_hint(data, shifts, history, boundary, assignments,
-                                      min(started + time_limit * 0.25, monotonic() + 2), cancel)
-                warm_keys = {(a.shift_id, a.employee_id) for a in warm}
-                hint_values = {index: int(reference_solver.value(model.get_int_var_from_proto_index(index)))
-                               for index in range(len(model.proto.variables))}
-                for key, variable in x.items():
-                    hint_values[variable.index] = int(key in warm_keys)
-                for flag, matching in day_flags + wish_flags:
-                    hint_values[flag.index] = max(hint_values[variable.index] for variable in matching)
-                model.clear_hints()
-                for index, value in hint_values.items():
-                    model.add_hint(model.get_int_var_from_proto_index(index), value)
-                objective = _fair_objective(model, data, shifts, x, history, hint_values)
-                remaining = time_limit - (monotonic() - started)
-                if remaining <= 0 or (cancel is not None and cancel.is_set()):
-                    break
-            else:
-                objective = objectives[stage]
-            if stage == 1 and not wishes:
-                optimal_stages.append(True)
+            builder.seed(assignments, day_flags)
+            objective = builder.objective(index)
+            # Jeder Hilfswert wird aus dem aktuell besten gültigen Plan berechnet.
+            # Alte Solverwerte werden nach lokaler Änderung vollständig ersetzt.
+            if best_score is not None:
+                builder.hints = _hint_values(model, builder, assignments, day_flags)
+            model.clear_hints()
+            for var_index, value in builder.hints.items():
+                model.add_hint(model.get_int_var_from_proto_index(var_index), value)
+            incumbent = None if best_score is None else best_score[index]
+            if incumbent == 0:
+                optimal_stages[index] = True  # sämtliche Ziele sind nichtnegativ
+                model.add(objective == 0)
                 continue
-            # Erste zwei Stufen sind meistens schnell; eine Reserve lässt Fairness zu.
-            stage_limit = remaining if stage == 2 else min(remaining, max(0.05, time_limit * (0.50 if stage == 0 else 0.20)))
+            if isinstance(objective, int):
+                optimal_stages[index] = True
+                continue
+            if kind == "coverage":
+                limit = min(remaining, time_limit * 0.17)
+            elif kind == "wishes":
+                limit = min(remaining, time_limit * 0.12)
+            elif kind.startswith("group"):
+                limit = min(remaining, time_limit * 0.21 / group_stages)
+            elif kind == "hours_max":
+                limit = min(remaining, time_limit * 0.18)
+            else:
+                limit = remaining
+            if limit <= 0:
+                break
+            limit = min(limit, search_deadline - monotonic())
+            if limit <= 0 or (cancel is not None and cancel.is_set()):
+                break
+            model.minimize(objective)
             solver = cp_model.CpSolver()
-            solver.parameters.max_time_in_seconds = stage_limit
+            solver.parameters.max_time_in_seconds = limit
             solver.parameters.num_search_workers = 1
             solver.parameters.random_seed = 202611
             solver.parameters.cp_model_probing_level = 0
-            if stage == 2:
-                # Skalierte absolute Fairnessausdrücke erzeugen beim Presolve
-                # riesige dünn besetzte Domänen. Der vollständige gültige Hint
-                # startet hier direkt die CP-SAT-Suche und bleibt als Rückfall.
+            if kind in {"hours_max", "fairness"}:
                 solver.parameters.cp_model_presolve = False
-            if stage == 0:
-                model.maximize(objective)
-            else:
-                model.minimize(objective)
             with lock:
                 active[0] = solver
-            if cancel is not None and cancel.is_set():
-                break
             model_status = solver.solve(model)
             with lock:
                 active[0] = None
-            if model_status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+            if model_status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+                candidate = [Assignment(s.id, e.id, (s.id, e.id) in fixed_keys)
+                             for s in shifts for e in data.employees if solver.boolean_value(x[(s.id, e.id)])]
+                consider(candidate)
+                optimal_stages[index] = model_status == cp_model.OPTIMAL
+                # Verwendeter Beweis muss zum tatsächlich zurückgegebenen Wert passen.
+                if optimal_stages[index] and int(solver.value(objective)) != best_score[index]:
+                    optimal_stages[index] = False
+                builder.hints = {v.index: int(solver.value(v))
+                                 for v in [model.get_int_var_from_proto_index(i)
+                                           for i in range(len(model.proto.variables))]}
+            elif model_status == cp_model.MODEL_INVALID:
+                errors = model.validate()
+                if best_score is not None:
+                    solver_warnings.append("Eine Optimierungsstufe konnte wegen numerischer Grenzen nicht verarbeitet werden. "
+                                           "Der beste gültige Entwurf bleibt erhalten; für die restlichen Stufen fehlt der Optimalitätsnachweis. "
+                                           "Bitte sehr große Stundensalden oder historische Belastungen prüfen.")
+                    break
+                return PlanResult("invalid", messages=["Das Optimierungsmodell konnte nicht verarbeitet werden. "
+                                                       "Bitte Stunden und historische Daten prüfen.", errors],
+                                  elapsed_seconds=monotonic() - started)
+            elif model_status == cp_model.INFEASIBLE:
+                # Ein bekannter zulässiger Entwurf schließt echte Unlösbarkeit aus.
+                if best_score is None:
+                    return PlanResult("invalid", messages=["Die fixierten Zuteilungen und aktivierten Regeln "
+                                                           "lassen keinen gültigen Entwurf zu."],
+                                      elapsed_seconds=monotonic() - started)
                 break
-            has_solution = True
-            reference_solver = solver
-            assignments = [Assignment(s.id, e.id, (s.id, e.id) in fixed_keys)
-                           for s in shifts for e in data.employees if solver.boolean_value(x[(s.id, e.id)])]
-            optimal = model_status == cp_model.OPTIMAL
-            optimal_stages.append(optimal)
-            if not optimal:
+            if best_score is None:
                 break
-            if stage < 2:
-                optimum = int(solver.value(objective))
-                model.add(objective == optimum)
-                if stage == 0 and optimum == sum(s.staff_required for s in shifts):
-                    for s in shifts:
-                        model.add(sum(x[(s.id, e.id)] for e in data.employees) == s.staff_required)
-                model.clear_hints()
-                for index in range(len(model.proto.variables)):
-                    variable = model.get_int_var_from_proto_index(index)
-                    model.add_hint(variable, solver.value(variable))
+            model.add(objective == best_score[index])
+            if kind == "coverage" and best_score[index] == 0:
+                for s in shifts:
+                    model.add(sum(x[(s.id, e.id)] for e in data.employees) == s.staff_required)
     finally:
         completed.set()
         if watcher.is_alive():
             watcher.join(timeout=0.1)
+    if best_score is not None and monotonic() < deadline and not (cancel is not None and cancel.is_set()):
+        previous = best_score
+        candidate = improve_plan(data, assignments, history, wish_history, boundary,
+                                 time_limit=max(0.0, deadline - monotonic()), cancel=cancel)
+        if consider(candidate):
+            first_changed = next(i for i, (before, after) in enumerate(zip(previous, best_score)) if before != after)
+            # Eine nachträgliche Verbesserung widerlegt ggf. einen bedingten alten
+            # Nachweis; spätere Stufen wurden unter einem anderen Prefix bewiesen.
+            for i in range(first_changed, len(optimal_stages)):
+                optimal_stages[i] = False
     cancelled = cancel is not None and cancel.is_set()
-    if not has_solution:
+    if best_score is None:
         status = "cancelled" if cancelled else "unknown"
-        if model_status == cp_model.INFEASIBLE:
-            return PlanResult("invalid", messages=["Die fixierten Zuteilungen und aktivierten Regeln "
-                                                    "lassen keinen gültigen Entwurf zu."],
-                              elapsed_seconds=monotonic() - started)
-        if model_status == cp_model.MODEL_INVALID:
-            return PlanResult("invalid", messages=["Das Optimierungsmodell konnte nicht verarbeitet werden. "
-                                                    "Bitte Stunden und historische Daten prüfen."],
-                              elapsed_seconds=monotonic() - started)
     else:
         errors = validate_assignments(data, assignments, boundary)
         if errors:
             return PlanResult("invalid", messages=["Interne Regelprüfung hat den Entwurf zurückgewiesen:"] + errors,
                               elapsed_seconds=monotonic() - started)
         status = "incomplete" if coverage(data, assignments) else (
-            "optimal" if len(optimal_stages) == 3 and all(optimal_stages) else "feasible")
+            "optimal" if all(optimal_stages) else "feasible")
     messages = _result_messages(data, shifts, assignments, boundary, status, optimal_stages, cancelled)
+    messages.extend(solver_warnings)
+    missing = sorted({month for entry in wish_history or [] for month in entry.missing_months})
+    if missing:
+        messages.append("Freiwunsch-Althistorie fehlt für bestätigte Monate: " + ", ".join(missing) +
+                        ". Der Ausgleich berücksichtigt nur verfügbare bestätigte Wunschstände.")
+    if improvements:
+        messages.append(f"{improvements} Verbesserung(en) gegenüber gefundenen Startentwürfen; "
+                        "der endgültige Plan wurde mit allen verbindlichen Regeln neu geprüft und bewertet.")
     return PlanResult(status, assignments, coverage(data, assignments), preference_violations(data, assignments),
-                      messages, optimal_stages, monotonic() - started)
+                      messages, optimal_stages, monotonic() - started, names, list(best_score or []), improvements)
+
+
+def _hint_values(model, builder, assignments, day_flags):
+    """Hilfswerte nach einem neuen Incumbent durch die CP-Gleichungen rekonstruieren.
+
+    Die Definitionen sind azyklisch und wurden in ihrer Berechnungsreihenfolge
+    angelegt. Das hält einen gültigen Altplan einschließlich Quadratwerten bereit.
+    """
+    builder.seed(assignments, day_flags)
+    values = builder.hints
+    for constraint in model.proto.constraints:
+        if constraint.has_lin_max():
+            body = constraint.lin_max
+            expr_values = [expr.offset + sum(c * values[v] for v, c in zip(expr.vars, expr.coeffs))
+                           for expr in body.exprs]
+            target = body.target
+            if len(target.vars) == 1 and target.coeffs[0] == 1:
+                values[target.vars[0]] = max(expr_values) - target.offset
+        elif constraint.has_int_div():
+            body = constraint.int_div
+            numerator, denominator = body.exprs
+            n = numerator.offset + sum(c * values[v] for v, c in zip(numerator.vars, numerator.coeffs))
+            d = denominator.offset + sum(c * values[v] for v, c in zip(denominator.vars, denominator.coeffs))
+            target = body.target
+            values[target.vars[0]] = n // d
+        elif constraint.has_int_prod():
+            body = constraint.int_prod
+            product = 1
+            for expr in body.exprs:
+                product *= expr.offset + sum(c * values[v] for v, c in zip(expr.vars, expr.coeffs))
+            values[body.target.vars[0]] = product
+        elif constraint.has_linear():
+            body = constraint.linear
+            if len(body.domain) != 2 or body.domain[0] != body.domain[1]:
+                continue
+            # Nur Hilfsdefinitionen: Ziel ist der zuletzt angelegte Index.
+            if not body.vars:
+                continue
+            target = max(body.vars)
+            if target in {v.index for v in builder.x.values()}:
+                continue
+            coefficient = body.coeffs[list(body.vars).index(target)]
+            if coefficient not in (-1, 1):
+                continue
+            rest = sum(c * values[v] for v, c in zip(body.vars, body.coeffs) if v != target)
+            values[target] = (body.domain[0] - rest) // coefficient
+    return values

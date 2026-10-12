@@ -168,8 +168,9 @@ def test_confirmed_month_is_readonly_and_next_balance_is_forecast(window, monkey
 
 def test_background_worker_result_and_cleanup(window, monkeypatch):
     from dienstplan import planner
-    def fake_solve(data, history=None, boundary=None, time_limit=20, cancel=None):
+    def fake_solve(data, history=None, boundary=None, time_limit=20, cancel=None, wish_history=None):
         assert cancel is not None and time_limit == 20
+        assert wish_history == []
         shift = generate_shifts(data)[0]
         chosen = [Assignment(shift.id, data.employees[0].id)]
         return PlanResult("incomplete", chosen, planner.coverage(data, chosen))

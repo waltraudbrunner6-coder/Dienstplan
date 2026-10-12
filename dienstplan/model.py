@@ -198,6 +198,8 @@ class MonthData:
     rules: Rules = field(default_factory=Rules)
     assignments: list[Assignment] = field(default_factory=list)
     confirmed: bool = False
+    exceptions: set[str] = field(default_factory=set)
+    wish_snapshot: dict | None = None
 
     @property
     def key(self) -> str:
@@ -219,9 +221,15 @@ class MonthData:
             raise ValidationError("Schichtkennungen müssen eindeutig sein.")
         for s in self.shift_types:
             s.validate()
-        special = next(s for s in self.shift_types if s.special)
-        if special.paid_minutes <= max(s.paid_minutes for s in self.shift_types if not s.special):
-            raise ValidationError("Die besondere Schicht muss die längste bezahlte Schicht sein.")
+        daily_ids = {s.id for s in self.shift_types if not s.special}
+        for occurrence_id in self.exceptions:
+            try:
+                day_text, type_id = occurrence_id.split("/", 1)
+                day = date.fromisoformat(day_text)
+            except (ValueError, AttributeError) as exc:
+                raise ValidationError("Ein Ausnahmetag enthält ein ungültiges Datum oder eine ungültige Schicht.") from exc
+            if day_text != day.isoformat() or (day.year, day.month) != (self.year, self.month) or type_id not in daily_ids:
+                raise ValidationError("Ausnahmen gelten nur für tägliche Schichten im ausgewählten Monat.")
         self.rules.validate()
         validate_blockers(self.blockers)
 
@@ -233,11 +241,21 @@ def generate_shifts(data: MonthData) -> list[ShiftOccurrence]:
         for s in data.shift_types:
             if s.special and s.weekday != d.weekday():
                 continue
+            occurrence_id = f"{d.isoformat()}/{s.id}"
+            if not s.special and occurrence_id in data.exceptions:
+                continue
             start = datetime.combine(d, s.start)
             end = start + timedelta(minutes=s.duration_minutes)
-            result.append(ShiftOccurrence(f"{d.isoformat()}/{s.id}", s.id, s.name, start, end,
+            result.append(ShiftOccurrence(occurrence_id, s.id, s.name, start, end,
                                           s.paid_minutes, s.staff_required, s.special))
     return sorted(result, key=lambda s: (s.start, s.type_id))
+
+
+def inactive_shifts(data: MonthData) -> list[ShiftOccurrence]:
+    """Entfallene tägliche Termine für Anzeige/Export, ohne offenen Bedarf."""
+    from dataclasses import replace
+    return [s for s in generate_shifts(replace(data, exceptions=set()))
+            if not s.special and s.id in data.exceptions]
 
 
 @dataclass
@@ -250,6 +268,17 @@ class HistoryEntry:
 
 
 @dataclass
+class WishHistoryEntry:
+    employee_id: str
+    violated_keys: set[str] = field(default_factory=set)
+    missing_months: list[str] = field(default_factory=list)
+
+    @property
+    def violations(self) -> int:
+        return len(self.violated_keys)
+
+
+@dataclass
 class PlanResult:
     status: str
     assignments: list[Assignment] = field(default_factory=list)
@@ -258,6 +287,9 @@ class PlanResult:
     messages: list[str] = field(default_factory=list)
     optimal_stages: list[bool] = field(default_factory=list)
     elapsed_seconds: float = 0
+    stage_names: list[str] = field(default_factory=list)
+    objective_values: list[int] = field(default_factory=list)
+    improvements: int = 0
 
 
 def default_shifts() -> list[ShiftType]:

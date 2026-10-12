@@ -10,11 +10,11 @@ from fractions import Fraction
 from pathlib import Path
 
 from .model import (Assignment, Blocker, Employee, HistoryEntry, MonthData, Rules,
-                    ShiftType, ValidationError, generate_shifts, month_days,
+                    ShiftType, ValidationError, WishHistoryEntry, generate_shifts, month_days,
                     overlaps, validate_blockers)
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def _encode(data: MonthData) -> str:
@@ -30,6 +30,8 @@ def _encode(data: MonthData) -> str:
                         for s in data.shift_types],
         "rules": vars(data.rules),
         "assignments": [vars(a) for a in data.assignments],
+        "exceptions": sorted(data.exceptions),
+        "wish_snapshot": data.wish_snapshot,
     }, ensure_ascii=False, separators=(",", ":"))
 
 
@@ -45,7 +47,18 @@ def _decode(payload: str) -> MonthData:
         rules=Rules(**raw["rules"]),
         assignments=[Assignment(**a) for a in raw["assignments"]],
         confirmed=raw.get("confirmed", False),
+        # Version 1 hatte weder Ausnahmen noch eingefrorene Wunschstatistiken.
+        # Altdaten bleiben unverändert; fehlende Statistik ist ausdrücklich
+        # unbekannt und wird nicht aus nachträglich veränderten Sperren geraten.
+        exceptions=set(raw.get("exceptions", [])),
+        wish_snapshot=raw.get("wish_snapshot"),
     )
+
+
+def _confirmed_wishes(data: MonthData) -> dict:
+    """Friert nur relevante, eindeutige Wünsche zum Bestätigungszeitpunkt ein."""
+    from .wishes import wish_snapshot
+    return wish_snapshot(data)
 
 
 def _validate_assignments(data: MonthData, boundary: list) -> None:
@@ -114,6 +127,9 @@ class Store:
             self.close()
             raise ValidationError("Diese Datendatei stammt aus einer neueren Programmversion.")
         with self.connection:
+            # Additive Migration: bestehende JSON-Monatsstände, Kennungen und
+            # Dezimalstunden werden nicht neu geschrieben. _decode ergänzt nur
+            # die fehlenden Werte im Speicher.
             self.connection.execute("CREATE TABLE IF NOT EXISTS months (month_key TEXT PRIMARY KEY, payload TEXT NOT NULL)")
             self.connection.execute("""CREATE TABLE IF NOT EXISTS blockers (
                 id TEXT PRIMARY KEY, employee_id TEXT NOT NULL, start TEXT NOT NULL,
@@ -218,6 +234,10 @@ class Store:
             _validate_assignments(candidate, self.boundary(data.year, data.month))
             if data.confirmed:
                 _require_complete(candidate)
+                candidate = replace(candidate, wish_snapshot=_confirmed_wishes(candidate))
+            elif candidate.wish_snapshot is not None:
+                # Ein bearbeiteter Entwurf ist kein bestätigter Wunschstand.
+                candidate = replace(candidate, wish_snapshot=None)
             self._protect_confirmed(combined, replacement=candidate)
             self._write_blockers(combined)
             self.connection.execute("INSERT INTO months(month_key,payload) VALUES(?,?) ON CONFLICT(month_key) DO UPDATE SET payload=excluded.payload",
@@ -241,6 +261,10 @@ class Store:
                 data.validate()
                 _validate_assignments(data, self.boundary(year, month))
                 _require_complete(data)
+                if not data.confirmed:
+                    data.wish_snapshot = _confirmed_wishes(data)
+            else:
+                data.wish_snapshot = None
             data.confirmed = bool(confirmed)
             self.connection.execute("UPDATE months SET payload=? WHERE month_key=?", (_encode(data), data.key))
 
@@ -275,4 +299,26 @@ class Store:
                 entry.special_minutes += sum(shifts[a.shift_id].paid_minutes for a in mine)
                 entry.expected_count += total_count * ratio
                 entry.expected_minutes += total_minutes * ratio
+        return list(aggregate.values())
+
+    def wish_history(self, before_year: int, before_month: int) -> list[WishHistoryEntry]:
+        """Eindeutige Übergehungen ausschließlich bestätigter Vormonate.
+
+        Derselbe Zeitraum über einer Monatsgrenze hat denselben Wunschschlüssel
+        und zählt kumuliert einmal. Änderungen der globalen Sperren können den
+        damals bestätigten Schnappschuss nicht rückwirkend beeinflussen.
+        """
+        month_days(before_year, before_month)
+        key = f"{before_year:04d}-{before_month:02d}"
+        aggregate: dict[str, WishHistoryEntry] = {}
+        for saved in self._snapshots():
+            if not saved.confirmed or saved.key >= key:
+                continue
+            for employee in saved.employees:
+                entry = aggregate.setdefault(employee.id, WishHistoryEntry(employee.id))
+                row = (saved.wish_snapshot or {}).get(employee.id)
+                if row is None:
+                    entry.missing_months.append(saved.key)
+                else:
+                    entry.violated_keys.update(row["violated"])
         return list(aggregate.values())

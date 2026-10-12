@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "platform": "Linux",
+  "architecture": "x86_64",
+  "python": "3.12.14",
+  "artifact": "Dienstplan",
+  "bytes": 293120738,
+  "mib": 279.54,
+  "archive": "Dienstplan-Linux-x86_64.tar.gz",
+  "archive_bytes": 113851365,
+  "archive_mib": 108.58,
+  "signed": false,
+  "stripped": true,
+  "archive_sha256": "a896b726a69275be507c51bc6605c5a55226a69370b6a18bacf140981caef8a0",
+  "automated_tests": 146,
+  "test_duration_seconds": 57.95,
+  "packaged_self_test": {
+    "status": "bestanden",
+    "people": 12,
+    "assigned_slots": 186,
+    "qt_platform": "offscreen",
+    "environment": "Archiv entpackt, minimaler Prozesskontext ohne Entwicklungsvenv"
+  },
+  "native_windows_tested": false,
+  "native_macos_tested": false
+}

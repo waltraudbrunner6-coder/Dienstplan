@@ -84,11 +84,11 @@ def test_blocker_limit_cross_month_and_duplicates():
     assert len(validate_blockers(blocks+[at_boundary])) == 5
 
 
-def test_special_is_longest_and_input_ranges():
+def test_special_duration_is_independent_of_daily_shifts():
     d=MonthData(2026,11,[Employee("a","Anna","40")],default_shifts())
     d.validate()
     d.shift_types[3].pause_minutes=241
-    with pytest.raises(ValidationError,match="längste"): d.validate()
+    d.validate()
 
 
 def test_minute_precision_and_unplausible_values_rejected():

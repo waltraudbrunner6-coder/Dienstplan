@@ -1,0 +1,4354 @@
+{
+  "month": "2026-11",
+  "baseline_commit": "e7e0fc5e319cc636ca95f0685b0728e5d535e1f8",
+  "ortools_version": "9.15.6755",
+  "python_version": "3.12.14",
+  "seconds_per_solver": 30.0,
+  "input_sha256": "c8c18702971f11e90ecad5524a808f984cd2e857a3d413f144027dfe69cbc14a",
+  "rules": {
+    "rest_minutes": 660,
+    "max_day_minutes": 720,
+    "max_week_minutes": 2400,
+    "max_consecutive_days": 6
+  },
+  "history": "Keine bestätigten Vormonate in beiden Läufen.",
+  "execution": "Serielle Läufe mit jeweils einem CP-SAT-Suchworker und Solver-Seed 202611.",
+  "normalized_hours": "Absolute Zielabweichung / max(Monatssoll, 60 Minuten); Quadrate summiert.",
+  "limitation": "Frühere externe Testgrenzen sind unbekannt; dies ist eine neue, dokumentierte Vergleichsfixture. Laufzeitgrenzen können zu verschiedenen Suchständen führen.",
+  "before": {
+    "status": "feasible",
+    "assigned_slots": 188,
+    "required_slots": 188,
+    "open_slots": 0,
+    "required_hours": 1238.0,
+    "planning_target_hours": 1285.8,
+    "wishes_violated": 2,
+    "total_absolute_deviation_minutes": 16518,
+    "max_absolute_relative_deviation": 0.3840410639290714,
+    "squared_relative_deviations": 0.6799047741194295,
+    "special_distinct_people": 6,
+    "special_max_count": 2,
+    "elapsed_seconds": 30.010179289000007,
+    "stage_names": [
+      "Besetzung",
+      "Wünsche insgesamt",
+      "Alte gewichtete Stunden-/Schichtsumme"
+    ],
+    "optimal_stages": [
+      true,
+      true,
+      false
+    ],
+    "objective_values": [],
+    "local_improvements": 0,
+    "messages": [
+      "Rechnerischer Stundenvergleich: Der vollständige Bedarf von 1238.00 Mitarbeiterstunden liegt 47.80 Stunden unter den individuellen Planungszielen (1285.80 Stunden). Genaue Zielerreichung aller Personen bei voller Besetzung ist damit unmöglich.",
+      "Gültiger Entwurf ohne vollständigen Optimalitätsnachweis; Zeitlimit oder Abbruch begrenzte die Suche."
+    ],
+    "hours": [
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 4770,
+        "new_balance_minutes": -1659,
+        "projected_balance_minutes": -1659,
+        "deviation_minutes": -1659,
+        "deviation_hours": -27.65,
+        "absolute_relative_deviation": 0.2580494633691087
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6180,
+        "new_balance_minutes": -249,
+        "projected_balance_minutes": -249,
+        "deviation_minutes": -249,
+        "deviation_hours": -4.15,
+        "absolute_relative_deviation": 0.03873075128324778
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 5040,
+        "new_balance_minutes": -1389,
+        "projected_balance_minutes": -1389,
+        "deviation_minutes": -1389,
+        "deviation_hours": -23.15,
+        "absolute_relative_deviation": 0.2160522631824545
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 5760,
+        "new_balance_minutes": -669,
+        "projected_balance_minutes": -669,
+        "deviation_minutes": -669,
+        "deviation_hours": -11.15,
+        "absolute_relative_deviation": 0.10405972935137657
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 4770,
+        "new_balance_minutes": -1659,
+        "projected_balance_minutes": -1659,
+        "deviation_minutes": -1659,
+        "deviation_hours": -27.65,
+        "absolute_relative_deviation": 0.2580494633691087
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 3960,
+        "new_balance_minutes": -2469,
+        "projected_balance_minutes": -2469,
+        "deviation_minutes": -2469,
+        "deviation_hours": -41.15,
+        "absolute_relative_deviation": 0.3840410639290714
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 4830,
+        "new_balance_minutes": -1599,
+        "projected_balance_minutes": -1599,
+        "deviation_minutes": -1599,
+        "deviation_hours": -26.65,
+        "absolute_relative_deviation": 0.2487167522165189
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6690,
+        "new_balance_minutes": 261,
+        "projected_balance_minutes": 261,
+        "deviation_minutes": 261,
+        "deviation_hours": 4.35,
+        "absolute_relative_deviation": 0.04059729351376575
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 7560,
+        "new_balance_minutes": 1131,
+        "projected_balance_minutes": 1131,
+        "deviation_minutes": 1131,
+        "deviation_hours": 18.85,
+        "absolute_relative_deviation": 0.17592160522631825
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 8040,
+        "new_balance_minutes": 1611,
+        "projected_balance_minutes": 1611,
+        "deviation_minutes": 1611,
+        "deviation_hours": 26.85,
+        "absolute_relative_deviation": 0.25058329444703686
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 7980,
+        "new_balance_minutes": 1551,
+        "projected_balance_minutes": 1551,
+        "deviation_minutes": 1551,
+        "deviation_hours": 25.85,
+        "absolute_relative_deviation": 0.24125058329444704
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 8700,
+        "new_balance_minutes": 2271,
+        "projected_balance_minutes": 2271,
+        "deviation_minutes": 2271,
+        "deviation_hours": 37.85,
+        "absolute_relative_deviation": 0.353243117125525
+      }
+    ],
+    "wishes": [
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "relevant": 6,
+        "fulfilled": 6,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "relevant": 5,
+        "fulfilled": 4,
+        "violated": 1,
+        "historical": 0,
+        "cumulative": 1,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "relevant": 6,
+        "fulfilled": 5,
+        "violated": 1,
+        "historical": 0,
+        "cumulative": 1,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "relevant": 5,
+        "fulfilled": 5,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "relevant": 6,
+        "fulfilled": 6,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "relevant": 5,
+        "fulfilled": 5,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "relevant": 6,
+        "fulfilled": 6,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "relevant": 5,
+        "fulfilled": 5,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "relevant": 0,
+        "fulfilled": 0,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "relevant": 0,
+        "fulfilled": 0,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "relevant": 0,
+        "fulfilled": 0,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "relevant": 0,
+        "fulfilled": 0,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      }
+    ],
+    "distribution": [
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 7,
+        "minutes": 2520,
+        "expected_count": 5.0,
+        "count_deviation": 2.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 720.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 9,
+        "minutes": 3240,
+        "expected_count": 5.0,
+        "count_deviation": 4.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 1440.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 3,
+        "minutes": 1080,
+        "expected_count": 5.0,
+        "count_deviation": -2.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -720.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 7,
+        "minutes": 2520,
+        "expected_count": 5.0,
+        "count_deviation": 2.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 720.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 4,
+        "minutes": 1440,
+        "expected_count": 5.0,
+        "count_deviation": -1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 1,
+        "minutes": 360,
+        "expected_count": 5.0,
+        "count_deviation": -4.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -1440.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 3,
+        "minutes": 1080,
+        "expected_count": 5.0,
+        "count_deviation": -2.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -720.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 6,
+        "minutes": 2160,
+        "expected_count": 5.0,
+        "count_deviation": 1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 4,
+        "minutes": 1440,
+        "expected_count": 5.0,
+        "count_deviation": -1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 9,
+        "minutes": 3240,
+        "expected_count": 5.0,
+        "count_deviation": 4.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 1440.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 2,
+        "minutes": 720,
+        "expected_count": 5.0,
+        "count_deviation": -3.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -1080.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 3,
+        "minutes": 1080,
+        "expected_count": 5.0,
+        "count_deviation": -2.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -720.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 6,
+        "minutes": 2160,
+        "expected_count": 5.0,
+        "count_deviation": 1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 4,
+        "minutes": 1440,
+        "expected_count": 5.0,
+        "count_deviation": -1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 3,
+        "minutes": 1080,
+        "expected_count": 5.0,
+        "count_deviation": -2.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -720.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 4,
+        "minutes": 1440,
+        "expected_count": 5.0,
+        "count_deviation": -1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 6,
+        "minutes": 2160,
+        "expected_count": 5.0,
+        "count_deviation": 1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 7,
+        "minutes": 2520,
+        "expected_count": 5.0,
+        "count_deviation": 2.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 720.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 7,
+        "minutes": 2520,
+        "expected_count": 5.0,
+        "count_deviation": 2.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 720.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 8,
+        "minutes": 2880,
+        "expected_count": 5.0,
+        "count_deviation": 3.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 1080.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 2,
+        "minutes": 720,
+        "expected_count": 5.0,
+        "count_deviation": -3.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -1080.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 1,
+        "minutes": 450,
+        "expected_count": 5.0,
+        "count_deviation": -4.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": -1800.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 3,
+        "minutes": 1350,
+        "expected_count": 5.0,
+        "count_deviation": -2.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": -900.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 4,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": -1.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": -450.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 4,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": -1.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": -450.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 4,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": -1.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": -450.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 4,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": -1.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": -450.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 3,
+        "minutes": 1350,
+        "expected_count": 5.0,
+        "count_deviation": -2.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": -900.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 8,
+        "minutes": 3600,
+        "expected_count": 5.0,
+        "count_deviation": 3.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 1350.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 6,
+        "minutes": 2700,
+        "expected_count": 5.0,
+        "count_deviation": 1.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 450.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 3,
+        "minutes": 1350,
+        "expected_count": 5.0,
+        "count_deviation": -2.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": -900.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 15,
+        "minutes": 6750,
+        "expected_count": 5.0,
+        "count_deviation": 10.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 4500.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 0,
+        "minutes": 0,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": -0.6666666666666666,
+        "expected_minutes": 340.0,
+        "minute_deviation": -340.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": -340.0,
+        "cumulative_deviation": -0.6666666666666666
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 0,
+        "minutes": 0,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": -0.6666666666666666,
+        "expected_minutes": 340.0,
+        "minute_deviation": -340.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": -340.0,
+        "cumulative_deviation": -0.6666666666666666
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 0,
+        "minutes": 0,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": -0.6666666666666666,
+        "expected_minutes": 340.0,
+        "minute_deviation": -340.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": -340.0,
+        "cumulative_deviation": -0.6666666666666666
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 0,
+        "minutes": 0,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": -0.6666666666666666,
+        "expected_minutes": 340.0,
+        "minute_deviation": -340.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": -340.0,
+        "cumulative_deviation": -0.6666666666666666
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 0,
+        "minutes": 0,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": -0.6666666666666666,
+        "expected_minutes": 340.0,
+        "minute_deviation": -340.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": -340.0,
+        "cumulative_deviation": -0.6666666666666666
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 2,
+        "minutes": 1020,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 1.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 680.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 680.0,
+        "cumulative_deviation": 1.3333333333333333
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 0,
+        "minutes": 0,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": -0.6666666666666666,
+        "expected_minutes": 340.0,
+        "minute_deviation": -340.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": -340.0,
+        "cumulative_deviation": -0.6666666666666666
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 2,
+        "minutes": 1020,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 1.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 680.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 680.0,
+        "cumulative_deviation": 1.3333333333333333
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      }
+    ],
+    "assignments": [
+      {
+        "shift_id": "2026-11-01/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-01/frueh",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-01/spaet",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-01/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-01/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-01/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/frueh",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/spaet",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/nacht",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/nacht",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/frueh",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/spaet",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/nacht",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/spaet",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/spaet",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/sonder",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/sonder",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/frueh",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/spaet",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/nacht",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/spaet",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/nacht",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/frueh",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/spaet",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/spaet",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/frueh",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/spaet",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/nacht",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/nacht",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/spaet",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/nacht",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/nacht",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/frueh",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/spaet",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/nacht",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/nacht",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/sonder",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/sonder",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/frueh",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/frueh",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/spaet",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/nacht",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/frueh",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/spaet",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/nacht",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/frueh",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/spaet",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/frueh",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/spaet",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/nacht",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/frueh",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/spaet",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/spaet",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/nacht",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/spaet",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/nacht",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/frueh",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/spaet",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/nacht",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/sonder",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/sonder",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/spaet",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/nacht",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/nacht",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/frueh",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/spaet",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/nacht",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/spaet",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/spaet",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/nacht",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/spaet",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/spaet",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/nacht",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/frueh",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/nacht",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/frueh",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/spaet",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/spaet",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/nacht",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/nacht",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/sonder",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/sonder",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/frueh",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/spaet",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/nacht",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/spaet",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/nacht",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/frueh",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/nacht",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/frueh",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/spaet",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/nacht",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/frueh",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/frueh",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/spaet",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/nacht",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/nacht",
+        "employee_id": "person-07",
+        "fixed": false
+      }
+    ]
+  },
+  "after": {
+    "status": "feasible",
+    "assigned_slots": 188,
+    "required_slots": 188,
+    "open_slots": 0,
+    "required_hours": 1238.0,
+    "planning_target_hours": 1285.8,
+    "wishes_violated": 2,
+    "total_absolute_deviation_minutes": 2868,
+    "max_absolute_relative_deviation": 0.09006066262249184,
+    "squared_relative_deviations": 0.028139234643650913,
+    "special_distinct_people": 8,
+    "special_max_count": 1,
+    "elapsed_seconds": 30.005716883000787,
+    "stage_names": [
+      "Offene Besetzungsplätze",
+      "Übergangene Priorität-2-Wünsche insgesamt",
+      "Übergangene Wünsche: Gruppe mit 5 Wünschen",
+      "Übergangene Wünsche: Gruppe mit 6 Wünschen",
+      "Gruppe mit 5 Wünschen: größte kumulierte Belastung",
+      "Gruppe mit 5 Wünschen: quadratische kumulierte Belastung",
+      "Gruppe mit 6 Wünschen: größte kumulierte Belastung",
+      "Gruppe mit 6 Wünschen: quadratische kumulierte Belastung",
+      "Größte relative Stundenabweichung (Promille)",
+      "Quadratische Stunden- und Schichtfairness"
+    ],
+    "optimal_stages": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ],
+    "objective_values": [
+      0,
+      2,
+      0,
+      2,
+      0,
+      0,
+      1,
+      2,
+      91,
+      1220680672
+    ],
+    "local_improvements": 5,
+    "messages": [
+      "Rechnerischer Stundenvergleich: Der vollständige Bedarf von 1238.00 Mitarbeiterstunden liegt 47.80 Stunden unter den individuellen Planungszielen (1285.80 Stunden). Genaue Zielerreichung aller Personen bei voller Besetzung ist damit unmöglich.",
+      "Gültiger Entwurf ohne vollständigen Optimalitätsnachweis; Zeitlimit oder Abbruch begrenzte die Suche.",
+      "5 Verbesserung(en) gegenüber gefundenen Startentwürfen; der endgültige Plan wurde mit allen verbindlichen Regeln neu geprüft und bewertet."
+    ],
+    "hours": [
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6360,
+        "new_balance_minutes": -69,
+        "projected_balance_minutes": -69,
+        "deviation_minutes": -69,
+        "deviation_hours": -1.15,
+        "absolute_relative_deviation": 0.010732617825478302
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 5850,
+        "new_balance_minutes": -579,
+        "projected_balance_minutes": -579,
+        "deviation_minutes": -579,
+        "deviation_hours": -9.65,
+        "absolute_relative_deviation": 0.09006066262249184
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6000,
+        "new_balance_minutes": -429,
+        "projected_balance_minutes": -429,
+        "deviation_minutes": -429,
+        "deviation_hours": -7.15,
+        "absolute_relative_deviation": 0.06672888474101726
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6360,
+        "new_balance_minutes": -69,
+        "projected_balance_minutes": -69,
+        "deviation_minutes": -69,
+        "deviation_hours": -1.15,
+        "absolute_relative_deviation": 0.010732617825478302
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6210,
+        "new_balance_minutes": -219,
+        "projected_balance_minutes": -219,
+        "deviation_minutes": -219,
+        "deviation_hours": -3.65,
+        "absolute_relative_deviation": 0.03406439570695287
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6360,
+        "new_balance_minutes": -69,
+        "projected_balance_minutes": -69,
+        "deviation_minutes": -69,
+        "deviation_hours": -1.15,
+        "absolute_relative_deviation": 0.010732617825478302
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6000,
+        "new_balance_minutes": -429,
+        "projected_balance_minutes": -429,
+        "deviation_minutes": -429,
+        "deviation_hours": -7.15,
+        "absolute_relative_deviation": 0.06672888474101726
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6360,
+        "new_balance_minutes": -69,
+        "projected_balance_minutes": -69,
+        "deviation_minutes": -69,
+        "deviation_hours": -1.15,
+        "absolute_relative_deviation": 0.010732617825478302
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 5850,
+        "new_balance_minutes": -579,
+        "projected_balance_minutes": -579,
+        "deviation_minutes": -579,
+        "deviation_hours": -9.65,
+        "absolute_relative_deviation": 0.09006066262249184
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6360,
+        "new_balance_minutes": -69,
+        "projected_balance_minutes": -69,
+        "deviation_minutes": -69,
+        "deviation_hours": -1.15,
+        "absolute_relative_deviation": 0.010732617825478302
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6210,
+        "new_balance_minutes": -219,
+        "projected_balance_minutes": -219,
+        "deviation_minutes": -219,
+        "deviation_hours": -3.65,
+        "absolute_relative_deviation": 0.03406439570695287
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "weekly_hours": "25",
+        "target_minutes": 6429,
+        "opening_minutes": 0,
+        "desired_minutes": 0,
+        "planning_minutes": 6429,
+        "planned_minutes": 6360,
+        "new_balance_minutes": -69,
+        "projected_balance_minutes": -69,
+        "deviation_minutes": -69,
+        "deviation_hours": -1.15,
+        "absolute_relative_deviation": 0.010732617825478302
+      }
+    ],
+    "wishes": [
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "relevant": 6,
+        "fulfilled": 5,
+        "violated": 1,
+        "historical": 0,
+        "cumulative": 1,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "relevant": 5,
+        "fulfilled": 5,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "relevant": 6,
+        "fulfilled": 6,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "relevant": 5,
+        "fulfilled": 5,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "relevant": 6,
+        "fulfilled": 6,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "relevant": 5,
+        "fulfilled": 5,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "relevant": 6,
+        "fulfilled": 5,
+        "violated": 1,
+        "historical": 0,
+        "cumulative": 1,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "relevant": 5,
+        "fulfilled": 5,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "relevant": 0,
+        "fulfilled": 0,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "relevant": 0,
+        "fulfilled": 0,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "relevant": 0,
+        "fulfilled": 0,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "relevant": 0,
+        "fulfilled": 0,
+        "violated": 0,
+        "historical": 0,
+        "cumulative": 0,
+        "missing_months": [],
+        "snapshot_missing": false
+      }
+    ],
+    "distribution": [
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 6,
+        "minutes": 2160,
+        "expected_count": 5.0,
+        "count_deviation": 1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 4,
+        "minutes": 1440,
+        "expected_count": 5.0,
+        "count_deviation": -1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "type_id": "frueh",
+        "shift_name": "Frühdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 4,
+        "minutes": 1440,
+        "expected_count": 5.0,
+        "count_deviation": -1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": -360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 6,
+        "minutes": 2160,
+        "expected_count": 5.0,
+        "count_deviation": 1.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 360.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "type_id": "spaet",
+        "shift_name": "Spätdienst",
+        "count": 5,
+        "minutes": 1800,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 1800.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "type_id": "nacht",
+        "shift_name": "Nachtdienst",
+        "count": 5,
+        "minutes": 2250,
+        "expected_count": 5.0,
+        "count_deviation": 0.0,
+        "expected_minutes": 2250.0,
+        "minute_deviation": 0.0,
+        "historical_count": 0,
+        "historical_expected": 0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0,
+        "cumulative_minute_deviation": 0,
+        "cumulative_deviation": 0
+      },
+      {
+        "employee_id": "person-01",
+        "name": "Person 1",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      },
+      {
+        "employee_id": "person-02",
+        "name": "Person 2",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 0,
+        "minutes": 0,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": -0.6666666666666666,
+        "expected_minutes": 340.0,
+        "minute_deviation": -340.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": -340.0,
+        "cumulative_deviation": -0.6666666666666666
+      },
+      {
+        "employee_id": "person-03",
+        "name": "Person 3",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      },
+      {
+        "employee_id": "person-04",
+        "name": "Person 4",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      },
+      {
+        "employee_id": "person-05",
+        "name": "Person 5",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 0,
+        "minutes": 0,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": -0.6666666666666666,
+        "expected_minutes": 340.0,
+        "minute_deviation": -340.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": -340.0,
+        "cumulative_deviation": -0.6666666666666666
+      },
+      {
+        "employee_id": "person-06",
+        "name": "Person 6",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      },
+      {
+        "employee_id": "person-07",
+        "name": "Person 7",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      },
+      {
+        "employee_id": "person-08",
+        "name": "Person 8",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      },
+      {
+        "employee_id": "person-09",
+        "name": "Person 9",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 0,
+        "minutes": 0,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": -0.6666666666666666,
+        "expected_minutes": 340.0,
+        "minute_deviation": -340.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": -340.0,
+        "cumulative_deviation": -0.6666666666666666
+      },
+      {
+        "employee_id": "person-10",
+        "name": "Person 10",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      },
+      {
+        "employee_id": "person-11",
+        "name": "Person 11",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 0,
+        "minutes": 0,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": -0.6666666666666666,
+        "expected_minutes": 340.0,
+        "minute_deviation": -340.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": -340.0,
+        "cumulative_deviation": -0.6666666666666666
+      },
+      {
+        "employee_id": "person-12",
+        "name": "Person 12",
+        "type_id": "sonder",
+        "shift_name": "Besonderer Dienst",
+        "count": 1,
+        "minutes": 510,
+        "expected_count": 0.6666666666666666,
+        "count_deviation": 0.3333333333333333,
+        "expected_minutes": 340.0,
+        "minute_deviation": 170.0,
+        "historical_count": 0,
+        "historical_expected": 0.0,
+        "historical_minutes": 0,
+        "historical_expected_minutes": 0.0,
+        "cumulative_minute_deviation": 170.0,
+        "cumulative_deviation": 0.3333333333333333
+      }
+    ],
+    "assignments": [
+      {
+        "shift_id": "2026-11-01/frueh",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-01/frueh",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-01/nacht",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-01/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-01/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-01/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/frueh",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/nacht",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/nacht",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/spaet",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-02/spaet",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/frueh",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/nacht",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/nacht",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/spaet",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-03/spaet",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/frueh",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/nacht",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/nacht",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/sonder",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/sonder",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/spaet",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-04/spaet",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/frueh",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/nacht",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/spaet",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-05/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/nacht",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/spaet",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-06/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/frueh",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/frueh",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/spaet",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-07/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/frueh",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/spaet",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-08/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/frueh",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/frueh",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/nacht",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/nacht",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/spaet",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-09/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/frueh",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/nacht",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/nacht",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/spaet",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-10/spaet",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/frueh",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/nacht",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/nacht",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/sonder",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/sonder",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/spaet",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-11/spaet",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/frueh",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/nacht",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/nacht",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/spaet",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-12/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/nacht",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/spaet",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-13/spaet",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/frueh",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/nacht",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/spaet",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-14/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/frueh",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/nacht",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-15/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/frueh",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/nacht",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/nacht",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/spaet",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-16/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/frueh",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/frueh",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/nacht",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/nacht",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/spaet",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-17/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/frueh",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/frueh",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/nacht",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/nacht",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/sonder",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/sonder",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/spaet",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-18/spaet",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/frueh",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/nacht",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/nacht",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-19/spaet",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/frueh",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/frueh",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/nacht",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/nacht",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/spaet",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-20/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/nacht",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/nacht",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/spaet",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-21/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/frueh",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/frueh",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/spaet",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-22/spaet",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/nacht",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/nacht",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-23/spaet",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/frueh",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/frueh",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/nacht",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/nacht",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/spaet",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-24/spaet",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/frueh",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/frueh",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/nacht",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/nacht",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/sonder",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/sonder",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/spaet",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-25/spaet",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/frueh",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/frueh",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/nacht",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/nacht",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/spaet",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-26/spaet",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/frueh",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/frueh",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/nacht",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/nacht",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/spaet",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-27/spaet",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/frueh",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/frueh",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/nacht",
+        "employee_id": "person-06",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/nacht",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/spaet",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-28/spaet",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/frueh",
+        "employee_id": "person-02",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/frueh",
+        "employee_id": "person-10",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/nacht",
+        "employee_id": "person-11",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/nacht",
+        "employee_id": "person-12",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/spaet",
+        "employee_id": "person-07",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-29/spaet",
+        "employee_id": "person-08",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/frueh",
+        "employee_id": "person-04",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/frueh",
+        "employee_id": "person-09",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/nacht",
+        "employee_id": "person-03",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/nacht",
+        "employee_id": "person-05",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/spaet",
+        "employee_id": "person-01",
+        "fixed": false
+      },
+      {
+        "shift_id": "2026-11-30/spaet",
+        "employee_id": "person-10",
+        "fixed": false
+      }
+    ]
+  }
+}

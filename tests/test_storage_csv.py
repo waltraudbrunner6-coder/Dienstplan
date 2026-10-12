@@ -1,15 +1,18 @@
 """Speicher-, Historien- und CSV-Verträge ohne Oberfläche."""
 import csv
-from datetime import datetime, timedelta
+import json
+import sqlite3
+from datetime import datetime, time, timedelta
 from decimal import Decimal
 from fractions import Fraction
 
 import pytest
 
-from dienstplan.csvio import export_fairness, export_hours, export_plan, preview_csv
+from dienstplan.csvio import export_fairness, export_hours, export_plan, export_wishes, preview_csv
+from dienstplan.hours import demand_minutes, monthly_target
 from dienstplan.model import (Assignment, Blocker, Employee, MonthData, ValidationError,
                              default_shifts, generate_shifts)
-from dienstplan.storage import Store
+from dienstplan.storage import SCHEMA_VERSION, Store, _encode
 
 
 def month(year=2026, number=11, complete=False):
@@ -280,3 +283,138 @@ def test_exports_show_slots_fixes_wishes_forecast_and_fairness(tmp_path):
         rows = list(csv.DictReader(stream, delimiter=";"))
     assert len(rows) == 4 * 12
     assert rows[0]["Einsätze im Monat"] == "1"
+
+
+@pytest.mark.parametrize("end", [time(12), time(16), time(20)])
+def test_short_equal_or_long_special_shift_plan_roundtrip(tmp_path, end):
+    data = month(complete=True)
+    data.shift_types[3].end = end
+    path = tmp_path / "daten.sqlite"
+    with Store(path) as store:
+        store.save_month(data)
+        store.set_confirmed(2026, 11, True)
+    with Store(path) as store:
+        loaded = store.load_month(2026, 11)
+        loaded.validate()
+        assert loaded.confirmed
+        assert loaded.shift_types[3].end == end
+        assert loaded.assignments == data.assignments
+        assert store.history(2026, 12)[6].special_minutes == 4 * (end.hour - 8) * 60
+
+
+def test_exceptions_roundtrip_preserves_original_shifts_and_reactivates(tmp_path):
+    data = month(complete=True)
+    exceptions = {"2026-11-16/frueh", "2026-11-16/nacht", "2026-11-30/nacht"}
+    data.exceptions = exceptions
+    data.assignments = [a for a in data.assignments if a.shift_id not in exceptions]
+    before = demand_minutes(data)
+    with Store(tmp_path / "daten.sqlite") as store:
+        store.save_month(data)
+        loaded = store.load_month(2026, 11)
+        assert loaded.exceptions == exceptions
+        assert loaded.assignments == data.assignments
+        assert demand_minutes(loaded) == before
+        ids = {s.id for s in generate_shifts(loaded)}
+        assert "2026-11-15/nacht" in ids
+        assert "2026-11-16/spaet" in ids
+        assert not ids & exceptions
+        loaded.exceptions.remove("2026-11-30/nacht")
+        store.save_month(loaded)
+        reloaded = store.load_month(2026, 11)
+        restored = next(s for s in generate_shifts(reloaded) if s.id == "2026-11-30/nacht")
+        assert restored.end == datetime(2026, 12, 1, 6)
+        assert demand_minutes(reloaded) == before + 16 * 60
+
+
+def test_version_one_migration_preserves_payload_and_decimal_hours(tmp_path):
+    data = month(complete=True)
+    for employee, hours in zip(data.employees, ("37.125", "12.345", "0", "40.0001")):
+        employee.weekly_hours = Decimal(hours)
+    data.employees[0].opening_minutes = 321
+    data.employees[0].desired_minutes = -67
+    raw = json.loads(_encode(data))
+    raw.pop("exceptions")
+    raw.pop("wish_snapshot")
+    payload = json.dumps(raw, ensure_ascii=False, separators=(",", ":"))
+    path = tmp_path / "version1.sqlite"
+    old_blocker = blocker("2026-11-02", employee="p3", priority=2, name="existing-blocker-id")
+    with sqlite3.connect(path) as connection:
+        connection.execute("CREATE TABLE months (month_key TEXT PRIMARY KEY, payload TEXT NOT NULL)")
+        connection.execute("INSERT INTO months VALUES(?,?)", (data.key, payload))
+        connection.execute("""CREATE TABLE blockers (
+            id TEXT PRIMARY KEY, employee_id TEXT NOT NULL, start TEXT NOT NULL,
+            end TEXT NOT NULL, priority INTEGER NOT NULL CHECK(priority IN (1,2)),
+            comment TEXT NOT NULL DEFAULT '', UNIQUE(employee_id,start,end,priority))""")
+        connection.execute("INSERT INTO blockers VALUES(?,?,?,?,?,?)",
+                           (old_blocker.id, old_blocker.employee_id, old_blocker.start.isoformat(timespec="minutes"),
+                            old_blocker.end.isoformat(timespec="minutes"), old_blocker.priority, old_blocker.comment))
+        connection.execute("PRAGMA user_version=1")
+    with Store(path) as store:
+        loaded = store.load_month(2026, 11)
+        assert loaded.exceptions == set()
+        assert loaded.wish_snapshot is None
+        assert loaded.employees == data.employees
+        assert loaded.assignments == data.assignments
+        assert loaded.blockers == [old_blocker]
+        assert [monthly_target(e, 2026, 11) for e in loaded.employees] == [
+            monthly_target(e, 2026, 11) for e in data.employees]
+        assert store.connection.execute("PRAGMA user_version").fetchone()[0] == SCHEMA_VERSION == 2
+        assert store.connection.execute("SELECT payload FROM months").fetchone()[0] == payload
+        store.save_month(loaded)
+    with Store(path) as store:
+        assert store.load_month(2026, 11).employees == data.employees
+        assert store.get_blockers() == [old_blocker]
+
+
+def test_confirmed_exception_change_and_stale_assignment_are_rejected_atomically(tmp_path):
+    data = month(complete=True)
+    with Store(tmp_path / "daten.sqlite") as store:
+        store.save_month(data)
+        data.exceptions.add("2026-11-16/frueh")
+        with pytest.raises(ValidationError, match="unbekannt"):
+            store.save_month(data)
+        assert store.load_month(2026, 11).exceptions == set()
+        assert store.load_month(2026, 11).assignments == data.assignments
+        store.set_confirmed(2026, 11, True)
+        data.assignments = [a for a in data.assignments if a.shift_id not in data.exceptions]
+        with pytest.raises(ValidationError, match="bestätigt"):
+            store.save_month(data)
+        assert store.load_month(2026, 11).exceptions == set()
+
+
+def test_export_exceptions_have_one_status_row_and_no_demand_or_open_place(tmp_path):
+    data = month()
+    data.exceptions = {"2026-11-16/frueh", "2026-11-16/nacht"}
+    path = tmp_path / "plan.csv"
+    export_plan(path, data)
+    with path.open(encoding="utf-8-sig", newline="") as stream:
+        rows = list(csv.DictReader(stream, delimiter=";"))
+    inactive = [r for r in rows if r["Status"] == "ENTFÄLLT"]
+    assert len(inactive) == 2
+    assert all(r["Datum"] == "2026-11-16" for r in inactive)
+    assert {r["Schicht"] for r in inactive} == {"Frühdienst", "Nachtdienst"}
+    assert all(r["Bezahlte Stunden"] == r["Besetzungsplatz"] == r["Person"] == "" for r in inactive)
+    assert sum(r["Person"] == "OFFEN" for r in rows) == sum(s.staff_required for s in generate_shifts(data))
+    overnight = next(r for r in inactive if r["Schicht"] == "Nachtdienst")
+    assert overnight["Ende"] == "2026-11-17 06:00"
+
+
+def test_export_wish_statistics_contains_unique_current_historic_and_missing_data(tmp_path):
+    from dienstplan.model import WishHistoryEntry
+    from dienstplan.wishes import wish_key
+    data = month()
+    wish = blocker("2026-11-01", priority=2)
+    data.blockers = [wish, blocker("2026-11-01", priority=2, name="duplicate")]
+    data.assignments = [Assignment("2026-11-01/frueh", "p0"), Assignment("2026-11-01/spaet", "p0")]
+    history = [WishHistoryEntry("p0", {wish_key(wish), "old-key"}, ["2026-10"])]
+    path = tmp_path / "wuensche.csv"
+    export_wishes(path, data, history)
+    assert path.read_bytes().startswith(b"\xef\xbb\xbf")
+    with path.open(encoding="utf-8-sig", newline="") as stream:
+        rows = list(csv.DictReader(stream, delimiter=";"))
+    assert rows[0]["Relevante Priorität-2-Wünsche"] == "1"
+    assert rows[0]["Erfüllte Wünsche im Monat"] == "0"
+    assert rows[0]["Übergangene Wünsche im Monat"] == "1"
+    assert rows[0]["Historische Übergehungen"] == "2"
+    assert rows[0]["Kumulierte Belastung"] == "2"
+    assert rows[0]["Fehlende bestätigte Althistorie"] == "2026-10"

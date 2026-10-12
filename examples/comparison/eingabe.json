@@ -1,0 +1,731 @@
+{
+  "assignments": [],
+  "blockers": [
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-01",
+      "end": "2026-11-04T00:00:00",
+      "id": "nov-01-p1-03",
+      "priority": 1,
+      "start": "2026-11-03T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-01",
+      "end": "2026-11-09T00:00:00",
+      "id": "nov-01-p1-08",
+      "priority": 1,
+      "start": "2026-11-08T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-01",
+      "end": "2026-11-15T00:00:00",
+      "id": "nov-01-p1-14",
+      "priority": 1,
+      "start": "2026-11-14T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-01",
+      "end": "2026-11-26T00:00:00",
+      "id": "nov-01-p1-25",
+      "priority": 1,
+      "start": "2026-11-25T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-01",
+      "end": "2026-11-02T00:00:00",
+      "id": "nov-01-p2-01",
+      "priority": 2,
+      "start": "2026-11-01T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-01",
+      "end": "2026-11-08T00:00:00",
+      "id": "nov-01-p2-07",
+      "priority": 2,
+      "start": "2026-11-07T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-01",
+      "end": "2026-11-16T00:00:00",
+      "id": "nov-01-p2-15",
+      "priority": 2,
+      "start": "2026-11-15T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-01",
+      "end": "2026-11-19T00:00:00",
+      "id": "nov-01-p2-18",
+      "priority": 2,
+      "start": "2026-11-18T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-01",
+      "end": "2026-11-23T00:00:00",
+      "id": "nov-01-p2-22",
+      "priority": 2,
+      "start": "2026-11-22T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-01",
+      "end": "2026-11-30T00:00:00",
+      "id": "nov-01-p2-29",
+      "priority": 2,
+      "start": "2026-11-29T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-02",
+      "end": "2026-11-06T00:00:00",
+      "id": "nov-02-p1-05",
+      "priority": 1,
+      "start": "2026-11-05T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-02",
+      "end": "2026-11-10T00:00:00",
+      "id": "nov-02-p1-09",
+      "priority": 1,
+      "start": "2026-11-09T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-02",
+      "end": "2026-11-18T00:00:00",
+      "id": "nov-02-p1-17",
+      "priority": 1,
+      "start": "2026-11-17T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-02",
+      "end": "2026-11-29T00:00:00",
+      "id": "nov-02-p1-28",
+      "priority": 1,
+      "start": "2026-11-28T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-02",
+      "end": "2026-11-03T00:00:00",
+      "id": "nov-02-p2-02",
+      "priority": 2,
+      "start": "2026-11-02T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-02",
+      "end": "2026-11-08T00:00:00",
+      "id": "nov-02-p2-07",
+      "priority": 2,
+      "start": "2026-11-07T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-02",
+      "end": "2026-11-15T00:00:00",
+      "id": "nov-02-p2-14",
+      "priority": 2,
+      "start": "2026-11-14T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-02",
+      "end": "2026-11-23T00:00:00",
+      "id": "nov-02-p2-22",
+      "priority": 2,
+      "start": "2026-11-22T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-02",
+      "end": "2026-12-01T00:00:00",
+      "id": "nov-02-p2-30",
+      "priority": 2,
+      "start": "2026-11-30T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-03",
+      "end": "2026-11-03T00:00:00",
+      "id": "nov-03-p1-02",
+      "priority": 1,
+      "start": "2026-11-02T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-03",
+      "end": "2026-11-12T00:00:00",
+      "id": "nov-03-p1-11",
+      "priority": 1,
+      "start": "2026-11-11T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-03",
+      "end": "2026-11-19T00:00:00",
+      "id": "nov-03-p1-18",
+      "priority": 1,
+      "start": "2026-11-18T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-03",
+      "end": "2026-11-27T00:00:00",
+      "id": "nov-03-p1-26",
+      "priority": 1,
+      "start": "2026-11-26T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-03",
+      "end": "2026-11-02T00:00:00",
+      "id": "nov-03-p2-01",
+      "priority": 2,
+      "start": "2026-11-01T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-03",
+      "end": "2026-11-09T00:00:00",
+      "id": "nov-03-p2-08",
+      "priority": 2,
+      "start": "2026-11-08T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-03",
+      "end": "2026-11-16T00:00:00",
+      "id": "nov-03-p2-15",
+      "priority": 2,
+      "start": "2026-11-15T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-03",
+      "end": "2026-11-23T00:00:00",
+      "id": "nov-03-p2-22",
+      "priority": 2,
+      "start": "2026-11-22T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-03",
+      "end": "2026-11-28T00:00:00",
+      "id": "nov-03-p2-27",
+      "priority": 2,
+      "start": "2026-11-27T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-03",
+      "end": "2026-11-30T00:00:00",
+      "id": "nov-03-p2-29",
+      "priority": 2,
+      "start": "2026-11-29T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-04",
+      "end": "2026-11-07T00:00:00",
+      "id": "nov-04-p1-06",
+      "priority": 1,
+      "start": "2026-11-06T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-04",
+      "end": "2026-11-13T00:00:00",
+      "id": "nov-04-p1-12",
+      "priority": 1,
+      "start": "2026-11-12T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-04",
+      "end": "2026-11-21T00:00:00",
+      "id": "nov-04-p1-20",
+      "priority": 1,
+      "start": "2026-11-20T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-04",
+      "end": "2026-11-30T00:00:00",
+      "id": "nov-04-p1-29",
+      "priority": 1,
+      "start": "2026-11-29T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-04",
+      "end": "2026-11-05T00:00:00",
+      "id": "nov-04-p2-04",
+      "priority": 2,
+      "start": "2026-11-04T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-04",
+      "end": "2026-11-08T00:00:00",
+      "id": "nov-04-p2-07",
+      "priority": 2,
+      "start": "2026-11-07T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-04",
+      "end": "2026-11-16T00:00:00",
+      "id": "nov-04-p2-15",
+      "priority": 2,
+      "start": "2026-11-15T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-04",
+      "end": "2026-11-23T00:00:00",
+      "id": "nov-04-p2-22",
+      "priority": 2,
+      "start": "2026-11-22T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-04",
+      "end": "2026-11-29T00:00:00",
+      "id": "nov-04-p2-28",
+      "priority": 2,
+      "start": "2026-11-28T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-05",
+      "end": "2026-11-02T00:00:00",
+      "id": "nov-05-p1-01",
+      "priority": 1,
+      "start": "2026-11-01T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-05",
+      "end": "2026-11-11T00:00:00",
+      "id": "nov-05-p1-10",
+      "priority": 1,
+      "start": "2026-11-10T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-05",
+      "end": "2026-11-20T00:00:00",
+      "id": "nov-05-p1-19",
+      "priority": 1,
+      "start": "2026-11-19T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-05",
+      "end": "2026-11-25T00:00:00",
+      "id": "nov-05-p1-24",
+      "priority": 1,
+      "start": "2026-11-24T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-05",
+      "end": "2026-11-06T00:00:00",
+      "id": "nov-05-p2-05",
+      "priority": 2,
+      "start": "2026-11-05T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-05",
+      "end": "2026-11-09T00:00:00",
+      "id": "nov-05-p2-08",
+      "priority": 2,
+      "start": "2026-11-08T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-05",
+      "end": "2026-11-15T00:00:00",
+      "id": "nov-05-p2-14",
+      "priority": 2,
+      "start": "2026-11-14T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-05",
+      "end": "2026-11-23T00:00:00",
+      "id": "nov-05-p2-22",
+      "priority": 2,
+      "start": "2026-11-22T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-05",
+      "end": "2026-11-28T00:00:00",
+      "id": "nov-05-p2-27",
+      "priority": 2,
+      "start": "2026-11-27T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-05",
+      "end": "2026-11-30T00:00:00",
+      "id": "nov-05-p2-29",
+      "priority": 2,
+      "start": "2026-11-29T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-06",
+      "end": "2026-11-05T00:00:00",
+      "id": "nov-06-p1-04",
+      "priority": 1,
+      "start": "2026-11-04T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-06",
+      "end": "2026-11-14T00:00:00",
+      "id": "nov-06-p1-13",
+      "priority": 1,
+      "start": "2026-11-13T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-06",
+      "end": "2026-11-22T00:00:00",
+      "id": "nov-06-p1-21",
+      "priority": 1,
+      "start": "2026-11-21T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-06",
+      "end": "2026-11-28T00:00:00",
+      "id": "nov-06-p1-27",
+      "priority": 1,
+      "start": "2026-11-27T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-06",
+      "end": "2026-11-03T00:00:00",
+      "id": "nov-06-p2-02",
+      "priority": 2,
+      "start": "2026-11-02T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-06",
+      "end": "2026-11-09T00:00:00",
+      "id": "nov-06-p2-08",
+      "priority": 2,
+      "start": "2026-11-08T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-06",
+      "end": "2026-11-16T00:00:00",
+      "id": "nov-06-p2-15",
+      "priority": 2,
+      "start": "2026-11-15T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-06",
+      "end": "2026-11-23T00:00:00",
+      "id": "nov-06-p2-22",
+      "priority": 2,
+      "start": "2026-11-22T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-06",
+      "end": "2026-12-01T00:00:00",
+      "id": "nov-06-p2-30",
+      "priority": 2,
+      "start": "2026-11-30T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-07",
+      "end": "2026-11-08T00:00:00",
+      "id": "nov-07-p1-07",
+      "priority": 1,
+      "start": "2026-11-07T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-07",
+      "end": "2026-11-16T00:00:00",
+      "id": "nov-07-p1-15",
+      "priority": 1,
+      "start": "2026-11-15T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-07",
+      "end": "2026-11-24T00:00:00",
+      "id": "nov-07-p1-23",
+      "priority": 1,
+      "start": "2026-11-23T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-07",
+      "end": "2026-11-02T00:00:00",
+      "id": "nov-07-p2-01",
+      "priority": 2,
+      "start": "2026-11-01T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-07",
+      "end": "2026-11-07T00:00:00",
+      "id": "nov-07-p2-06",
+      "priority": 2,
+      "start": "2026-11-06T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-07",
+      "end": "2026-11-15T00:00:00",
+      "id": "nov-07-p2-14",
+      "priority": 2,
+      "start": "2026-11-14T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-07",
+      "end": "2026-11-19T00:00:00",
+      "id": "nov-07-p2-18",
+      "priority": 2,
+      "start": "2026-11-18T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-07",
+      "end": "2026-11-23T00:00:00",
+      "id": "nov-07-p2-22",
+      "priority": 2,
+      "start": "2026-11-22T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-07",
+      "end": "2026-11-29T00:00:00",
+      "id": "nov-07-p2-28",
+      "priority": 2,
+      "start": "2026-11-28T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-08",
+      "end": "2026-11-09T00:00:00",
+      "id": "nov-08-p1-08",
+      "priority": 1,
+      "start": "2026-11-08T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-08",
+      "end": "2026-11-17T00:00:00",
+      "id": "nov-08-p1-16",
+      "priority": 1,
+      "start": "2026-11-16T00:00:00"
+    },
+    {
+      "comment": "Fiktive verbindliche Sperre",
+      "employee_id": "person-08",
+      "end": "2026-12-01T00:00:00",
+      "id": "nov-08-p1-30",
+      "priority": 1,
+      "start": "2026-11-30T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-08",
+      "end": "2026-11-03T00:00:00",
+      "id": "nov-08-p2-02",
+      "priority": 2,
+      "start": "2026-11-02T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-08",
+      "end": "2026-11-08T00:00:00",
+      "id": "nov-08-p2-07",
+      "priority": 2,
+      "start": "2026-11-07T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-08",
+      "end": "2026-11-15T00:00:00",
+      "id": "nov-08-p2-14",
+      "priority": 2,
+      "start": "2026-11-14T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-08",
+      "end": "2026-11-23T00:00:00",
+      "id": "nov-08-p2-22",
+      "priority": 2,
+      "start": "2026-11-22T00:00:00"
+    },
+    {
+      "comment": "Fiktiver Freiwunsch",
+      "employee_id": "person-08",
+      "end": "2026-11-28T00:00:00",
+      "id": "nov-08-p2-27",
+      "priority": 2,
+      "start": "2026-11-27T00:00:00"
+    }
+  ],
+  "confirmed": false,
+  "employees": [
+    {
+      "desired_minutes": 0,
+      "id": "person-01",
+      "name": "Person 1",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-02",
+      "name": "Person 2",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-03",
+      "name": "Person 3",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-04",
+      "name": "Person 4",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-05",
+      "name": "Person 5",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-06",
+      "name": "Person 6",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-07",
+      "name": "Person 7",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-08",
+      "name": "Person 8",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-09",
+      "name": "Person 9",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-10",
+      "name": "Person 10",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-11",
+      "name": "Person 11",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    },
+    {
+      "desired_minutes": 0,
+      "id": "person-12",
+      "name": "Person 12",
+      "opening_minutes": 0,
+      "weekly_hours": "25"
+    }
+  ],
+  "exceptions": [],
+  "month": 11,
+  "rules": {
+    "max_consecutive_days": 6,
+    "max_day_minutes": 720,
+    "max_week_minutes": 2400,
+    "rest_minutes": 660
+  },
+  "shift_types": [
+    {
+      "end": "16:00:00",
+      "id": "frueh",
+      "name": "Frühdienst",
+      "pause_minutes": 0,
+      "staff_required": 2,
+      "start": "10:00:00",
+      "weekday": null
+    },
+    {
+      "end": "22:00:00",
+      "id": "spaet",
+      "name": "Spätdienst",
+      "pause_minutes": 0,
+      "staff_required": 2,
+      "start": "16:00:00",
+      "weekday": null
+    },
+    {
+      "end": "01:00:00",
+      "id": "nacht",
+      "name": "Nachtdienst",
+      "pause_minutes": 30,
+      "staff_required": 2,
+      "start": "17:00:00",
+      "weekday": null
+    },
+    {
+      "end": "04:00:00",
+      "id": "sonder",
+      "name": "Besonderer Dienst",
+      "pause_minutes": 30,
+      "staff_required": 2,
+      "start": "19:00:00",
+      "weekday": 2
+    }
+  ],
+  "year": 2026
+}

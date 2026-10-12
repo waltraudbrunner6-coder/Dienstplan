@@ -21,7 +21,7 @@ from .hours import demand_minutes, fairness_rows, hour_rows, monthly_target
 from .model import (
     Assignment, Blocker, Employee, MonthData, Rules, ShiftType, ValidationError,
     decimal_hours, default_shifts, format_hours, generate_shifts, new_id,
-    to_minutes, validate_blockers, overlaps,
+    to_minutes, validate_blockers, overlaps, month_days,
 )
 
 WEEKDAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
@@ -52,17 +52,19 @@ class SolverWorker(QObject):
     finished = Signal(object)
     failed = Signal(str)
 
-    def __init__(self, data, history, boundary, limit, cancel):
+    def __init__(self, data, history, boundary, limit, cancel, wish_history=None):
         super().__init__()
         self.data, self.history, self.boundary = data, history, boundary
         self.limit, self.cancel = limit, cancel
+        self.wish_history = wish_history or []
 
     @Slot()
     def run(self):
         try:
             from .planner import solve
             self.finished.emit(solve(self.data, history=self.history, boundary=self.boundary,
-                                     time_limit=self.limit, cancel=self.cancel))
+                                     time_limit=self.limit, cancel=self.cancel,
+                                     wish_history=self.wish_history))
         except Exception as exc:
             self.failed.emit(f"Die Planung konnte nicht ausgeführt werden: {exc}")
 
@@ -145,6 +147,8 @@ class MainWindow(QMainWindow):
         self._loading = True
         self._thread = None; self._worker = None; self._cancel = None
         self._last_status = "Gespeicherter Plan" if self.data.assignments else "Noch kein Dienstplan"
+        self._exception_notice = ""
+        self._proof_text = ""
         self.setWindowTitle("Dienstplan – lokale Monatsplanung")
         self.resize(1320, 850)
         central = QWidget(); layout = QVBoxLayout(central); self.setCentralWidget(central)
@@ -160,7 +164,7 @@ class MainWindow(QMainWindow):
         layout.addLayout(top)
         self.banner = QLabel(); self.banner.setWordWrap(True); layout.addWidget(self.banner)
         self.tabs = QTabWidget(); layout.addWidget(self.tabs, 1)
-        self._build_team(); self._build_shifts(); self._build_blockers(); self._build_result()
+        self._build_team(); self._build_shifts(); self._build_exceptions(); self._build_blockers(); self._build_result()
         footer = QHBoxLayout()
         footer.addWidget(QLabel("Zeitlimit (Sekunden)"))
         self.limit_spin = QSpinBox(); self.limit_spin.setRange(1, 600); self.limit_spin.setValue(20)
@@ -221,7 +225,7 @@ class MainWindow(QMainWindow):
 
     def _build_shifts(self):
         page = QWidget(); layout = QVBoxLayout(page)
-        note = QLabel("Drei tägliche Dienste und ein längerer wöchentlicher Dienst. Ende ≤ Start bedeutet Folgetag "
+        note = QLabel("Drei tägliche Dienste und ein besonderer wöchentlicher Dienst mit frei wählbarer Dauer. Ende ≤ Start bedeutet Folgetag "
                       "(gleiche Uhrzeiten = 24 Stunden). Schichten zählen zum Monat ihres Startdatums.")
         note.setWordWrap(True); layout.addWidget(note)
         self.shift_table = _table(["Name", "Start", "Ende", "Enddatum", "Pause (Min.)", "Personenzahl", "Wochentag"])
@@ -243,10 +247,120 @@ class MainWindow(QMainWindow):
             row = QWidget(); horizontal = QHBoxLayout(row); horizontal.setContentsMargins(0, 0, 0, 0)
             horizontal.addWidget(enabled); horizontal.addWidget(value); horizontal.addStretch()
             form.addRow(title, row); self.rule_controls[key] = (enabled, value)
-            enabled.toggled.connect(value.setEnabled); enabled.toggled.connect(self._changed)
-            value.valueChanged.connect(self._changed)
+            enabled.toggled.connect(value.setEnabled); enabled.toggled.connect(self._settings_changed)
+            value.valueChanged.connect(self._settings_changed)
         layout.addWidget(group)
         self.tabs.addTab(page, "2 · Schichten und Grenzen")
+
+    def _build_exceptions(self):
+        page = QWidget(); layout = QVBoxLayout(page)
+        note = QLabel("Haken gesetzt = dieser tägliche Dienst entfällt am angezeigten Startdatum. "
+                      "Ein am Vortag begonnener Nachtdienst bleibt bestehen. Der besondere wöchentliche Dienst bleibt immer unverändert. "
+                      "Datumsbezogene Ausnahmen werden nicht in einen neuen Monat übernommen.")
+        note.setWordWrap(True); layout.addWidget(note)
+        self.exception_table = _table(["Datum", "Wochentag", "Täglicher Dienst 1", "Täglicher Dienst 2", "Täglicher Dienst 3", "Hinweis"])
+        self.exception_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.exception_table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        layout.addWidget(self.exception_table)
+        row = QHBoxLayout(); self.exception_buttons = []
+        for title, slot in [("Gewählte Tage: alle täglichen Dienste entfallen", self.deactivate_selected_days),
+                            ("Gewählte Tage: Ausnahmen aufheben", self.restore_selected_days),
+                            ("Alle Monatsausnahmen aufheben", self.restore_all_exceptions)]:
+            button = QPushButton(title); button.clicked.connect(slot); row.addWidget(button); self.exception_buttons.append(button)
+        row.addStretch(); layout.addLayout(row)
+        self.tabs.addTab(page, "3 · Ausnahmetage")
+
+    def _fill_exceptions(self):
+        daily = [shift for shift in self.data.shift_types if not shift.special]
+        self.exception_table.setHorizontalHeaderLabels(["Datum", "Wochentag", *[s.name for s in daily], "Hinweis"])
+        self.exception_table.setRowCount(month_days(self.data.year, self.data.month))
+        self._exception_widgets = {}
+        self._exception_dates = []
+        for row in range(self.exception_table.rowCount()):
+            day = date(self.data.year, self.data.month, row + 1)
+            self._exception_dates.append(day)
+            self.exception_table.setItem(row, 0, _item(day.strftime("%d.%m.%Y")))
+            self.exception_table.setItem(row, 1, _item(WEEKDAYS[day.weekday()]))
+            inactive = []
+            for col, shift in enumerate(daily, 2):
+                occurrence_id = f"{day.isoformat()}/{shift.id}"
+                checkbox = QCheckBox("entfällt")
+                checkbox.setChecked(occurrence_id in self.data.exceptions)
+                checkbox.setToolTip(f"{shift.name} am {day:%d.%m.%Y}: Haken = entfällt")
+                if checkbox.isChecked(): inactive.append(shift.name)
+                self.exception_table.setCellWidget(row, col, checkbox)
+                self._exception_widgets[occurrence_id] = checkbox
+                checkbox.toggled.connect(lambda checked, key=occurrence_id: self._exception_changed(key, checked))
+            self.exception_table.setItem(row, 5, _item("Entfällt: " + ", ".join(inactive) if inactive else "Alle täglichen Dienste aktiv"))
+
+    def _exception_changed(self, occurrence_id, inactive):
+        if self._loading: return
+        desired = set(self.data.exceptions)
+        if inactive: desired.add(occurrence_id)
+        else: desired.discard(occurrence_id)
+        self.set_exceptions(desired)
+
+    def _selected_exception_days(self):
+        return [self._exception_dates[index.row()] for index in self.exception_table.selectionModel().selectedRows()]
+
+    def deactivate_selected_days(self):
+        days = self._selected_exception_days()
+        if not days:
+            self.statusBar().showMessage("Bitte zuerst eine oder mehrere Datumszeilen auswählen.", 5000); return
+        desired = set(self.data.exceptions)
+        desired.update(f"{day.isoformat()}/{shift.id}" for day in days for shift in self.data.shift_types if not shift.special)
+        self.set_exceptions(desired)
+
+    def restore_selected_days(self):
+        prefixes = {day.isoformat() + "/" for day in self._selected_exception_days()}
+        if not prefixes:
+            self.statusBar().showMessage("Bitte zuerst eine oder mehrere Datumszeilen auswählen.", 5000); return
+        self.set_exceptions({key for key in self.data.exceptions if not any(key.startswith(prefix) for prefix in prefixes)})
+
+    def restore_all_exceptions(self):
+        self.set_exceptions(set())
+
+    def set_exceptions(self, desired):
+        """Ändert einen Monatsentwurf atomar; feste Zuteilungen werden ausdrücklich benannt."""
+        if self.data.confirmed or self._thread is not None:
+            self._loading = True; self._fill_exceptions(); self._loading = False; self._update_enabled()
+            self._error("Bestätigte Monate können nicht geändert werden. Bitte zuerst die Bestätigung aufheben." if self.data.confirmed
+                        else "Bitte die laufende Berechnung zuerst beenden.")
+            return False
+        try:
+            draft = self.collect_data()
+            desired = set(desired)
+            if desired == draft.exceptions: return True
+            removed_keys = desired - draft.exceptions
+            removed = [assignment for assignment in draft.assignments if assignment.shift_id in removed_keys]
+            shifts = {shift.id: shift for shift in generate_shifts(draft)}
+            names = {employee.id: employee.name for employee in draft.employees}
+            details = [f"{shifts[a.shift_id].start:%d.%m.%Y} · {shifts[a.shift_id].name} · {names[a.employee_id]}"
+                       + (" (fixiert)" if a.fixed else "") for a in removed]
+            if removed:
+                text = f"{len(removed)} zugeteilte Einsätze entfallen aus dem bearbeiteten Entwurf:\n" + "\n".join(details)
+                text += "\n\nAuch aufgeführte fixierte Zuteilungen werden entfernt, weil der Schichttermin entfällt. Fortfahren?"
+                if QMessageBox.question(self, "Zugewiesene Dienste entfallen", text,
+                                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                        QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
+                    self._loading = True; self._fill_exceptions(); self._loading = False; self._update_enabled(); return False
+            draft.exceptions = desired
+            draft.assignments = [assignment for assignment in draft.assignments if assignment.shift_id not in removed_keys]
+            draft.validate()
+            restored = self.data.exceptions - desired
+            self.data = draft; self.dirty = True
+            self._proof_text = ""
+            self._last_status = "Entwurf mit geänderten Ausnahmetagen – vor Bestätigung erneut prüfen"
+            self._exception_notice = (f"{len(removed)} Einsätze durch Ausnahmen entfernt: " + "; ".join(details)) if removed else (
+                f"{len(restored)} tägliche Schichttermine wieder aktiviert; neue Besetzungsplätze sind offen." if restored
+                else f"{len(removed_keys)} tägliche Schichttermine entfallen; Bedarf und faire Sollanteile sind aktualisiert.")
+            self._loading = True; self._fill_exceptions(); self._fill_plan(); self._loading = False
+            self._refresh_summaries(); self._update_banner(); self._update_enabled()
+            self.statusBar().showMessage(self._exception_notice, 10000)
+            return True
+        except Exception as exc:
+            self._loading = True; self._fill_exceptions(); self._loading = False; self._update_enabled()
+            self._error(f"Die Ausnahmen wurden nicht geändert. {exc}"); return False
 
     def _build_blockers(self):
         page = QWidget(); layout = QVBoxLayout(page)
@@ -265,7 +379,7 @@ class MainWindow(QMainWindow):
             button = QPushButton(title); button.clicked.connect(slot); row.addWidget(button); self.blocker_buttons.append(button)
         row.addStretch(); layout.addLayout(row)
         self.blocker_person.currentIndexChanged.connect(self._fill_blockers)
-        self.tabs.addTab(page, "3 · Sperren und CSV")
+        self.tabs.addTab(page, "4 · Sperren und CSV")
 
     def _build_result(self):
         page = QWidget(); layout = QVBoxLayout(page)
@@ -276,18 +390,29 @@ class MainWindow(QMainWindow):
         self.hours_table = _table(["Person", "Woche (h)", "Monatssoll", "Anfangssaldo", "Gew. Endsaldo", "Planungsziel",
                                    "Eingeplant", "Neue +/-", "Endsaldo-Prognose", "Zielabweichung"])
         self.summary_tabs.addTab(self.hours_table, "Stundenprognose (alle Werte in h)")
-        self.fairness_table = _table(["Person", "Schicht", "Anzahl", "Stunden", "Fairer Anteil Anzahl", "Abweichung Anzahl",
+        self.fairness_table = _table(["Person", "Schicht", "Anzahl", "Stunden", "Fairer Anteil besetzter Einsätze", "Abweichung Anzahl",
                                       "Fairer Anteil (h)", "Abweichung (h)", "Sonder-Historie Anzahl", "Hist. Sollanteil Anzahl",
                                       "Sonder-Historie (h)", "Hist. Sollanteil (h)", "Sonder-Abweichung Anzahl gesamt", "Sonder-Abweichung (h) gesamt"])
         self.summary_tabs.addTab(self.fairness_table, "Schichtverteilung")
+        wishes_page = QWidget(); wishes_layout = QVBoxLayout(wishes_page)
+        wishes_note = QLabel("Nur eindeutige Priorität-2-Wünsche mit Überschneidung zu aktiven Diensten zählen. "
+                             "Nach möglichst vollständiger Besetzung und minimaler Gesamtzahl an Übergehungen werden zuerst Personen mit weniger Wünschen geschützt; "
+                             "innerhalb gleicher Wunschanzahl wird die kumulierte Belastung ausgeglichen. "
+                             "Besetzung und verbindliche Regeln können Wünsche einschränken; ohne Optimalitätsnachweis bleibt Verbesserung möglich.")
+        wishes_note.setWordWrap(True); wishes_layout.addWidget(wishes_note)
+        self.wishes_table = _table(["Person", "Relevante Wünsche", "Erfüllt (Entwurf)", "Übergangen (Entwurf)",
+                                    "Historische Übergehungen", "Kumulierte Belastung", "Fehlende Althistorie"])
+        wishes_layout.addWidget(self.wishes_table)
+        self.summary_tabs.addTab(wishes_page, "Freiwünsche")
         self.conflicts = QTextEdit(); self.conflicts.setReadOnly(True); self.conflicts.setMaximumHeight(155)
         layout.addWidget(self.conflicts)
         buttons = QHBoxLayout(); self.export_buttons = []
-        for title, kind in [("Dienstplan als CSV …", "plan"), ("Stunden als CSV …", "hours"), ("Verteilung als CSV …", "fairness")]:
+        for title, kind in [("Dienstplan als CSV …", "plan"), ("Stunden als CSV …", "hours"), ("Verteilung als CSV …", "fairness"), ("Freiwünsche als CSV …", "wishes")]:
             button = QPushButton(title); button.clicked.connect(lambda checked=False, k=kind: self.export_csv(k))
             buttons.addWidget(button); self.export_buttons.append(button)
         buttons.addStretch(); layout.addLayout(buttons)
-        self.tabs.addTab(page, "4 · Ergebnis und Export")
+        self.result_page = page
+        self.tabs.addTab(page, "5 · Ergebnis und Export")
 
     def _fill(self):
         self._loading = True
@@ -314,15 +439,15 @@ class MainWindow(QMainWindow):
             else: weekday.addItem("Täglich, auch Wochenende"); weekday.setEnabled(False)
             for col, widget in enumerate([name, start, end, next_day, pause, count, weekday]):
                 self.shift_table.setCellWidget(row, col, widget)
-            name.textChanged.connect(self._changed); pause.valueChanged.connect(self._changed); count.valueChanged.connect(self._changed)
-            weekday.currentIndexChanged.connect(self._changed)
+            name.textChanged.connect(self._settings_changed); pause.valueChanged.connect(self._settings_changed); count.valueChanged.connect(self._settings_changed)
+            weekday.currentIndexChanged.connect(self._settings_changed)
             start.timeChanged.connect(lambda *_, r=row: self._shift_time_changed(r))
             end.timeChanged.connect(lambda *_, r=row: self._shift_time_changed(r))
             self._shift_time_changed(row)
         for key, (enabled, value) in self.rule_controls.items():
             raw = getattr(self.data.rules, key); enabled.setChecked(raw is not None)
             if raw is not None: value.setValue(raw if key == "max_consecutive_days" else raw / 60)
-        self._fill_people(); self._fill_blockers(); self._fill_plan(); self._refresh_summaries()
+        self._fill_people(); self._fill_blockers(); self._fill_exceptions(); self._fill_plan(); self._refresh_summaries()
         self._loading = False; self._update_enabled(); self._update_banner()
 
     def _fill_people(self):
@@ -345,7 +470,7 @@ class MainWindow(QMainWindow):
     def _shift_time_changed(self, row):
         start = self.shift_table.cellWidget(row, 1).time(); end = self.shift_table.cellWidget(row, 2).time()
         self.shift_table.cellWidget(row, 3).setText("Folgetag (+1 Tag)" if end <= start else "Gleicher Tag")
-        self._changed()
+        self._settings_changed()
 
     def _team_changed(self, item):
         if self._loading: return
@@ -370,7 +495,30 @@ class MainWindow(QMainWindow):
 
     def _changed(self, *_):
         if not self._loading:
-            self.dirty = True; self._update_banner()
+            self.dirty = True
+            self._proof_text = ""
+            self._last_status = "Entwurf mit geänderten Eingaben – erneut prüfen"
+            self._update_banner()
+
+    def _settings_changed(self, *_):
+        """Gültige Schichteingaben aktualisieren Bedarf, Wunschrelevanz und Plätze sofort."""
+        if self._loading: return
+        self._changed()
+        try:
+            draft = self.collect_data()
+        except (ValueError, ArithmeticError) as exc:
+            # Ein vorübergehend leerer Name oder eine zu lange Pause darf weiter
+            # bearbeitet werden. Speichern/Planen prüft die Eingaben erneut.
+            self.result_status.setText("Eingaben noch nicht gültig – bitte korrigieren")
+            self.conflicts.setPlainText(f"Bitte die Eingaben korrigieren: {exc}")
+            return
+        self.data = draft
+        self._loading = True
+        try:
+            self._fill_exceptions(); self._fill_plan(); self._refresh_summaries()
+        finally:
+            self._loading = False
+        self._update_enabled()
 
     def _update_banner(self):
         state = "Bestätigter Monat – zum Bearbeiten zuerst Bestätigung aufheben." if self.data.confirmed else "Entwurf"
@@ -381,7 +529,8 @@ class MainWindow(QMainWindow):
     def _update_enabled(self):
         editing = not self.data.confirmed and self._thread is None
         self.team_table.setEnabled(editing); self.shift_table.setEnabled(editing)
-        for button in [self.add_employee_button, self.remove_employee_button, self.copy_shifts_button, *self.blocker_buttons]: button.setEnabled(editing)
+        self.exception_table.setEnabled(editing)
+        for button in [self.add_employee_button, self.remove_employee_button, self.copy_shifts_button, *self.blocker_buttons, *self.exception_buttons]: button.setEnabled(editing)
         for enabled, value in self.rule_controls.values():
             enabled.setEnabled(editing); value.setEnabled(editing and enabled.isChecked())
         for combo, fixed in getattr(self, "_slot_widgets", {}).values():
@@ -425,7 +574,7 @@ class MainWindow(QMainWindow):
         try:
             self.data = self.collect_data(False)
             self.data.employees.append(Employee(new_id(), f"Person {len(self.data.employees) + 1}", Decimal(40)))
-            self.dirty = True; self._fill()
+            self._changed(); self._fill()
         except ValueError as exc: self._error(exc)
 
     def remove_employee(self):
@@ -436,7 +585,7 @@ class MainWindow(QMainWindow):
             if any(a.employee_id == employee.id for a in draft.assignments):
                 raise ValidationError("Bitte zuerst die Zuteilungen dieser Person im Dienstplan entfernen.")
             del draft.employees[row]
-            self.data = draft; self.dirty = True; self._fill()
+            self.data = draft; self._changed(); self._fill()
         except ValueError as exc: self._error(exc)
 
     def save_month(self):
@@ -468,10 +617,13 @@ class MainWindow(QMainWindow):
         try:
             self.data = self._get_month(year, month)
             self.dirty = False; self._last_status = "Gespeicherter Plan" if self.data.assignments else "Noch kein Dienstplan"
+            self._exception_notice = ""; self._proof_text = ""
             self._fill()
         except Exception as exc: self._error(f"Der Monat konnte nicht geladen werden. {exc}")
 
     def copy_shifts(self):
+        if self.data.confirmed:
+            self._error("Bestätigte Monate können nicht geändert werden. Bitte zuerst die Bestätigung aufheben."); return
         months = [m for m in self._stored_months() if m != (self.data.year, self.data.month)]
         if not months: self._error("Es ist noch kein anderer Monat gespeichert."); return
         labels = [f"{MONTHS[m - 1]} {y}" for y, m in months]
@@ -482,7 +634,11 @@ class MainWindow(QMainWindow):
             if draft.assignments and QMessageBox.question(self, "Vorhandene Zuteilungen", "Beim Kopieren werden die Zuteilungen im aktuellen Entwurf entfernt. Fortfahren?",
                                                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes: return
             draft.shift_types = copy.deepcopy(source.shift_types); draft.assignments = []
-            self.data = draft; self.dirty = True; self._fill()
+            # Nur Einstellungen übernehmen. Der Zielmonat behält seine eigenen
+            # Datums-Ausnahmen, soweit die Schichtkennung in der Vorlage existiert.
+            daily_ids = {shift.id for shift in draft.shift_types if not shift.special}
+            draft.exceptions = {key for key in draft.exceptions if key.split("/", 1)[1] in daily_ids}
+            self.data = draft; self._changed(); self._fill()
         except Exception as exc: self._error(f"Die Einstellungen konnten nicht kopiert werden. {exc}")
 
     def _selected_employee(self):
@@ -502,7 +658,7 @@ class MainWindow(QMainWindow):
         # Personenkennungen und genaue Sperrenliste müssen gemeinsam erreichbar
         # bleiben, auch beim allerersten Import und anschließendem Neustart.
         self.store.save_month_with_blockers(draft, employee.id, unique)
-        self.data = draft; self.dirty = False; self._fill()
+        self.data = draft; self._changed(); self.dirty = False; self._fill()
         self.statusBar().showMessage("Sperren und aktuelle Monatseingaben gemeinsam lokal gespeichert.", 6000)
 
     def add_blocker(self):
@@ -565,8 +721,12 @@ class MainWindow(QMainWindow):
                       f"{shift.start:%H:%M}–{shift.end:%H:%M}" + (" (+1 Tag)" if shift.end.date() > shift.start.date() else "") + f" / {format_hours(shift.paid_minutes)} h"]
             for col, value in enumerate(values): self.plan_table.setItem(row, col, _item(value))
             widget = QWidget(); slots = QVBoxLayout(widget); slots.setContentsMargins(2, 2, 2, 2)
-            for index in range(shift.staff_required):
-                line = QHBoxLayout(); line.addWidget(QLabel(f"Platz {index + 1}"))
+            # Nach einer kleineren Besetzungszahl bleiben überzählige Einsätze
+            # erreichbar, insbesondere zum ausdrücklichen Freigeben Fixierter.
+            visible_slots = max(shift.staff_required, len(mine))
+            for index in range(visible_slots):
+                line = QHBoxLayout()
+                line.addWidget(QLabel(f"Platz {index + 1}" + (" (überzählig)" if index >= shift.staff_required else "")))
                 combo = QComboBox(); combo.addItem("— offen —", None)
                 for e in self.data.employees: combo.addItem(e.name, e.id)
                 fixed = QCheckBox("Fixiert")
@@ -578,11 +738,14 @@ class MainWindow(QMainWindow):
                 combo.currentIndexChanged.connect(lambda *_, s=shift.id, i=index: self._manual_changed(s, i))
                 fixed.toggled.connect(lambda *_, s=shift.id, i=index: self._manual_changed(s, i))
             self.plan_table.setCellWidget(row, 4, widget)
-            self.plan_table.setRowHeight(row, max(42, shift.staff_required * 36))
+            self.plan_table.setRowHeight(row, max(42, visible_slots * 36))
         self._update_enabled()
 
     def _manual_changed(self, shift_id, slot):
         if self._loading: return
+        if self.data.confirmed:
+            self._error("Bestätigte Monate können nicht geändert werden. Bitte zuerst die Bestätigung aufheben.")
+            self._loading = True; self._fill_plan(); self._loading = False; return
         try:
             draft = self.collect_data()
             proposed = [Assignment(s, c.currentData(), f.isChecked()) for (s, _), (c, f) in self._slot_widgets.items() if c.currentData()]
@@ -591,11 +754,23 @@ class MainWindow(QMainWindow):
             changed_combo, changed_fixed = self._slot_widgets[(shift_id, slot)]
             if any(s == shift_id and (s, e) not in {(a.shift_id, a.employee_id) for a in proposed} for s, e in old_fixed):
                 raise ValidationError("Diese Zuteilung ist fixiert. Bitte zuerst den Haken „Fixiert“ entfernen.")
-            self._validate_plan(draft, proposed)
+            old_pairs = {(a.shift_id, a.employee_id) for a in self.data.assignments}
+            new_pairs = {(a.shift_id, a.employee_id) for a in proposed}
+            new_fixed = {(a.shift_id, a.employee_id) for a in proposed if a.fixed}
+            release_only = (old_pairs == new_pairs and len(proposed) == len(self.data.assignments)
+                            and new_fixed < old_fixed)
+            try:
+                self._validate_plan(draft, proposed)
+            except ValidationError:
+                # Die Freigabe ändert keine Arbeitszeit/Zuteilung und muss auch
+                # nach geänderten Grenzen möglich sein, damit erneut geplant
+                # werden kann. Bestehende Konflikte bleiben deutlich sichtbar.
+                if not release_only: raise
             draft.assignments = proposed; self.data = draft; self.dirty = True
             changed_fixed.setEnabled(bool(changed_combo.currentData()))
             if not changed_combo.currentData(): changed_fixed.setChecked(False)
             self._last_status = "Manuell bearbeiteter gültiger Entwurf"
+            self._proof_text = ""
             self._refresh_summaries(); self._update_banner(); self._update_enabled()
         except Exception as exc:
             self._error(f"Die Änderung wurde abgelehnt. {exc}")
@@ -603,8 +778,10 @@ class MainWindow(QMainWindow):
 
     def _refresh_summaries(self, data=None):
         from .planner import preference_violations, validate_assignments
+        from .wishes import display_wishes, wish_rows
         data = data or self.data
         history = self.store.history(data.year, data.month)
+        wish_history = self.store.wish_history(data.year, data.month)
         historical = {entry.employee_id: entry for entry in history}
         special_types = {shift.id for shift in data.shift_types if shift.special}
         rows = hour_rows(data); self.hours_table.setRowCount(len(rows))
@@ -625,8 +802,22 @@ class MainWindow(QMainWindow):
                       h["historical_count"], number(h["historical_expected"]), format_hours(past_minutes), number(past_expected / 60),
                       number(h["cumulative_deviation"], True), number(cumulative_minutes / 60, True)]
             for col, value in enumerate(values): self.fairness_table.setItem(row, col, _item(value))
+        wishes = wish_rows(data, wish_history=wish_history)
+        self.wishes_table.setRowCount(len(wishes))
+        missing_months = set()
+        snapshot_missing = False
+        for row, wish in enumerate(wishes):
+            missing = wish["missing_months"]
+            missing_months.update(missing)
+            snapshot_missing = snapshot_missing or wish.get("snapshot_missing", False)
+            history_note = ", ".join(missing) if missing else "keine"
+            if wish.get("snapshot_missing", False): history_note += "; damals nicht erfasst: aktuelle Blockerzählung"
+            values = [wish["name"], wish["relevant"], wish["fulfilled"], wish["violated"], wish["historical"],
+                      wish["cumulative"], history_note]
+            for col, value in enumerate(values): self.wishes_table.setItem(row, col, _item(value))
         needed = demand_minutes(data); target = sum(h.planning_minutes for h in rows)
         violations = preference_violations(data, data.assignments)
+        displayed_wishes = display_wishes(data)
         hard_errors = validate_assignments(data, data.assignments, boundary=self.store.boundary(data.year, data.month))
         assigned_counts = {}
         for a in data.assignments: assigned_counts[a.shift_id] = assigned_counts.get(a.shift_id, 0) + 1
@@ -635,11 +826,11 @@ class MainWindow(QMainWindow):
             count = max(0, shift.staff_required - assigned_counts.get(shift.id, 0)); open_n += count
             hints = ([f"⚠ {count} Platz/Plätze offen"] if count else ["✓ Besetzt"])
             assigned = {a.employee_id for a in data.assignments if a.shift_id == shift.id}
-            if any(b.priority == 2 and b.employee_id in assigned and overlaps(shift.start, shift.end, b.start, b.end) for b in data.blockers):
+            if any(b.employee_id in assigned and overlaps(shift.start, shift.end, b.start, b.end) for b in displayed_wishes):
                 hints.append("⚠ Wunsch übergangen")
             self.plan_table.setItem(row, 5, _item(" · ".join(hints)))
         label = "⚠ Ungültiger Entwurf – verbindliche Konflikte; bitte erneut planen" if hard_errors else self._last_status
-        self.result_status.setText(f"{label} · {open_n} offene Plätze · {len(violations)} übergangene Priorität-2-Wünsche")
+        self.result_status.setText(f"{label} · {open_n} offene Plätze · {sum(w['violated'] for w in wishes)} übergangene Priorität-2-Wünsche")
         balance = needed - target
         lines = [f"Bedarf einschließlich Personenzahl: {format_hours(needed)} Mitarbeiterstunden. Summe Planungsziele: {format_hours(target)} h."]
         if balance > 0: lines.append(f"Der Bedarf übersteigt die Planungsziele um {format_hours(balance)} h. Bei vollständiger Besetzung entstehen gegenüber den individuellen Zielen Mehrstunden.")
@@ -647,22 +838,39 @@ class MainWindow(QMainWindow):
         else: lines.append("Bedarf und Ziele sind rechnerisch gleich; Sperren und Grenzen können die Besetzung trotzdem einschränken.")
         untested = [title for key, title in [("rest_minutes", "Ruhezeit"), ("max_day_minutes", "Tagesstunden"), ("max_week_minutes", "Wochenstunden"), ("max_consecutive_days", "Arbeitstage in Folge")] if getattr(data.rules, key) is None]
         lines.append("Nicht geprüft: " + (", ".join(untested) if untested else "keine der angebotenen Grenzen"))
+        if data.exceptions:
+            lines.append(f"{len(data.exceptions)} tägliche Schichttermine entfallen gemäß Ausnahmetagen; sie zählen nicht zu Bedarf und offenen Plätzen.")
+        if self._exception_notice: lines.append(self._exception_notice)
+        if missing_months:
+            lines.append("Fehlende Freiwunsch-Althistorie in bestätigten Monaten: " + ", ".join(sorted(missing_months))
+                         + ". Die kumulierte Belastung enthält ausschließlich bekannte eindeutige Übergehungen.")
+        if snapshot_missing:
+            lines.append("Freiwünsche dieses bestätigten Altmonats wurden damals nicht eingefroren. Die angezeigten aktuellen Blockerzahlen sind kein historischer Nachweis.")
+        elif data.confirmed and data.wish_snapshot is not None:
+            lines.append("Die Freiwunschübersicht verwendet den eingefrorenen bestätigten Monatsstand; spätere Sperrenänderungen verändern diese Zahlen nicht.")
+        if self._proof_text: lines.append(self._proof_text)
+        lines.append("Freiwünsche: gleiche Gesamtzahl → weniger relevante Wünsche zuerst schützen → Belastung innerhalb gleicher Wunschanzahl ausgleichen. "
+                     "Verbindliche Regeln und Besetzung gelten vorrangig. Ohne vollständigen Optimalitätsnachweis ist weitere Verbesserung möglich.")
         if hard_errors: lines += ["Verbindliche Konflikte im angezeigten Entwurf:"] + hard_errors
         if violations: lines += ["Übergangene Wünsche:"] + [str(v) for v in violations]
         self.conflicts.setPlainText("\n".join(lines))
 
     def start_planning(self):
         if self._thread is not None: return
+        if self.data.confirmed:
+            self._error("Bestätigte Monate können nicht neu geplant werden. Bitte zuerst die Bestätigung aufheben."); return
         try:
             draft = self.collect_data(); self._validate_plan(draft, [a for a in draft.assignments if a.fixed])
             needed = demand_minutes(draft); target = sum(r.planning_minutes for r in hour_rows(draft))
             self.data = draft; self._fill_plan(); self._refresh_summaries()
             self._last_status = f"Berechnung läuft (Bedarf {format_hours(needed)} h, Planungsziele {format_hours(target)} h) …"
-            self.result_status.setText(self._last_status); self.tabs.setCurrentIndex(3)
+            self._proof_text = ""
+            self.result_status.setText(self._last_status); self.tabs.setCurrentWidget(self.result_page)
             history = self.store.history(draft.year, draft.month)
+            wish_history = self.store.wish_history(draft.year, draft.month)
             boundary = self.store.boundary(draft.year, draft.month)
             self._cancel = Event(); self._thread = QThread(self)
-            self._worker = SolverWorker(copy.deepcopy(draft), history, boundary, self.limit_spin.value(), self._cancel)
+            self._worker = SolverWorker(copy.deepcopy(draft), history, boundary, self.limit_spin.value(), self._cancel, wish_history)
             self._worker.moveToThread(self._thread)
             self._thread.started.connect(self._worker.run)
             self._worker.finished.connect(self._receive_result)
@@ -680,6 +888,15 @@ class MainWindow(QMainWindow):
     @Slot(object)
     def _receive_result(self, result):
         label = STATUS.get(result.status, "Planung beendet")
+        if self.data.confirmed:
+            self._error("Ein berechneter Entwurf darf keinen bestätigten Monatsstand überschreiben."); return
+        names = getattr(result, "stage_names", [])
+        proofs = result.optimal_stages
+        if result.status == "optimal" and proofs and not all(proofs):
+            label = STATUS["incomplete" if any(result.open_slots.values()) else "feasible"]
+        proof_parts = [f"{name}: {'bewiesen' if index < len(proofs) and proofs[index] else 'ohne Optimalitätsnachweis'}"
+                       for index, name in enumerate(names)]
+        proof_text = "Nachweis je Optimierungsstufe: " + "; ".join(proof_parts) if proof_parts else ""
         if result.status in {"unknown", "invalid", "cancelled"} and not result.assignments:
             self._last_status = label; self.result_status.setText(label)
             self.conflicts.append("\n".join(result.messages)); return
@@ -693,6 +910,7 @@ class MainWindow(QMainWindow):
         try:
             self._validate_plan(self.data, result.assignments)
             self.data.assignments = result.assignments; self.dirty = True; self._last_status = label
+            self._proof_text = proof_text
             self._fill_plan(); self._refresh_summaries(); self._update_banner()
             if result.messages: self.conflicts.append("\n".join(result.messages))
         except Exception as exc: self._error(f"Der neue Entwurf wurde nicht übernommen. {exc}")
@@ -716,12 +934,14 @@ class MainWindow(QMainWindow):
             if self.data.confirmed:
                 if QMessageBox.question(self, "Bestätigung aufheben", "Der Monat wird wieder bearbeitbar und zählt vorerst nicht mehr zur bestätigten Historie. Fortfahren?",
                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes: return
-                self.store.set_confirmed(self.data.year, self.data.month, False); self.data.confirmed = False
+                self.store.set_confirmed(self.data.year, self.data.month, False)
+                self.data = self.store.load_month(self.data.year, self.data.month)
             else:
                 if not self.save_month(): return
                 if QMessageBox.question(self, "Plan bestätigen", "Diesen gespeicherten Monatsplan als bestätigte Planungshistorie verwenden? Der Monat wird anschließend gegen Bearbeitung geschützt.",
                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes: return
-                self.store.set_confirmed(self.data.year, self.data.month, True); self.data.confirmed = True
+                self.store.set_confirmed(self.data.year, self.data.month, True)
+                self.data = self.store.load_month(self.data.year, self.data.month)
             self.dirty = False; self._update_enabled(); self._update_banner(); self._refresh_summaries()
         except Exception as exc: self._error(f"Die Bestätigung konnte nicht geändert werden. {exc}")
 
@@ -732,6 +952,7 @@ class MainWindow(QMainWindow):
             path, _ = QFileDialog.getSaveFileName(self, "CSV exportieren", f"{draft.key}-{kind}.csv", "CSV-Dateien (*.csv)")
             if not path: return
             if kind == "fairness": csvio.export_fairness(path, draft, self.store.history(draft.year, draft.month))
+            elif kind == "wishes": csvio.export_wishes(path, draft, self.store.wish_history(draft.year, draft.month))
             else: getattr(csvio, f"export_{kind}")(path, draft)
             self.statusBar().showMessage("CSV-Datei gespeichert (UTF-8 mit BOM, Semikolon).", 5000)
         except Exception as exc: self._error(f"Der Export konnte nicht erstellt werden. {exc}")
@@ -739,7 +960,7 @@ class MainWindow(QMainWindow):
     def show_help(self):
         candidates = [Path(getattr(sys, "_MEIPASS", "")) / "README.md", Path(__file__).resolve().parent.parent / "README.md"]
         content = next((p.read_text(encoding="utf-8") for p in candidates if p.is_file()),
-                       "Monat wählen → Team und Stunden erfassen → Schichten einstellen → Sperren importieren → Dienstplan erstellen → prüfen und speichern.\n\n"
+                       "Monat wählen → Team und Stunden erfassen → Schichten einstellen → Ausnahmetage wählen → Sperren importieren → Dienstplan erstellen → prüfen und speichern.\n\n"
                        "CSV: datum;von;bis;prioritaet;kommentar. Datum YYYY-MM-DD, Zeiten HH:MM. Beide Zeiten leer = ganztägig. Bis ≤ Von = Folgetag. "
                        "Priorität 1 ist verbindlich, Priorität 2 ein Wunsch. Alle Stunden sind Prognosen.")
         content += (f"\n\n## Persönlicher Speicherort\n\n`{self.database_path}`\n\n"
@@ -747,7 +968,10 @@ class MainWindow(QMainWindow):
                     "(wenn keiner existiert: aus dem ersten gespeicherten späteren Monat). "
                     "Aus einem bestätigten Monat wird der prognostizierte Endsaldo als neuer Anfangssaldo übernommen; "
                     "bitte vor der Planung anhand der tatsächlichen Situation prüfen. Aus einem Entwurf bleibt der "
-                    "bisherige Anfangssaldo erhalten. Der neue gewünschte Endsaldo entspricht zunächst dem Anfangssaldo.")
+                    "bisherige Anfangssaldo erhalten. Der neue gewünschte Endsaldo entspricht zunächst dem Anfangssaldo. "
+                    "Datumsbezogene Ausnahmen werden beim Anlegen eines neuen Monats nicht übernommen. "
+                    "Beim Kopieren einer Vorlage in einen bereits geöffneten Monat bleiben dessen eigene Ausnahmen erhalten, "
+                    "soweit die Schichtkennungen übereinstimmen.")
         dialog = QDialog(self); dialog.setWindowTitle("Dienstplan – deutsche Anleitung"); dialog.resize(850, 650)
         layout = QVBoxLayout(dialog); text = QTextEdit(); text.setReadOnly(True); text.setMarkdown(content); layout.addWidget(text)
         close = QPushButton("Schließen"); close.clicked.connect(dialog.accept); layout.addWidget(close); dialog.exec()

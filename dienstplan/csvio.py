@@ -3,16 +3,18 @@ from __future__ import annotations
 
 import csv
 import io
+import json
 import os
 import re
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
 from .hours import fairness_rows, hour_rows
-from .model import (Blocker, HistoryEntry, MonthData, ValidationError, format_hours,
+from .model import (Blocker, HistoryEntry, MonthData, ValidationError, WishHistoryEntry, format_hours,
                     generate_shifts, new_id, overlaps, validate_blockers)
+from .wishes import relevant_wishes, wish_rows
 
 
 @dataclass
@@ -143,23 +145,58 @@ def _write_csv(path: Path | str, header: list[str], rows: list[list]) -> None:
 _WEEKDAYS = ("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag")
 
 
+def _plan_wish_intervals(data: MonthData) -> dict[str, list[tuple[datetime, datetime, str]]]:
+    """Bestätigte Konfliktmarkierungen folgen dem damaligen Wunschstand.
+
+    Der Schnappschuss speichert stabile Zeiträume, keine veränderlichen Kommentare.
+    Ein später gelöschter oder neu importierter Wunsch ändert damit auch den
+    Dienstplanexport eines bestätigten Monats nicht rückwirkend.
+    """
+    result: dict[str, list[tuple[datetime, datetime, str]]] = {}
+    if data.confirmed and data.wish_snapshot is not None:
+        for employee_id, row in data.wish_snapshot.items():
+            for key in sorted(set(row.get("violated", []))):
+                person, start, end = json.loads(key)
+                if person == employee_id:
+                    result.setdefault(employee_id, []).append(
+                        (datetime.fromisoformat(start), datetime.fromisoformat(end),
+                         "Wunsch (bestätigter Stand)"))
+    else:
+        for blocker in relevant_wishes(data):
+            result.setdefault(blocker.employee_id, []).append(
+                (blocker.start, blocker.end, blocker.comment or "Wunsch"))
+    return result
+
+
 def export_plan(path: Path | str, data: MonthData) -> None:
     names = {e.id: e.name for e in data.employees}
+    wish_intervals = _plan_wish_intervals(data)
+    hint = "Dienstplan-Prognose"
+    if data.confirmed and data.wish_snapshot is None:
+        hint += "; damals bestätigte Wunschstatistik fehlt; Wunschkonflikte anhand aktueller Sperren"
     rows = []
-    for shift in generate_shifts(data):
+    active = {s.id for s in generate_shifts(data)}
+    # Ausgefallene tägliche Termine erhalten eine einzige Statuszeile. Sie sind
+    # weder offene Plätze noch bezahlte Einsätze und werden nicht vervielfacht.
+    for shift in generate_shifts(replace(data, exceptions=set())):
+        if shift.id not in active:
+            rows.append([shift.start.date().isoformat(), _WEEKDAYS[shift.start.weekday()], shift.name,
+                         shift.start.strftime("%Y-%m-%d %H:%M"), shift.end.strftime("%Y-%m-%d %H:%M"),
+                         "", "", "ENTFÄLLT", "", "", "", "Ausnahmetag; keine Mitarbeiterstunden"])
+            continue
         assigned = [a for a in data.assignments if a.shift_id == shift.id]
         for slot in range(shift.staff_required):
             assignment = assigned[slot] if slot < len(assigned) else None
-            wishes = [] if assignment is None else [b for b in data.blockers
-                if b.priority == 2 and b.employee_id == assignment.employee_id
-                and overlaps(shift.start, shift.end, b.start, b.end)]
-            wishes_text = " | ".join(f"{b.start:%Y-%m-%d %H:%M}–{b.end:%Y-%m-%d %H:%M}: {b.comment or 'Wunsch'}" for b in wishes)
+            wishes = [] if assignment is None else [b for b in wish_intervals.get(assignment.employee_id, [])
+                if overlaps(shift.start, shift.end, b[0], b[1])]
+            wishes_text = " | ".join(f"{start:%Y-%m-%d %H:%M}–{end:%Y-%m-%d %H:%M}: {comment}"
+                                      for start, end, comment in wishes)
             rows.append([shift.start.date().isoformat(), _WEEKDAYS[shift.start.weekday()], shift.name,
                          shift.start.strftime("%Y-%m-%d %H:%M"), shift.end.strftime("%Y-%m-%d %H:%M"),
                          slot + 1, names.get(assignment.employee_id, assignment.employee_id) if assignment else "OFFEN",
                          "Offener Platz" if assignment is None else ("Priorität-2-Wunsch übergangen" if wishes else "Besetzt"),
                          "Ja" if assignment and assignment.fixed else "Nein", wishes_text,
-                         format_hours(shift.paid_minutes), "Dienstplan-Prognose"])
+                         format_hours(shift.paid_minutes), hint])
     _write_csv(path, ["Datum", "Wochentag", "Schicht", "Beginn", "Ende", "Besetzungsplatz", "Person",
                       "Status", "Fixiert", "Übergangene Priorität-2-Wünsche", "Bezahlte Stunden", "Hinweis"], rows)
 
@@ -192,3 +229,18 @@ def export_fairness(path: Path | str, data: MonthData, history: list[HistoryEntr
                       "Besondere Einsätze Historie", "Fairer Anteil Historie", "Besondere Stunden Historie",
                       "Fairer Stundenanteil Historie", "Besondere Abweichung einschließlich Historie",
                       "Besondere Stundenabweichung einschließlich Historie"], rows)
+
+
+def export_wishes(path: Path | str, data: MonthData,
+                  wish_history: list[WishHistoryEntry] | None = None) -> None:
+    """Exportiert die eingefrorene/aktuelle Statistik ohne erfundene Althistorie."""
+    rows = [[r["name"], r["relevant"], r["fulfilled"], r["violated"],
+             r["historical"], r["cumulative"],
+             ", ".join(r["missing_months"]) or "Keine",
+             ("Damals bestätigte Wunschstatistik fehlt; angezeigte Monatszahlen aus aktuellen Sperren"
+              if r.get("snapshot_missing") else ("Bestätigter Wunschstand" if data.confirmed else "Aktueller Entwurf")),
+             "Dienstplan-Prognose"]
+            for r in wish_rows(data, wish_history=wish_history)]
+    _write_csv(path, ["Person", "Relevante Priorität-2-Wünsche", "Erfüllte Wünsche im Monat",
+                      "Übergangene Wünsche im Monat", "Historische Übergehungen",
+                      "Kumulierte Belastung", "Fehlende bestätigte Althistorie", "Statistikstatus", "Hinweis"], rows)
