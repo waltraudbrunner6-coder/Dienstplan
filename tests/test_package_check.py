@@ -31,6 +31,10 @@ def test_import_failure_is_recorded_without_standard_output(tmp_path, monkeypatc
 ])
 def test_package_check_requires_exit_status_and_full_report(tmp_path, monkeypatch, exit_code, report_kind, expected):
     from scripts import check_package as checker
+    # Dieser Test simuliert ausschließlich den Programmprozess. Ein echter
+    # GitHub-Step-Bericht gehört zum nachfolgenden nativen Build, nicht zur
+    # Testphase vor Existenz von dist/build-report.json.
+    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
     def run(command):
         assert command[1:3] == ["--self-test", "--self-test-report"]
         if report_kind != "missing":
