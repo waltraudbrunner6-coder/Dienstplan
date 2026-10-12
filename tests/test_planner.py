@@ -180,6 +180,46 @@ def test_start_timeout_retains_valid_partial_progress(monkeypatch):
     assert data.assignments == []
 
 
+def test_fast_seed_swap_respects_wishes_and_fixed_assignments(monkeypatch):
+    from dienstplan import planner
+    from dienstplan.fixtures import daily_swap_case
+    from dienstplan.optimization import ObjectiveContext, evaluate_plan
+    data = daily_swap_case()
+    before = list(data.assignments)
+    monkeypatch.setattr(planner, "monotonic", lambda: 0.0)
+    improved = planner._balance_seed_swaps(data, generate_shifts(data), before,
+                                         ObjectiveContext(data), 1.0, None)
+    assert evaluate_plan(data, improved) < evaluate_plan(data, before)
+    assert not validate_assignments(data, improved)
+    assert all(a in improved for a in before if a.fixed)
+    # Der gleiche Stunden-/Typvorteil darf einen zusätzlichen Wunsch nicht
+    # übergehen; der schnelle Vergleich muss hier die höheren Stufen prüfen.
+    start = datetime(2026, 11, 16, 10)
+    data.blockers.append(Blocker("swap-wish", "person-04", start, start + timedelta(hours=6), 2))
+    protected = planner._balance_seed_swaps(data, generate_shifts(data), before,
+                                         ObjectiveContext(data), 1.0, None)
+    assert protected == before
+    assert data.assignments == before
+
+
+def test_fast_equal_duration_swap_includes_special_history(monkeypatch):
+    from dienstplan import planner
+    from dienstplan.optimization import ObjectiveContext, evaluate_plan
+    data = month(2, "0.5")
+    data.shift_types[3].end = time(10)  # Besondere/tägliche Dienste gleich lang.
+    before = [Assignment("2026-02-04/a", "p0"), Assignment("2026-02-04/d", "p1")]
+    history = [HistoryEntry("p0", 0, 0, Fraction(1), Fraction(60)),
+               HistoryEntry("p1", 4, 240, Fraction(1), Fraction(60))]
+    monkeypatch.setattr(planner, "monotonic", lambda: 0.0)
+    improved = planner._balance_seed_swaps(data, generate_shifts(data), before,
+                                         ObjectiveContext(data, history), 1.0, None)
+    assert Assignment("2026-02-04/d", "p0") in improved
+    assert evaluate_plan(data, improved, history) < evaluate_plan(data, before, history)
+    assert evaluate_plan(data, improved, history)[:-1] == evaluate_plan(data, before, history)[:-1]
+    assert not validate_assignments(data, improved)
+    assert history[1].special_count == 4
+
+
 def test_history_prefers_people_below_their_previous_share():
     data = month(4)
     history = [HistoryEntry("p0", 4, 480, Fraction(2), Fraction(240)),

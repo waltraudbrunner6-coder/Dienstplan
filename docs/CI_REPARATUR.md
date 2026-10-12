@@ -87,3 +87,40 @@ keinen GitHub-Release.
 Die lokalen Ergebnisse beweisen keine nativen Windows-/macOS-Builds. Der neue
 Actions-Lauf und seine tatsächlich abgeschlossenen Job-/Artefaktzustände sind
 gesondert zu prüfen; es gibt kein `continue-on-error`.
+
+## Weitere Absicherung der begrenzten Suchzeit
+
+Der [Diagnoselauf für 001620a](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/38282851586)
+bestand auf **allen drei** Zielplattformen Tests, Build, Programm-Selbsttest und
+Upload. Damit ist auch die Windows-DLL-Ergänzung nativ geprüft. Ein vorheriger
+Intel-Lauf hatte einen Testfehler ohne abrufbare Einzeldiagnose; die vollständige
+JUnit-Fehlermeldung wird deshalb künftig unter Beibehaltung des pytest-Exitcodes
+als öffentliche Actions-Annotation ausgegeben. Die Diagnosefunktion wurde lokal
+mit einem echten, absichtlich fehlschlagenden temporären pytest-Fall geprüft.
+
+Unabhängig davon ließ sich die verbleibende Zeitabhängigkeit der täglichen
+Typverteilung lokal reproduzieren: bei kontrolliert dreifach beschleunigter
+Ablaufuhr und entsprechend verkürzten Solverbudgets enthielt eine tägliche
+Schichtgruppe vier bis sechs Einsätze statt vier bis fünf. Das reale ursprüngliche
+Intel-Fehlerprotokoll war nicht verfügbar; dieser Versuch beansprucht keine
+identische Runnergeschwindigkeit oder identischen damaligen Suchstand.
+
+Die Tauschbewertung wird daher weiter beschleunigt. Bei gleicher bezahlter Dauer
+erhält ein Tausch persönliche Stunden, Besetzung und Typsummen. Ohne berührte
+Wünsche verändern sich nur vier personenbezogene Typterme. Deren exakte marginale
+Kosten werden je Suchrunde vorbereitet, einschließlich bestätigter Sonderhistorie.
+Bei berührten Wünschen bleibt die vollständige lexikografische Prüfung erforderlich;
+vor Übernahme gilt immer dieselbe harte Regelprüfung einschließlich Fixierungen
+und Randmonaten. Die Zielfunktion, Prioritäten und das Acht-Sekunden-Limit ändern
+sich nicht. Die Initialisierung benötigte im lokalen Vergleich rund **0,20 Sekunden**;
+mit dreifacher Ablaufuhr gelang anschließend die geforderte Verteilung.
+
+Zwei neue Tests prüfen die allgemeine tägliche Tauschverbesserung mit unveränderten
+Fixierungen, die Ablehnung bei zusätzlicher Wunschverletzung und den Ausgleich
+bestätigter Historie bei gleich langen besonderen/täglichen Diensten. CP-Modell
+und Nachbewertung bleiben kongruent. Der gesamte aktuelle Stand besteht
+**158 Tests in 59,86 Sekunden** unter Linux; sein nativer Workflow muss für
+diesen abschließenden Stand erneut vollständig geprüft werden.
+Auch das abschließende Linux-Paket besteht `scripts/check_package.py` ohne
+Entwicklungsvenv: **293.133.947 Bytes / 279,55 MiB** unkomprimiert und
+**113.851.127 Bytes / 108,58 MiB** TAR.GZ, mit zwölf Personen und 186 Plätzen.

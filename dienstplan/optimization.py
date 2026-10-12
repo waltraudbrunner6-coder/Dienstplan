@@ -175,21 +175,27 @@ class _PlanState:
         result.append(max(norms.values(), default=0))
         final = HOURS_WEIGHT * sum(n * n for n in norms.values())
         for type_id in c.type_ids:
-            special = type_id in c.special_types
-            factor = SPECIAL_WEIGHT if special else REGULAR_WEIGHT
             for e in c.people:
-                count_balance = FAIR_SCALE * self.counts[(e, type_id)] - c.shares[e] * self.type_counts[type_id]
-                minute_balance = FAIR_SCALE * self.minutes[(e, type_id)] - c.shares[e] * self.type_minutes[type_id]
-                minute_norm = ceil_div(abs(minute_balance), 60)
-                final += factor * (count_balance * count_balance + minute_norm * minute_norm)
-                if special and e in c.hist:
-                    cumulative_count = count_balance + c.historical_count_balance.get(e, 0)
-                    cumulative_minutes = minute_balance + c.historical_minute_balance.get(e, 0)
-                    cumulative_minute_norm = ceil_div(abs(cumulative_minutes), 60)
-                    final += HISTORY_WEIGHT * (cumulative_count * cumulative_count +
-                                               cumulative_minute_norm * cumulative_minute_norm)
+                final += self.type_penalty(e, type_id)
         result.append(final)
         return tuple(result)
+
+    def type_penalty(self, employee_id: str, type_id: str, count_delta=0, minutes_delta=0) -> int:
+        """Einzelterm für exakte lokale Differenzen bei unveränderten Typsummen."""
+        c = self.context
+        special = type_id in c.special_types
+        factor = SPECIAL_WEIGHT if special else REGULAR_WEIGHT
+        count_balance = FAIR_SCALE * (self.counts[(employee_id, type_id)] + count_delta) - c.shares[employee_id] * self.type_counts[type_id]
+        minute_balance = FAIR_SCALE * (self.minutes[(employee_id, type_id)] + minutes_delta) - c.shares[employee_id] * self.type_minutes[type_id]
+        minute_norm = ceil_div(abs(minute_balance), 60)
+        value = factor * (count_balance * count_balance + minute_norm * minute_norm)
+        if special and employee_id in c.hist:
+            cumulative_count = count_balance + c.historical_count_balance.get(employee_id, 0)
+            cumulative_minutes = minute_balance + c.historical_minute_balance.get(employee_id, 0)
+            cumulative_minute_norm = ceil_div(abs(cumulative_minutes), 60)
+            value += HISTORY_WEIGHT * (cumulative_count * cumulative_count +
+                                       cumulative_minute_norm * cumulative_minute_norm)
+        return value
 
 
 def improve_plan(data: MonthData, assignments: list[Assignment], history=None,

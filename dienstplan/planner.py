@@ -297,10 +297,19 @@ def _balance_seed_swaps(data, shifts, chosen, context, deadline, cancel, boundar
     """Schnelle Startverbesserung durch regelgültige Tausche gleicher Dauer."""
     from .optimization import _PlanState
     by_id = {s.id: s for s in shifts}
+    type_minutes = {s.type_id: s.paid_minutes for s in shifts}
     current = list(chosen)
     while monotonic() < deadline and not (cancel is not None and cancel.is_set()):
         state = _PlanState(context, current)
         before = state.score()
+        # Typsummen bleiben bei Tauschen erhalten: alle marginalen Kosten
+        # einmal vorbereiten statt bei jedem Paar das ganze Team auszuwerten.
+        prices = {}
+        for person in context.people:
+            for kind, duration in type_minutes.items():
+                base = state.type_penalty(person,kind)
+                for sign in (-1,1):
+                    prices[(person,kind,sign)] = state.type_penalty(person,kind,sign,sign*duration) - base
         keys = {(a.shift_id, a.employee_id) for a in current}
         movable = [(i, a) for i, a in enumerate(current) if not a.fixed]
         changed = False
@@ -313,14 +322,24 @@ def _balance_seed_swaps(data, shifts, chosen, context, deadline, cancel, boundar
                         or left.paid_minutes != right.paid_minutes
                         or (a.shift_id, b.employee_id) in keys or (b.shift_id, a.employee_id) in keys):
                     continue
-                for assignment, sign in ((a,-1),(b,-1),
-                                         (Assignment(a.shift_id,b.employee_id),1),
-                                         (Assignment(b.shift_id,a.employee_id),1)):
-                    state.adjust(assignment.shift_id,assignment.employee_id,sign)
-                better = state.score() < before
-                for assignment, sign in ((Assignment(a.shift_id,b.employee_id),-1),
-                                         (Assignment(b.shift_id,a.employee_id),-1),(a,1),(b,1)):
-                    state.adjust(assignment.shift_id,assignment.employee_id,sign)
+                moves = ((a,-1),(b,-1),
+                         (Assignment(a.shift_id,b.employee_id),1),
+                         (Assignment(b.shift_id,a.employee_id),1))
+                affects_wishes = any(context.wish_matches.get((item.shift_id,item.employee_id))
+                                     for item,_ in moves)
+                # Gleiche Dauer erhält persönliche Stunden und alle Typsummen.
+                # Ohne berührte Wünsche ändern sich nur vier Einzelterme.
+                if affects_wishes:
+                    for assignment, sign in moves:
+                        state.adjust(assignment.shift_id,assignment.employee_id,sign)
+                    better = state.score() < before
+                    for assignment, sign in moves:
+                        state.adjust(assignment.shift_id,assignment.employee_id,-sign)
+                else:
+                    better = (prices[(a.employee_id,left.type_id,-1)] +
+                              prices[(b.employee_id,left.type_id,1)] +
+                              prices[(b.employee_id,right.type_id,-1)] +
+                              prices[(a.employee_id,right.type_id,1)]) < 0
                 if not better:
                     continue
                 candidate = list(current)
