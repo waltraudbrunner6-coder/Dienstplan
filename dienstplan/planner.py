@@ -12,6 +12,7 @@ Zeitangaben sind lokale naive Uhrzeiten: keine automatische Sommerzeitkorrektur.
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import replace
 from datetime import date, datetime, time, timedelta
 from fractions import Fraction
 from math import isfinite
@@ -107,6 +108,11 @@ def validate_assignments(data: MonthData, assignments: list[Assignment] | None =
     """
     shifts = generate_shifts(data)
     by_id = {s.id: s for s in shifts}
+    return _validate_prepared(data, assignments, boundary, shifts, by_id)
+
+
+def _validate_prepared(data, assignments, boundary, shifts, by_id):
+    """Dieselben Regeln mit vorbereiteten Terminen für viele Startvorschläge."""
     people = {e.id: e.name for e in data.employees}
     chosen = data.assignments if assignments is None else assignments
     errors = []
@@ -287,13 +293,61 @@ def _add_rules(model: cp_model.CpModel, data: MonthData, shifts: list[ShiftOccur
     return day_flags
 
 
-def _balanced_hint(data, shifts, history, boundary, fallback, deadline, cancel):
+def _balance_seed_swaps(data, shifts, chosen, context, deadline, cancel, boundary=None):
+    """Schnelle Startverbesserung durch regelgültige Tausche gleicher Dauer."""
+    from .optimization import _PlanState
+    by_id = {s.id: s for s in shifts}
+    current = list(chosen)
+    while monotonic() < deadline and not (cancel is not None and cancel.is_set()):
+        state = _PlanState(context, current)
+        before = state.score()
+        keys = {(a.shift_id, a.employee_id) for a in current}
+        movable = [(i, a) for i, a in enumerate(current) if not a.fixed]
+        changed = False
+        for pos, (i, a) in enumerate(movable):
+            for j, b in movable[pos + 1:]:
+                if monotonic() >= deadline or (cancel is not None and cancel.is_set()):
+                    return current
+                left, right = by_id[a.shift_id], by_id[b.shift_id]
+                if (a.employee_id == b.employee_id or left.type_id == right.type_id
+                        or left.paid_minutes != right.paid_minutes
+                        or (a.shift_id, b.employee_id) in keys or (b.shift_id, a.employee_id) in keys):
+                    continue
+                for assignment, sign in ((a,-1),(b,-1),
+                                         (Assignment(a.shift_id,b.employee_id),1),
+                                         (Assignment(b.shift_id,a.employee_id),1)):
+                    state.adjust(assignment.shift_id,assignment.employee_id,sign)
+                better = state.score() < before
+                for assignment, sign in ((Assignment(a.shift_id,b.employee_id),-1),
+                                         (Assignment(b.shift_id,a.employee_id),-1),(a,1),(b,1)):
+                    state.adjust(assignment.shift_id,assignment.employee_id,sign)
+                if not better:
+                    continue
+                candidate = list(current)
+                candidate[i] = Assignment(a.shift_id,b.employee_id)
+                candidate[j] = Assignment(b.shift_id,a.employee_id)
+                if not _validate_prepared(data,candidate,boundary,shifts,by_id):
+                    current = candidate
+                    changed = True
+                    break
+            if changed:
+                break
+        if not changed:
+            break
+    return current
+
+
+def _balanced_hint(data, shifts, history, boundary, fallback, deadline, cancel, wish_history=None):
     """Zulässiger Startpunkt, danach verbessert CP-SAT die gesamte Zielfunktion.
 
-    Dieser Vorschlag wird nur verwendet, wenn er beide bereits bewiesenen Ziele
-    exakt beibehält. Er verändert niemals die lexikografische Optimierung.
+    Kandidaten und Tausche verwenden dieselbe lexikografische Bewertung wie
+    CP-SAT. Auch bei abgelaufener Startzeit bleibt der beste gültige Teilplan
+    erhalten; die anschließende Optimierung hält ihre höheren Stufen fest.
     """
+    from .optimization import ObjectiveContext, _PlanState
     chosen = [a for a in data.assignments if a.fixed]
+    context = ObjectiveContext(data, history, wish_history)
+    state = _PlanState(context, chosen)
     by_employee = defaultdict(list)
     selected = defaultdict(set)
     minutes = defaultdict(int)
@@ -306,6 +360,16 @@ def _balanced_hint(data, shifts, history, boundary, fallback, deadline, cancel):
     old_by_employee = defaultdict(list)
     for assignment, occurrence in boundary or []:
         old_by_employee[assignment.employee_id].append((assignment, occurrence))
+    personal_data = {e.id: replace(data, employees=[e], blockers=[b for b in data.blockers if b.employee_id == e.id])
+                     for e in data.employees}
+
+    def best_valid_start():
+        required = {(a.shift_id, a.employee_id) for a in data.assignments if a.fixed}
+        if (fallback and required.issubset({(a.shift_id, a.employee_id) for a in fallback})
+                and not _validate_prepared(data, fallback, boundary, shifts, by_id)
+                and context.evaluate(fallback) <= state.score()):
+            return list(fallback)
+        return list(chosen)
     for s in shifts:
         total_type[s.type_id] += s.staff_required
     for a in chosen:
@@ -313,23 +377,18 @@ def _balanced_hint(data, shifts, history, boundary, fallback, deadline, cancel):
         selected[a.shift_id].add(a.employee_id)
         minutes[a.employee_id] += by_id[a.shift_id].paid_minutes
         counts[(a.employee_id, by_id[a.shift_id].type_id)] += 1
-    breached = {b.identity for b in data.blockers if b.priority == 2
-                and any(a.employee_id == b.employee_id
-                        and overlaps(by_id[a.shift_id].start, by_id[a.shift_id].end, b.start, b.end)
-                        for a in chosen)}
     for s in sorted(shifts, key=lambda occurrence: (not occurrence.special, occurrence.start, occurrence.type_id)):
         for _ in range(s.staff_required - len(selected[s.id])):
             if monotonic() >= deadline or (cancel is not None and cancel.is_set()):
-                return fallback
+                return best_valid_start()
             options = []
             for e in data.employees:
                 if e.id in selected[s.id]:
                     continue
                 assignment = Assignment(s.id, e.id)
-                if validate_assignments(data, by_employee[e.id] + [assignment], old_by_employee[e.id]):
+                if _validate_prepared(personal_data[e.id], by_employee[e.id] + [assignment],
+                                      old_by_employee[e.id], shifts, by_id):
                     continue
-                wishes = {b.identity for b in data.blockers if b.priority == 2 and b.employee_id == e.id
-                          and overlaps(s.start, s.end, b.start, b.end)}
                 expected = total_type[s.type_id] * shares[e.id] / FAIR_SCALE
                 if s.special:
                     old = hist.get(e.id, HistoryEntry(e.id))
@@ -339,21 +398,24 @@ def _balanced_hint(data, shifts, history, boundary, fallback, deadline, cancel):
                 else:
                     score = (minutes[e.id] + s.paid_minutes) / max(goals[e.id], 1)
                     score += 0.25 * (counts[(e.id, s.type_id)] + 1) / max(expected, 0.001)
-                options.append((len(wishes - breached), score, e.id, assignment, wishes))
+                state.adjust(s.id, e.id, 1)
+                objective_score = state.score()
+                state.adjust(s.id, e.id, -1)
+                options.append((objective_score, score, e.id, assignment))
             if not options:
                 continue
-            _, _, employee_id, assignment, wishes = min(options, key=lambda item: item[:3])
+            _, _, employee_id, assignment = min(options, key=lambda item: item[:3])
             chosen.append(assignment)
             by_employee[employee_id].append(assignment)
             selected[s.id].add(employee_id)
             minutes[employee_id] += s.paid_minutes
             counts[(employee_id, s.type_id)] += 1
-            breached.update(wishes)
-    if fallback and (len(chosen) != len(fallback) or len(preference_violations(data, chosen)) != len(preference_violations(data, fallback))):
+            state.adjust(s.id, employee_id, 1)
+    if _validate_prepared(data, chosen, boundary, shifts, by_id):
         return fallback
-    if validate_assignments(data, chosen, boundary):
-        return fallback
-    return chosen
+    chosen = _balance_seed_swaps(data, shifts, chosen, context, deadline, cancel, boundary)
+    state = _PlanState(context, chosen)
+    return best_valid_start()
 
 
 def _result_messages(data, shifts, assignments, boundary, status, optimal_stages, cancelled):
@@ -609,7 +671,7 @@ def solve(data: MonthData, history: list[HistoryEntry] | None = None,
         consider(data.assignments)
     if monotonic() < deadline and time_limit >= 0.05:
         greedy = _balanced_hint(data, shifts, history, boundary, [],
-                                min(deadline, started + min(0.8, time_limit * 0.06)), cancel)
+                                min(deadline, started + min(0.8, time_limit * 0.12)), cancel, wish_history)
         if greedy and not validate_assignments(data, greedy, boundary):
             consider(greedy)
     if monotonic() >= deadline:

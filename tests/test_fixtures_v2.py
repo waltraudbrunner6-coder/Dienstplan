@@ -212,3 +212,38 @@ def test_comparison_against_original_commit_reads_identical_fixture_without_chec
     assert measured["planning_target_hours"] == 1285.8
     # Ein sehr kurzes Zeitlimit beweist weder Unbesetzbarkeit noch Optimalität.
     assert measured["assigned_slots"] + measured["open_slots"] == 188
+
+
+def test_missing_baseline_has_actual_git_diagnostic_without_fetching(monkeypatch):
+    import subprocess
+    from scripts import compare_planners as comparison
+
+    commands = []
+    run = subprocess.run
+    def record(command, **kwargs):
+        commands.append(command)
+        return run(command, **kwargs)
+    monkeypatch.setattr(comparison.subprocess, "run", record)
+    with pytest.raises(RuntimeError) as error:
+        comparison.baseline_sources("0" * 40)
+    message = str(error.value)
+    assert "Commit fehlt" in message and "fetch-depth: 0" in message
+    assert "Git-Fehler (Exitcode" in message
+    assert "fatal:" in message
+    assert commands == [["git", "cat-file", "-e", "0" * 40 + "^{commit}"]]
+
+
+def test_missing_baseline_file_is_reported_before_execution(monkeypatch):
+    import subprocess
+    from scripts import compare_planners as comparison
+
+    status_before = subprocess.run(["git", "status", "--porcelain"], cwd=comparison.ROOT,
+                                   check=True, capture_output=True).stdout
+    monkeypatch.setattr(comparison, "BASELINE_FILES", ("__init__.py", "missing-baseline-file.py"))
+    with pytest.raises(RuntimeError) as error:
+        comparison.baseline_sources(comparison.BASELINE_COMMIT)
+    message = str(error.value)
+    assert "dienstplan/missing-baseline-file.py fehlt" in message
+    assert "Git-Fehler (Exitcode" in message and "fatal:" in message
+    assert subprocess.run(["git", "status", "--porcelain"], cwd=comparison.ROOT,
+                          check=True, capture_output=True).stdout == status_before

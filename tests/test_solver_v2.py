@@ -79,11 +79,16 @@ def test_numeric_solver_limit_keeps_known_valid_plan():
     assert not all(result.optimal_stages)
 
 
-def test_tiny_limit_keeps_existing_valid_plan_and_input_unchanged():
+def test_tiny_limit_keeps_existing_valid_plan_and_input_unchanged(monkeypatch):
     data=competing_wishes()
     first=solve(data,time_limit=2)
     data.assignments=list(first.assignments)
     before=list(data.assignments)
+    # Ablauf vor der ersten Optimierungsstufe gezielt auslösen, unabhängig
+    # von Windows-Timerauflösung oder Geschwindigkeit des CI-Rechners.
+    from dienstplan import planner
+    ticks = iter((0.0, 1.0))
+    monkeypatch.setattr(planner, "monotonic", lambda: next(ticks, 1.0))
     again=solve(data,time_limit=0.0001)
     assert again.status=="feasible"
     assert again.assignments==before and data.assignments==before

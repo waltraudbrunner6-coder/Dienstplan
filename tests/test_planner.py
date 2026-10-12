@@ -132,11 +132,52 @@ def test_twelve_people_special_slots_distributed_without_repetition():
     data = month(12, "4")
     result = solve(data, time_limit=8)
     special = Counter(a.employee_id for a in result.assignments if a.shift_id.endswith("/d"))
+    assert not result.open_slots
+    assert not validate_assignments(data, result.assignments)
     assert sum(special.values()) == 8
-    assert max(special.values()) == 1
+    assert max(special[e.id] for e in data.employees) == 1
     for st in data.shift_types[:3]:
         counts = Counter(a.employee_id for a in result.assignments if a.shift_id.endswith("/" + st.id))
-        assert max(counts.values()) - min(counts.values()) <= 1
+        all_counts = [counts[e.id] for e in data.employees]
+        assert max(all_counts) - min(all_counts) <= 1
+
+
+def test_balanced_start_survives_solver_timeout_without_global_proof(monkeypatch):
+    """Auch ohne CP-SAT-Fund bleibt der faire gültige Startplan verfügbar."""
+    from dienstplan import planner
+    from dienstplan.optimization import evaluate_plan
+    data = month(12, "4")
+    # Keine Hardware-Zeitmessung: Startheuristik vollständig ausführen, dann
+    # alle echten Solverläufe gezielt ohne Ergebnis enden lassen.
+    monkeypatch.setattr(planner, "monotonic", lambda: 0.0)
+    monkeypatch.setattr(planner.cp_model.CpSolver, "solve", lambda *args: planner.cp_model.UNKNOWN)
+    monkeypatch.setattr(planner, "improve_plan", lambda data, assignments, *args, **kwargs: list(assignments))
+    result = planner.solve(data, time_limit=8)
+    assert not result.open_slots
+    assert not validate_assignments(data, result.assignments)
+    assert data.assignments == []
+    special = Counter(a.employee_id for a in result.assignments if a.shift_id.endswith("/d"))
+    assert sum(special.values()) == 8
+    assert max(special[e.id] for e in data.employees) == 1
+    for st in data.shift_types[:3]:
+        counts = Counter(a.employee_id for a in result.assignments if a.shift_id.endswith("/" + st.id))
+        assert max(counts[e.id] for e in data.employees) - min(counts[e.id] for e in data.employees) <= 1
+    assert result.objective_values == list(evaluate_plan(data, result.assignments))
+    # Null offene Plätze/Null Wünsche sind analytisch bewiesen. Der
+    # Optimierungsnachweis für Stunden/Fairness fehlt weiterhin.
+    assert result.optimal_stages == [True, True, False, False]
+    assert result.status == "feasible"
+
+
+def test_start_timeout_retains_valid_partial_progress(monkeypatch):
+    from dienstplan import planner
+    data = month(12, "4")
+    ticks = iter([0.0] * 4)
+    monkeypatch.setattr(planner, "monotonic", lambda: next(ticks, 1.0))
+    result = planner._balanced_hint(data, generate_shifts(data), None, None, [], 0.5, None)
+    assert 0 < len(result) < sum(s.staff_required for s in generate_shifts(data))
+    assert not validate_assignments(data, result)
+    assert data.assignments == []
 
 
 def test_history_prefers_people_below_their_previous_share():

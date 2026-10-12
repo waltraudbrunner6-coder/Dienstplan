@@ -31,6 +31,26 @@ from dienstplan.planner import coverage, solve, validate_assignments
 from dienstplan.wishes import wish_rows
 
 BASELINE_COMMIT = "e7e0fc5e319cc636ca95f0685b0728e5d535e1f8"
+BASELINE_FILES = ("__init__.py", "model.py", "hours.py", "planner.py")
+
+
+def baseline_sources(commit: str) -> dict[str, bytes]:
+    """Benötigte lokale Historie vor jedem Vergleich prüfen, ohne Netzwerk."""
+    commands = [("Commit", ["git", "cat-file", "-e", f"{commit}^{{commit}}"])]
+    commands.extend((f"dienstplan/{name}", ["git", "show", f"{commit}:dienstplan/{name}"])
+                    for name in BASELINE_FILES)
+    sources = {}
+    for label, command in commands:
+        result = subprocess.run(command, cwd=ROOT, capture_output=True)
+        if result.returncode:
+            details = result.stderr.decode("utf-8", errors="replace").strip()
+            raise RuntimeError(f"Originalsolver nicht verfügbar: {label} fehlt im lokalen Git-Stand "
+                               f"für Baseline {commit}. Bitte die Historie vor dem Vergleich bereitstellen "
+                               "(im CI actions/checkout mit fetch-depth: 0). "
+                               f"Git-Fehler (Exitcode {result.returncode}): {details}")
+        if label != "Commit":
+            sources[label.removeprefix("dienstplan/")] = result.stdout
+    return sources
 
 
 def fixture_payload(data) -> dict:
@@ -79,13 +99,12 @@ Path(sys.argv[3]).write_text(json.dumps(row, ensure_ascii=False), encoding="utf-
 
 
 def run_baseline(payload: dict, commit: str, seconds: float):
+    sources = baseline_sources(commit)
     with tempfile.TemporaryDirectory(prefix="dienstplan-vergleich-") as directory:
         temporary = Path(directory)
         package = temporary / "dienstplan"
         package.mkdir()
-        for name in ("__init__.py", "model.py", "hours.py", "planner.py"):
-            content = subprocess.run(["git", "show", f"{commit}:dienstplan/{name}"], cwd=ROOT,
-                                     capture_output=True, check=True).stdout
+        for name, content in sources.items():
             (package / name).write_bytes(content)
         input_file = temporary / "input.json"
         input_file.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
