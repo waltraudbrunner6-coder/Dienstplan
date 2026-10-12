@@ -5,6 +5,12 @@ Qt Widgets aus PySide6-Essentials, OR-Tools CP-SAT und SQLite. Keine Cloud, Anme
 oder Internetverbindung im Betrieb. Deutsche Oberfläche, Meldungen und Anleitung.
 Zielplattformen: Windows 10/11 x64 und macOS Sequoia 15 auf Intel/Apple Silicon.
 Native Pakete werden mit PyInstaller auf der jeweiligen Zielplattform erstellt.
+Windows-Builds sammeln die dynamisch geladenen OR-Tools-DLLs im Paketpfad
+`ortools/.libs`. Der native Workflow lädt die vollständige Git-Historie für den
+Originalsolververgleich. Die Prüfung des fertigen Programms verlangt Exitcode null
+und einen vollständigen JSON-Selbsttestbericht, auch bei Windows-GUI-Builds ohne
+Konsole. Importfehler werden vor Start der Oberfläche dokumentiert; die Jobübersicht
+enthält Größenbericht und Funktionsnachweis.
 
 ## Daten und Regeln
 

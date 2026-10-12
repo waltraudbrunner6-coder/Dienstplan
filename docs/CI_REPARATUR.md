@@ -50,6 +50,34 @@ Linux x64, Python 3.12.14, OR-Tools 9.15.6755:
 
 ## Native Prüfung
 
+Der [erste reparierte Lauf für debd60a](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/38280109872)
+bestand auf beiden Mac-Architekturen sämtliche Schritte einschließlich Paket-Selbsttest
+und Upload. Auf Windows bestanden Tests und PyInstaller; der gebaute Selbsttest endete
+nach einer Sekunde mit Exitcode 1, der Upload wurde daraufhin richtigerweise ausgelassen.
+Die öffentliche Schrittübersicht belegt diesen Zustand; das genaue alte Fehlerprotokoll
+war ohne freigegebene GitHub-API nicht abrufbar.
+
+Dabei wurde eine konkrete Windows-Verpackungslücke festgestellt: OR-Tools 9.15
+lädt seine DLLs aus einem dynamisch gebildeten Pfad `ortools/.libs`. Das geprüfte
+Windows-Wheel enthält dort neun DLLs. Für Windows verwendet der Build nun
+`--collect-binaries ortools`, das die Paketverzeichnisstruktur erhält.
+Zusätzlich schreibt `--self-test --self-test-report DATEI` einen JSON-Nachweis
+auch ohne Standardausgabe. Qt-Importe des Eintrittspunkts erfolgen erst nach
+der Argumentauswertung; Importfehler des Selbsttests können so erfasst werden.
+`scripts/check_package.py` verlangt sowohl Exitcode null als auch den vollständigen
+Funktionsnachweis. Fehler werden mit Traceback als GitHub-Annotation veröffentlicht.
+Ein fehlender Bericht oder eine nur teilweise Prüfung führt nicht zu einem grünen Job.
+
+Die sechs ergänzten Regressionfälle prüfen Importfehler ohne Standardausgabe sowie
+Erfolg, fehlerhaften Exitcode, fehlenden/fehlgeschlagenen/unvollständigen Nachweis.
+Der bestehende Demo-Neustarttest verwendet weiterhin die echte Speicherung und
+prüft unverändert den Erhalt von Name und fixierter Zuteilung. Nach dieser Ergänzung
+bestanden **156 Tests** in **61,35 Sekunden** unter Linux.
+Der neu gebaute Linux-Stand besteht auch die neue JSON-Paketprüfung in minimaler
+Prozessumgebung: **293.129.999 Bytes / 279,55 MiB** unkomprimiert,
+**113.847.440 Bytes / 108,57 MiB** TAR.GZ. Die native Jobübersicht enthält
+den jeweils gemessenen Größenbericht und den bestandenen Funktionsnachweis.
+
 Der Workflow baut Windows x64, macOS Sequoia ARM64 und macOS Sequoia Intel getrennt.
 Jeder Job führt die vollständigen Tests, PyInstaller, den Selbsttest des gebauten
 Programms und den Upload des Archivs samt Größenbericht aus. Ein CI-Tag `v*` oder

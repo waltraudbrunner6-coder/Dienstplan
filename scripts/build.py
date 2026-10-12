@@ -40,6 +40,11 @@ def main() -> int:
     stripped = sys.platform.startswith("linux") and not args.no_strip and shutil.which("strip") is not None
     if stripped:
         command.append("--strip")
+    if sys.platform == "win32":
+        # ortools.__init__ lädt WinDLLs ausdrücklich aus ortools/.libs.
+        # Die automatische pyd-Abhängigkeitsanalyse allein erhält diesen
+        # dynamisch zusammengesetzten Paketpfad nicht zuverlässig.
+        command.extend(["--collect-binaries", "ortools"])
     # Nur CP-SAT wird verwendet. Qt Widgets braucht weder WebEngine noch QML.
     for module in (
         "ortools.constraint_solver", "ortools.linear_solver", "ortools.graph",

@@ -42,7 +42,7 @@ jobs:
       - name: Eigenständig startbares Paket erstellen
         run: python scripts/build.py
       - name: Gebautes Programm mit Solver und Oberfläche prüfen
-        run: python -c "from pathlib import Path; import subprocess,sys; p = Path('dist/Dienstplan.app/Contents/MacOS/Dienstplan') if sys.platform == 'darwin' else Path('dist/Dienstplan/Dienstplan.exe'); subprocess.run([str(p.resolve()), '--self-test'], check=True)"
+        run: python scripts/check_package.py
       - name: Pakete zur Prüfung bereitstellen
         uses: actions/upload-artifact@v4
         with:

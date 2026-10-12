@@ -11,6 +11,7 @@ from dienstplan.storage import Store
 
 def test_demo_entry_reopens_existing_plan(tmp_path, monkeypatch):
     from dienstplan import __main__ as entry
+    from dienstplan import ui
     app=QApplication.instance() or QApplication([])
     database=tmp_path/"demo.sqlite3"
     data=demo_month()
@@ -24,7 +25,7 @@ def test_demo_entry_reopens_existing_plan(tmp_path, monkeypatch):
             shown.append(data)
         def show(self):
             pass
-    monkeypatch.setattr(entry,"MainWindow",FakeWindow)
+    monkeypatch.setattr(ui,"MainWindow",FakeWindow)
     monkeypatch.setattr(QApplication,"exec",lambda *args:0)
     assert entry.main(["--demo","--database",str(database)])==0
     assert shown[0].assignments==data.assignments

@@ -5,24 +5,22 @@ import argparse
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QLibraryInfo, QLocale, QStandardPaths, QTranslator
-from PySide6.QtWidgets import QApplication, QMessageBox
-
-from .storage import Store
-from .ui import MainWindow
-
-
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Lokale deutsche Monatsdienstplanung")
     parser.add_argument("--database", type=Path, help="Abweichende lokale SQLite-Datei")
     parser.add_argument("--demo", action="store_true", help="Zwölf-Personen-Demonstrationsmonat öffnen")
     parser.add_argument("--self-test", action="store_true", help="Lokalen Funktionstest ohne Benutzereingaben ausführen")
+    parser.add_argument("--self-test-report", type=Path, help="JSON-Bericht des Selbsttests speichern")
     parser.add_argument("--year", type=int, default=None, help="Jahr des Startmonats")
     parser.add_argument("--month", type=int, default=None, help="Startmonat (1–12)")
     args = parser.parse_args(argv)
     if args.self_test:
         from .smoke import run_smoke_test
-        return run_smoke_test()
+        return run_smoke_test(args.self_test_report)
+    from PySide6.QtCore import QLibraryInfo, QLocale, QStandardPaths, QTranslator
+    from PySide6.QtWidgets import QApplication, QMessageBox
+    from .storage import Store
+    from .ui import MainWindow
     app = QApplication.instance() or QApplication(sys.argv[:1])
     QLocale.setDefault(QLocale("de_DE"))
     translator = QTranslator(app)

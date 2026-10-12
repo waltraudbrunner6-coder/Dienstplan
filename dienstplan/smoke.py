@@ -4,10 +4,18 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import traceback
 from pathlib import Path
 
 
-def run_smoke_test() -> int:
+def run_smoke_test(report_path: Path | None = None) -> int:
+    def report(values):
+        content = json.dumps(values, ensure_ascii=False)
+        if report_path is not None:
+            Path(report_path).write_text(content + "\n", encoding="utf-8")
+        # Windows-GUI-Pakete besitzen keine Standardausgabe. Die Datei
+        # transportiert den Nachweis und Fehler auch ohne Konsole ins CI.
+        print(content)
     try:
         from .csvio import export_fairness, export_hours, export_plan, export_wishes, preview_csv
         from .demo import demo_month
@@ -61,10 +69,10 @@ def run_smoke_test() -> int:
             assert window.isVisible(), "Desktop-Fenster wurde nicht angezeigt."
             window.close(); app.processEvents()
             store.close()
-            print(json.dumps({"selbsttest":"bestanden","personen":12,"zuteilungen":len(result.assignments),
+            report({"selbsttest":"bestanden","personen":12,"zuteilungen":len(result.assignments),
                               "status":result.status,"csv_sqlite_solver_qt":True,
-                              "ausnahmetage":True,"kurzer_sonderdienst":True,"freiwunschhistorie":True},ensure_ascii=False))
+                              "ausnahmetage":True,"kurzer_sonderdienst":True,"freiwunschhistorie":True})
         return 0
     except Exception as exc:
-        print(json.dumps({"selbsttest":"fehlgeschlagen","fehler":str(exc)},ensure_ascii=False))
+        report({"selbsttest":"fehlgeschlagen","fehler":str(exc),"details":traceback.format_exc()})
         return 1
