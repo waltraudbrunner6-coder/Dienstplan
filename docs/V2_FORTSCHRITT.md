@@ -83,6 +83,22 @@ Gesamtlauf: **242 bestanden in 91,76 s**. M01–M07 und I06 sind als isolierte
 Speicher-/Migrationsfälle abgedeckt, M08 teilweise (noch keine Anwendungskonten).
 W08 ist nun als Speicher-/Neustartverfahren abgedeckt, noch nicht über die UI.
 
+## C1 – Unabhängige Kernprüfung
+
+Direkt aus Ergebnisblöcken geprüft: Referenzen/Duplikate/Kapazität, feste Personen,
+Katalogzeiten, Rechte/Führerschein/Beschäftigung, benötigte Vertragsversionen,
+Urlaub, geschützte Teamzeit und LB-Verlängerung, ein Block je Startdatum,
+reale 660-Minuten-Ruhe und höchstens fünf belegte Arbeitstage inklusive Randpause
+und alter Randdienste. Alte Konflikte ohne Bezug zu neuer Zuteilung werden nicht
+nachträglich umgeschrieben. Enthaltene Teilnahme wird separat erklärt.
+Der Bericht kennzeichnet seinen Kernumfang ausdrücklich als keinen vollständigen
+V2-/Rechtsnachweis. Keine Solverflags werden als Regelbeleg übernommen.
+
+`tests/test_v2_validation.py`: 10 gezielte Fälle einschließlich exakter 660/659-
+Grenze, Jahresrand und manipulierter Pause in Teamzeit. Gesamtlauf: **252 Tests bestanden**, Details im aktuellen JUnit-Bericht.
+R01–R08, U07, P01–P07 und O09 sind damit auf Kernprüferebene abgedeckt;
+Wochenenden/Quoten, komplette UI und produktive Profile bleiben separat.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
@@ -94,5 +110,5 @@ reine Domainfunktion vor, noch nicht als vollständiges Optimierungsziel.
 
 ## Nächster zusammenhängender Schritt
 
-C1: unabhängige direkte Ergebnisprüfung für Beschäftigung, Rechte, Urlaub,
-Startdatum, reale Ruhe und tatsächliche Arbeitstagsfolgen; danach C2-Kalenderregeln.
+C2: Wochenenden, zusammenhängende arbeitsfreie Kalendertage, bekannte/unbekannte
+Randdaten, Planungshorizont und explizit profilierte Wochenquoten.
