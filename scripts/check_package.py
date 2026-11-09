@@ -40,7 +40,22 @@ def check_package(executable: Path) -> int:
         return result.returncode or (0 if valid else 1)
 
 
+def check_v2_package(executable: Path) -> int:
+    with tempfile.TemporaryDirectory(prefix='dienstplan-v2-paketpruefung-') as directory:
+        report=Path(directory)/'v2-selbsttest.json'
+        environment=os.environ.copy();environment['PYTHONTZPATH']=''
+        result=subprocess.run([str(executable.resolve()),'--self-test-v2','--self-test-report',str(report)],env=environment)
+        if not report.exists():
+            error_annotation('Kein V2-Paketbericht; Programmstart/Zeitzonendaten prüfen.');return result.returncode or 1
+        values=json.loads(report.read_text(encoding='utf-8'));print(json.dumps(values,ensure_ascii=False,indent=2))
+        valid=(values.get('selbsttest')=='bestanden' and values.get('personen')==12 and values.get('zuteilungen')==8
+               and all(values.get(key) is True for key in ('dst','solver_pruefer','sqlite','exportpaket','qt')))
+        if result.returncode or not valid:error_annotation(values.get('details') or 'V2-Paketprüfung unvollständig/fehlgeschlagen.')
+        return result.returncode or (0 if valid else 1)
+
+
 if __name__ == "__main__":
     path = ("dist/Dienstplan.app/Contents/MacOS/Dienstplan" if sys.platform == "darwin" else
             "dist/Dienstplan/Dienstplan.exe" if sys.platform == "win32" else "dist/Dienstplan/Dienstplan")
-    raise SystemExit(check_package(Path(path)))
+    status=check_package(Path(path))
+    raise SystemExit(status or check_v2_package(Path(path)))

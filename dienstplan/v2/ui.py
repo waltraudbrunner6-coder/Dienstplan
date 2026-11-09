@@ -114,7 +114,8 @@ class Workbench(QDialog):
         accounts={a.person_id:a for a in self.profile.accounts}
         self.table(self.team,('ID (fest)','Name','Wochenstunden (ein Vertrag)','Anfang min','Wunschende min','Beschäftigung [von, bis)','Rechte (Details)'),
                    [(p.id,p.name,str(p.contracts.versions[0].weekly_hours) if len(p.contracts.versions)==1 else 'mehrere Vertragsversionen',accounts[p.id].opening_minutes,accounts[p.id].desired_minutes,
-                     f'{p.employment.dates.start} bis {p.employment.dates.end}',str([(r.dates.start,r.dates.end,sorted(r.codes),r.driving_license) for r in p.rights])) for p in self.inputs.people],True)
+                     f'{p.employment.dates.start} bis {p.employment.dates.end}',
+                     '; '.join(f'{r.dates.start} bis {r.dates.end}: '+', '.join(sorted(r.codes))+'; Führerschein '+{True:'ja',False:'nein',None:'unbekannt'}[r.driving_license] for r in p.rights)) for p in self.inputs.people],True)
         from PySide6.QtCore import Qt
         for i in range(self.team.rowCount()):
             for j in (0,5,6):self.team.item(i,j).setFlags(self.team.item(i,j).flags()&~Qt.ItemFlag.ItemIsEditable)
@@ -178,7 +179,8 @@ class Workbench(QDialog):
             for i in range(max(e.service.staff or 0,len(selected))):
                 b=selected[i] if i<len(selected) else None;self.plan_rows.append((e,b))
                 rows.append((e.id,e.service.code,i+1,b.person_id if b else 'OFFEN',b.work_minutes if b else '',
-                             'fixiert' if b in self.inputs.locked else '',str([(p.start.astimezone(vienna()).isoformat(),p.end.astimezone(vienna()).isoformat()) for p in b.breaks]) if b else ''))
+                             'fixiert' if b in self.inputs.locked else '',
+                             '; '.join(p.start.astimezone(vienna()).strftime('%d.%m. %H:%M')+'–'+p.end.astimezone(vienna()).strftime('%d.%m. %H:%M') for p in b.breaks) if b else ''))
         self.table(self.plan,('Termin','Dienst','Platz','Person','Arbeitsminuten','Fixierung','Konkrete Pause'),rows)
         hours=hours_rows(self.inputs.people,self.blocks+self.inputs.boundary,self.inputs.absences,self.inputs.year,self.inputs.month,accounts=self.profile.accounts,target_profile='S0',month_profile='M0')
         self.table(self.hours,('Person','Soll min','Anfang','Wunschende','Urlaub','Arbeitsziel','Geplant','Prognose Ende','Abweichung'),[(r.person_id,r.target,r.opening,r.desired,r.credits,r.goal,r.work,r.projected,r.deviation) for r in hours])
@@ -357,7 +359,7 @@ class Workbench(QDialog):
 
     def change_assignment(self):
         term,old=self.selected();choices=[b for b in self.inputs.candidates if b.id==term.id]
-        labels=[f'{b.person_id}: Pause '+str([(p.start.astimezone(vienna()).strftime('%H:%M'),p.end.astimezone(vienna()).strftime('%H:%M')) for p in b.breaks]) for b in choices]
+        labels=[f'{b.person_id}: Pause '+('; '.join(p.start.astimezone(vienna()).strftime('%H:%M')+'–'+p.end.astimezone(vienna()).strftime('%H:%M') for p in b.breaks) or 'keine') for b in choices]
         if not labels:raise ValueError('Keine konkreten Kandidaten vorhanden; Rechte/Pausenprofile prüfen.')
         label,ok=QInputDialog.getItem(self,'Zuteilung','Person und konkrete Pause:',labels,0,False)
         if ok:self.manual(tuple(b for b in self.blocks if b!=old)+(choices[labels.index(label)],))

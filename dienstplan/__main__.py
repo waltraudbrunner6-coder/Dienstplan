@@ -10,10 +10,14 @@ def main(argv=None):
     parser.add_argument("--database", type=Path, help="Abweichende lokale SQLite-Datei")
     parser.add_argument("--demo", action="store_true", help="Zwölf-Personen-Demonstrationsmonat öffnen")
     parser.add_argument("--self-test", action="store_true", help="Lokalen Funktionstest ohne Benutzereingaben ausführen")
+    parser.add_argument("--self-test-v2", action="store_true", help="Paketierten V2-Prüfbereich mit Testprofilen prüfen")
     parser.add_argument("--self-test-report", type=Path, help="JSON-Bericht des Selbsttests speichern")
     parser.add_argument("--year", type=int, default=None, help="Jahr des Startmonats")
     parser.add_argument("--month", type=int, default=None, help="Startmonat (1–12)")
     args = parser.parse_args(argv)
+    if args.self_test_v2:
+        from .v2.smoke import run
+        return run(args.self_test_report)
     if args.self_test:
         from .smoke import run_smoke_test
         return run_smoke_test(args.self_test_report)

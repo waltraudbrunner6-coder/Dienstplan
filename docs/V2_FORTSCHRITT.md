@@ -242,6 +242,24 @@ R-/Randwochen-/Urlaubsintegration oder betriebliche Vollmonatsmachbarkeit.
 Ein vollständiger aktiver Abwesenheitseditor, Bestätigungsaufhebung und die
 produktive Profilführung bleiben offen; CSV-Korrektur ist funktional angebunden.
 
+## F2 – Paketierter Selbsttest und native Prüfabläufe
+
+PyInstaller bündelt tzdata ausdrücklich. Neuer Paketaufruf `--self-test-v2`
+prüft Wien-DST, echte Optimierung/Prüfer, SQLite-Workspace, Export und sichtbares
+Qt-Fenster in temporären Testdateien. Der native Paketprüfer führt jetzt sowohl
+Legacy- als auch V2-Selbsttest aus; V2 mit leerem System-Zeitzonenpfad.
+Vorhandene Windows-/macOS-Matrix verwendet diesen Prüfer, ohne Produktumschaltung.
+
+Lokal: **320 Tests bestanden in 69,88 s**, zusätzliche fokussierte Qt/Paketprüfung
+nach visueller Textbereinigung **16 bestanden in 3,47 s**. Linux x86_64-Paket
+tatsächlich gebaut: **293.954.856 Bytes / 280,34 MiB**, TAR.GZ **108,97 MiB**.
+Legacy-Paketselbsttest mit 186 Zuteilungen und V2-Test mit zwölf Personen/acht
+Zuteilungen erfolgreich, einschließlich gebündeltem tzdata 2026.6 / IANA 2026f.
+Keine Windows-/macOS-Abnahme aus diesen Linux-Ergebnissen abgeleitet.
+Native Actions-Läufe werden nach dem Push gestartet und anschließend separat
+mit tatsächlichem Commit/Architektur/Ergebnis dokumentiert. X05 bleibt bis zu
+diesen Prüfungen und manueller Offline-/Signierungsabnahme teilweise offen.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
@@ -254,6 +272,5 @@ Monatsskalierung des Kalenders mit Ausschlussschnitten ist weiterhin begrenzt.
 ## Nächster zusammenhängender Schritt
 
 Nutzer hat am 10.11.2026 selbstständige Fortsetzung bestätigt.
-Nächster Schritt F2: paketierter V2-Selbsttest mit gebündeltem tzdata und echte
-native Plattformprüfungen über den vorhandenen Workflow;
+Nächster Schritt: native Prüfungen ausführen und konkrete Fehler korrigieren;
 keine produktive Umschaltung oder echte Datenmigration ohne gesonderten Auftrag.

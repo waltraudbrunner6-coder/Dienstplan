@@ -31,6 +31,7 @@ def main() -> int:
         "--distpath", str(output), "--workpath", str(working / "analysis"),
         "--specpath", str(working), "--paths", str(root),
         "--collect-submodules", "dienstplan",
+        "--collect-data", "tzdata",
         "--add-data", str(root / "README.md") + os.pathsep + ".",
         "--add-data", str(root / "docs") + os.pathsep + "docs",
     ]
