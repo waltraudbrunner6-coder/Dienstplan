@@ -47,6 +47,7 @@ class PlanningInput:
         for key in ('quotas','coverage'):
             object.__setattr__(self,key,tuple(sorted(getattr(self,key),key=lambda v:getattr(v,'id',getattr(v,'event_id','')))))
         terms={e.id:e for e in self.events}
+        if any(e.person_id not in {p.id for p in self.people} for e in self.absences):raise DomainError('Abwesenheit/Wunsch verweist auf unbekannte Person.')
         if not self.optional_ids<=terms.keys():raise DomainError('Unbekannte optionale Terminkennung.')
         if self.quotas and self.week_policy is None:raise DomainError('Wochenquoten benötigen ein ausdrückliches Wochenprofil.')
         if len({q.id for q in self.quotas})!=len(self.quotas):raise DomainError('Doppelte Wochenquoten.')

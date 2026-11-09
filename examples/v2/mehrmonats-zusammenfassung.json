@@ -1,0 +1,1348 @@
+[
+  {
+    "month": "2026-11",
+    "scope": "Synthetischer Vier-Termine-Test; kein vollständiger Betriebsmonat",
+    "objectives": [
+      [
+        "coverage",
+        0
+      ],
+      [
+        "wishes",
+        0
+      ],
+      [
+        "hours_max",
+        1000
+      ],
+      [
+        "hours_spread",
+        10934088
+      ],
+      [
+        "shifts",
+        610666752
+      ],
+      [
+        "late_break",
+        0
+      ]
+    ],
+    "global_optimal": false,
+    "shares": [
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "A",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "B",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "C",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "D",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "E",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "F",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "G",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "H",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "I",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "J",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "K",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "L",
+        "work_minutes": 450
+      }
+    ],
+    "hours": [
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -5979,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "A",
+        "projected": -5979,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -5979,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "B",
+        "projected": -5979,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -6429,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "C",
+        "projected": -6429,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -6429,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "D",
+        "projected": -6429,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -5979,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "E",
+        "projected": -5979,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -5979,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "F",
+        "projected": -5979,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -6429,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "G",
+        "projected": -6429,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -6429,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "H",
+        "projected": -6429,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -5979,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "I",
+        "projected": -5979,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -5979,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "J",
+        "projected": -5979,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -5979,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "K",
+        "projected": -5979,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -5979,
+        "goal": 6429,
+        "opening": 0,
+        "person_id": "L",
+        "projected": -5979,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 45000
+        },
+        "target": 6429,
+        "work": 450
+      }
+    ],
+    "history_basis": {
+      "confirmations": [],
+      "missing": [
+        "2026-01: kein bestätigter V2-Wunschstand",
+        "2026-02: kein bestätigter V2-Wunschstand",
+        "2026-03: kein bestätigter V2-Wunschstand",
+        "2026-04: kein bestätigter V2-Wunschstand",
+        "2026-05: kein bestätigter V2-Wunschstand",
+        "2026-06: kein bestätigter V2-Wunschstand",
+        "2026-07: kein bestätigter V2-Wunschstand",
+        "2026-08: kein bestätigter V2-Wunschstand",
+        "2026-09: kein bestätigter V2-Wunschstand",
+        "2026-10: kein bestätigter V2-Wunschstand"
+      ]
+    },
+    "confirmation_count": 1
+  },
+  {
+    "month": "2026-12",
+    "scope": "Synthetischer Vier-Termine-Test; kein vollständiger Betriebsmonat",
+    "objectives": [
+      [
+        "coverage",
+        0
+      ],
+      [
+        "wishes",
+        0
+      ],
+      [
+        "hours_max",
+        1901
+      ],
+      [
+        "hours_spread",
+        42349964
+      ],
+      [
+        "shifts",
+        610666800
+      ],
+      [
+        "late_break",
+        0
+      ]
+    ],
+    "global_optimal": false,
+    "shares": [
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "A",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "B",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "C",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 2,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "D",
+        "work_minutes": 900
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "E",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "F",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "G",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 2,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "H",
+        "work_minutes": 900
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "I",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "J",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "K",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "L",
+        "work_minutes": 0
+      }
+    ],
+    "hours": [
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12622,
+        "goal": 12622,
+        "opening": -5979,
+        "person_id": "A",
+        "projected": -12622,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12622,
+        "goal": 12622,
+        "opening": -5979,
+        "person_id": "B",
+        "projected": -12622,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12622,
+        "goal": 13072,
+        "opening": -6429,
+        "person_id": "C",
+        "projected": -12622,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12172,
+        "goal": 13072,
+        "opening": -6429,
+        "person_id": "D",
+        "projected": -12172,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 900
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12622,
+        "goal": 12622,
+        "opening": -5979,
+        "person_id": "E",
+        "projected": -12622,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12172,
+        "goal": 12622,
+        "opening": -5979,
+        "person_id": "F",
+        "projected": -12172,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12622,
+        "goal": 13072,
+        "opening": -6429,
+        "person_id": "G",
+        "projected": -12622,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12172,
+        "goal": 13072,
+        "opening": -6429,
+        "person_id": "H",
+        "projected": -12172,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 900
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12622,
+        "goal": 12622,
+        "opening": -5979,
+        "person_id": "I",
+        "projected": -12622,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12622,
+        "goal": 12622,
+        "opening": -5979,
+        "person_id": "J",
+        "projected": -12622,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12172,
+        "goal": 12622,
+        "opening": -5979,
+        "person_id": "K",
+        "projected": -12172,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -12622,
+        "goal": 12622,
+        "opening": -5979,
+        "person_id": "L",
+        "projected": -12622,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 0
+      }
+    ],
+    "history_basis": {
+      "confirmations": [
+        "2026-11"
+      ],
+      "missing": [
+        "2026-01: kein bestätigter V2-Wunschstand",
+        "2026-02: kein bestätigter V2-Wunschstand",
+        "2026-03: kein bestätigter V2-Wunschstand",
+        "2026-04: kein bestätigter V2-Wunschstand",
+        "2026-05: kein bestätigter V2-Wunschstand",
+        "2026-06: kein bestätigter V2-Wunschstand",
+        "2026-07: kein bestätigter V2-Wunschstand",
+        "2026-08: kein bestätigter V2-Wunschstand",
+        "2026-09: kein bestätigter V2-Wunschstand",
+        "2026-10: kein bestätigter V2-Wunschstand"
+      ]
+    },
+    "confirmation_count": 2
+  },
+  {
+    "month": "2027-01",
+    "scope": "Synthetischer Vier-Termine-Test; kein vollständiger Betriebsmonat",
+    "objectives": [
+      [
+        "coverage",
+        0
+      ],
+      [
+        "wishes",
+        0
+      ],
+      [
+        "hours_max",
+        2833
+      ],
+      [
+        "hours_spread",
+        96310668
+      ],
+      [
+        "shifts",
+        48
+      ],
+      [
+        "late_break",
+        0
+      ]
+    ],
+    "global_optimal": true,
+    "shares": [
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "A",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "B",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "C",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "D",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "E",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "F",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "G",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "H",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "I",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "J",
+        "work_minutes": 450
+      },
+      {
+        "code": "WL",
+        "count": 0,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "K",
+        "work_minutes": 0
+      },
+      {
+        "code": "WL",
+        "count": 1,
+        "expected_count": {
+          "denominator": 3,
+          "numerator": 2
+        },
+        "expected_minutes": {
+          "denominator": 1,
+          "numerator": 300
+        },
+        "person_id": "L",
+        "work_minutes": 450
+      }
+    ],
+    "hours": [
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 19265,
+        "opening": -12622,
+        "person_id": "A",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 19265,
+        "opening": -12622,
+        "person_id": "B",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 19265,
+        "opening": -12622,
+        "person_id": "C",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 18815,
+        "opening": -12172,
+        "person_id": "D",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 19265,
+        "opening": -12622,
+        "person_id": "E",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 18815,
+        "opening": -12172,
+        "person_id": "F",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 19265,
+        "opening": -12622,
+        "person_id": "G",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 18815,
+        "opening": -12172,
+        "person_id": "H",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 19265,
+        "opening": -12622,
+        "person_id": "I",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 19265,
+        "opening": -12622,
+        "person_id": "J",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 18815,
+        "opening": -12172,
+        "person_id": "K",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 0
+      },
+      {
+        "credits": 0,
+        "desired": 0,
+        "deviation": -18815,
+        "goal": 19265,
+        "opening": -12622,
+        "person_id": "L",
+        "projected": -18815,
+        "raw_credits": {
+          "denominator": 1,
+          "numerator": 0
+        },
+        "raw_target": {
+          "denominator": 7,
+          "numerator": 46500
+        },
+        "target": 6643,
+        "work": 450
+      }
+    ],
+    "history_basis": {
+      "confirmations": [
+        "2026-11",
+        "2026-12"
+      ],
+      "missing": [
+        "2026-01: kein bestätigter V2-Wunschstand",
+        "2026-02: kein bestätigter V2-Wunschstand",
+        "2026-03: kein bestätigter V2-Wunschstand",
+        "2026-04: kein bestätigter V2-Wunschstand",
+        "2026-05: kein bestätigter V2-Wunschstand",
+        "2026-06: kein bestätigter V2-Wunschstand",
+        "2026-07: kein bestätigter V2-Wunschstand",
+        "2026-08: kein bestätigter V2-Wunschstand",
+        "2026-09: kein bestätigter V2-Wunschstand",
+        "2026-10: kein bestätigter V2-Wunschstand"
+      ]
+    },
+    "confirmation_count": 3
+  }
+]

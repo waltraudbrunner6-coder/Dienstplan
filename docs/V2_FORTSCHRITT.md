@@ -215,18 +215,45 @@ damit als kleine Testprofilfälle (keine Produkt-/Monatsabnahme) geprüft.
 Snapshot/Profil/Seed/Worker; tatsächliche Läufe in `examples/v2/benchmark-e2.json`.
 Es sind ausdrücklich nur vier WL-Testtermine, kein rekonstruierter Betriebsmonat.
 
+## F1 – Angebundener technischer Prüfbereich und Exporte
+
+V2-Prüfbereich als explizites Fenster innerhalb der vorhandenen Qt-Anwendung,
+getrennte temporäre/neue Schema-3-Testdatei. Name/Vertrag/Konten, datierte
+Beschäftigung/Vertrags-/Berechtigungsversionen, feste Sondertermine und konkrete
+Pausen, CSV-Korrekturvorschau, atomare Übernahme einschließlich aktualisierter
+Eingaben und verworfenem Altentwurf, Hintergrundsuche/Abbruch, Versionskonflikt,
+ausdrückliche Ergebnisübernahme, manuelle Zuteilungen/Einzelfixierungen und
+unabhängige Nachprüfung sind angeschlossen. Normale App/Benutzerdatenbank bleiben
+auf dem Legacy-Pfad. Keine produktive V2-Umschaltung.
+
+Vollständiger exakter Workspace-Codec mit tzdata-/Katalogversion und Fingerprint,
+unveränderlichen SQLite-Revisionen, geschützten Bestätigungen und Neustartprüfung.
+Atomare neue ZIP-Exportpakete mit gemeinsamer Revision, CSVs/Arbeitsstand/Prüfmanifest
+und Dateihashes; Schreibfehler veröffentlichen nichts, fremde Ziele bleiben erhalten.
+Anleitung `V2_BEDIENUNG.md`; der kleine Mehrmonatslauf mit 2 s pro Monat ist in
+`examples/v2/mehrmonats-zusammenfassung.json` dokumentiert. SQLite/ZIPs nur temporär,
+keine Benutzerdaten oder Datenbank im Git. Wiederholte Bestätigung zählt nicht doppelt.
+
+Fokussiert: Qt/Workspace/Export/Persistenz **23 Tests bestanden in 5,09 s**.
+Gesamtlauf: **317 bestanden in 72,89 s**. X01–X03 sind für den ausdrücklich kleinen
+Testbereich abgedeckt, kein fertiger produktiver Konfigurationsablauf. X04 teilweise:
+Monatswechsel/Prognosesalden/Historie geprüft, noch keine vollständige
+R-/Randwochen-/Urlaubsintegration oder betriebliche Vollmonatsmachbarkeit.
+Ein vollständiger aktiver Abwesenheitseditor, Bestätigungsaufhebung und die
+produktive Profilführung bleiben offen; CSV-Korrektur ist funktional angebunden.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
 erledigten Klärungen. Donnerstagswünsche bleiben zur Korrektur vorgemerkt, ohne
 aktive/teilweise Importübernahme. Testprofile sind ausdrücklich keine betrieblichen
-Freigaben. Produktive Wunschhistorie und neue Oberfläche sind noch nicht
-angebunden. Testprofiloptimierung ersetzt keine betriebliche Rechts-/Tarifprüfung.
+Freigaben. Produktive Wunschhistorie und vollständige produktive Oberfläche sind
+noch nicht freigegeben. Testprofiloptimierung ersetzt keine betriebliche Rechts-/Tarifprüfung.
 Monatsskalierung des Kalenders mit Ausschlussschnitten ist weiterhin begrenzt.
 
 ## Nächster zusammenhängender Schritt
 
 Nutzer hat am 10.11.2026 selbstständige Fortsetzung bestätigt.
-Nächster Schritt F1: geprüfte persistente Arbeitsstände, atomare Exportpakete und
-expliziter Qt-Prüfbereich innerhalb der bestehenden Anwendung. Danach F2-Plattformprüfungen;
+Nächster Schritt F2: paketierter V2-Selbsttest mit gebündeltem tzdata und echte
+native Plattformprüfungen über den vorhandenen Workflow;
 keine produktive Umschaltung oder echte Datenmigration ohne gesonderten Auftrag.

@@ -162,11 +162,11 @@ class V2Store:
         with self.transaction():
             self.connection.execute('INSERT INTO v2_corrections VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',(id,encoded(value)))
 
-    def load_correction(self,id,*,budgets,month):
+    def load_correction(self,id,*,budgets,month,additional_existing=()):
         row=self.connection.execute('SELECT payload FROM v2_corrections WHERE id=?',(id,)).fetchone()
         if not row:raise DomainError("Korrekturstapel fehlt oder wurde bereits übernommen.")
         value=json.loads(row[0]);rows=tuple(DraftRow(r['line'],tuple(tuple(x) for x in r['fields'])) for r in value['rows'])
-        return _check_rows(value['original_text'],rows,self.entries(),budgets,month,tuple(value['parse_errors']))
+        return _check_rows(value['original_text'],rows,self.entries()+tuple(additional_existing),budgets,month,tuple(value['parse_errors']))
 
     def discard_correction(self,id):
         with self.transaction():self.connection.execute('DELETE FROM v2_corrections WHERE id=?',(id,))
@@ -207,6 +207,48 @@ class V2Store:
 
     def save_draft_revision(self,id,payload):
         with self.transaction():self._immutable('v2_revisions',id,encoded(payload))
+
+    def load_workspace(self,year,month):
+        from .codec import restore_workspace
+        key=f'workspace:{year:04d}-{month:02d}'
+        row=self.connection.execute('SELECT r.payload FROM v2_meta m JOIN v2_revisions r ON m.value=r.id WHERE m.key=?',(key,)).fetchone()
+        return restore_workspace(json.loads(row[0])) if row else None
+
+    def save_workspace(self,inputs,profile,blocks=(),events=None,*,expected_revision):
+        from .codec import workspace
+        with self.transaction():
+            if self.input_revision!=expected_revision:raise DomainError('Eingaben/Historie geändert; Arbeitsstand erneut laden.')
+            month=f'{inputs.year:04d}-{inputs.month:02d}'
+            if self.connection.execute('SELECT 1 FROM v2_meta WHERE key=?',('confirmation:'+month,)).fetchone():
+                raise DomainError('Bestätigter Testmonat bleibt geschützt; keine stille Bearbeitung.')
+            value=workspace(inputs,profile,blocks,events);id='workspace/'+value['revision_id']
+            previous=self.connection.execute('SELECT value FROM v2_meta WHERE key=?',('workspace:'+month,)).fetchone()
+            changed=previous is None or previous[0]!=id
+            self._immutable('v2_revisions',id,encoded(value))
+            self.connection.execute('INSERT INTO v2_meta VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',('workspace:'+month,id))
+            if changed:self.connection.execute("UPDATE v2_meta SET value=CAST(value AS INTEGER)+1 WHERE key='input_revision'")
+            return value['revision_id']
+
+    def apply_correction(self,id,inputs,profile,*,budgets,expected_revision):
+        """Stapel, aktive Eingaben und verworfener Altentwurf atomar aktualisieren."""
+        from dataclasses import replace
+        from .codec import workspace
+        month=f'{inputs.year:04d}-{inputs.month:02d}'
+        with self.transaction():
+            if self.input_revision!=expected_revision:raise DomainError('Eingaben/Historie geändert; Korrekturen erneut prüfen.')
+            if self.connection.execute('SELECT 1 FROM v2_meta WHERE key=?',('confirmation:'+month,)).fetchone():raise DomainError('Bestätigter Testmonat bleibt geschützt.')
+            batch=self.load_correction(id,budgets=budgets,month=month,additional_existing=inputs.absences)
+            entries=batch.promote()
+            for entry in entries:
+                self.connection.execute('INSERT INTO v2_entries VALUES(?,?,?) ON CONFLICT(id) DO NOTHING',(entry.id,encoded(entry.identity),encoded(entry_payload(entry))))
+            merged={e.identity:e for e in inputs.absences+entries}
+            updated=replace(inputs,absences=tuple(merged.values()))
+            value=workspace(updated,profile);revision_id='workspace/'+value['revision_id']
+            self._immutable('v2_revisions',revision_id,encoded(value))
+            self.connection.execute('INSERT INTO v2_meta VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',('workspace:'+month,revision_id))
+            self.connection.execute('DELETE FROM v2_corrections WHERE id=?',(id,))
+            self.connection.execute("UPDATE v2_meta SET value=CAST(value AS INTEGER)+1 WHERE key='input_revision'")
+            return updated
 
     def confirmations(self):
         from .history import checked_payload

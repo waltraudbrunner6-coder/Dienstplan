@@ -24,7 +24,11 @@ Version 0.2.0: [Bestandsaufnahme](docs/V2_BESTANDSAUFNAHME.md),
 [Fachregeln](docs/V2_FACHREGELN.md), [offene Entscheidungen](docs/V2_OFFENE_FRAGEN.md),
 [Architektur/Migration](docs/V2_ARCHITEKTUR_UND_MIGRATION.md) und
 [Abnahmetestkatalog](docs/V2_ABNAHMETESTS.md). Etappe A beschreibt den Umbau;
-die dortigen V2-Regeln sind noch keine produktiv implementierte Planungsfunktion.
+die dortigen V2-Regeln sind noch keine produktiv freigegebene Planungsfunktion.
+Der Menüpunkt **V2-Prüfbereich (Testprofile)** bietet inzwischen echte Optimierung,
+Korrekturstapel, getrennte Speicherung und konsistente Exportpakete. Anleitung:
+[V2-Prüfbereich](docs/V2_BEDIENUNG.md), aktueller Prüfstand und Grenzen:
+[V2-Fortschritt](docs/V2_FORTSCHRITT.md). Die normale Anwendung behält ihre bisherige Datei.
 
 Python 3.12 verwenden. Die folgenden Befehle sind für Entwickler*innen; Nutzer*innen erhalten ein fertiges Paket. `requirements-lock.txt` hält die in Linux geprüften direkten und transitiven Versionen fest; die nativen Builds installieren die direkt festgelegten Versionen aus `requirements-dev.txt` mit passenden Plattformabhängigkeiten.
 

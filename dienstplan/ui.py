@@ -150,6 +150,8 @@ class MainWindow(QMainWindow):
         self._exception_notice = ""
         self._proof_text = ""
         self.setWindowTitle("Dienstplan – lokale Monatsplanung")
+        v2_action=self.menuBar().addAction("V2-Prüfbereich (Testprofile)")
+        v2_action.triggered.connect(self.open_v2_workbench)
         self.resize(1320, 850)
         central = QWidget(); layout = QVBoxLayout(central); self.setCentralWidget(central)
         top = QHBoxLayout()
@@ -183,6 +185,11 @@ class MainWindow(QMainWindow):
         self.year_spin.valueChanged.connect(self.change_month)
         self._fill()
         self.statusBar().showMessage(f"Speicherort: {self.database_path}")
+
+    def open_v2_workbench(self):
+        from .v2.ui import Workbench
+        dialog=Workbench(self)
+        dialog.exec()
 
     @staticmethod
     def _new_month(year, month):
