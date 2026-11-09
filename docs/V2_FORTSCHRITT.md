@@ -61,16 +61,38 @@ P01–P04/P08, Q09/Q10, W02/W04–W07, I01–I05; teilweise D07/D09,
 Q05–Q07/Q11, W01/W03/W08–W10 und Z02/Z05/Z06. Speicher-/Solver-/UI-Anteile
 dieser Fälle bleiben offen und sind keine Ende-zu-Ende-Abnahme.
 
+## B3 – Profile und Kopienspeicher
+
+Versionierte Profile mit Gültigkeit/Anwendung, exakten JSON-Parametern,
+Quellenbelegen, expliziter Bestätigung und abgetrennten synthetischen Profilen.
+Schreibgeschützter Legacy-Reader, SQLite-Backup einschließlich committed WAL,
+additive Schema-3-Kopie, bytegleiche alte Monats-Payloads/Sperren, Integritäts-
+und FK-Prüfung, kein Überschreiben des Originals oder fremder Zieldateien.
+Fehlerinjektionen nach Backup/DDL/vor Commit einschließlich KeyboardInterrupt,
+Idempotenz und Wiederöffnung geprüft. Keine Personen-/Urlaubs-/BK-/WL-Zuordnung
+aus fehlenden Altdaten erfunden.
+
+Persistente Korrekturstapel mit erneuter gemeinsamer Prüfung innerhalb der
+Übernahmetransaktion, Revisionsprüfung und vollständigem Rollback. Unveränderliche
+Profile und Entwurfsrevisionen; noch keine produktive Bestätigungs-/Historien-API.
+Das Schema enthält nur die tatsächlich benötigten Speicherbereiche; weitere
+Repositories/Migrationen werden mit ihren jeweiligen Funktionen ergänzt.
+
+`tests/test_v2_persistence.py`: **11 bestanden** (nur synthetische Datenbanken).
+Gesamtlauf: **242 bestanden in 91,76 s**. M01–M07 und I06 sind als isolierte
+Speicher-/Migrationsfälle abgedeckt, M08 teilweise (noch keine Anwendungskonten).
+W08 ist nun als Speicher-/Neustartverfahren abgedeckt, noch nicht über die UI.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
 erledigten Klärungen. Donnerstagswünsche bleiben zur Korrektur vorgemerkt, ohne
 aktive/teilweise Importübernahme. Testprofile sind ausdrücklich keine betrieblichen
-Freigaben. Pausenvertretung, vollständige Wunschhistorie, Migration, V2-Solver
-und neue Oberfläche sind noch nicht implementiert. T-/TS-Erfüllung liegt als
+Freigaben. Pausenvertretung, vollständige Wunschhistorie, V2-Solver und neue
+Oberfläche sind noch nicht implementiert. T-/TS-Erfüllung liegt als
 reine Domainfunktion vor, noch nicht als vollständiges Optimierungsziel.
 
 ## Nächster zusammenhängender Schritt
 
-B3: versionierte Profile, schreibgeschützter Legacy-Reader, transaktionale
-Kopienmigration mit Abbruch-/Rollbacktests und persistente Korrekturvormerkung.
+C1: unabhängige direkte Ergebnisprüfung für Beschäftigung, Rechte, Urlaub,
+Startdatum, reale Ruhe und tatsächliche Arbeitstagsfolgen; danach C2-Kalenderregeln.
