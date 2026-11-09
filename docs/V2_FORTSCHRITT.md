@@ -133,16 +133,37 @@ O01/O02/O05/O09 sind auf kleiner Solver-/Prüferebene abgedeckt; O06 teilweise
 (Besetzungsbeweis, noch keine mehrstufige Optimierung). Noch keine produktive
 V2-App-Anbindung, keine Pausenvertretung oder automatische Wochen-Terminauswahl.
 
+## D2 – Gekoppelte Termin-/Personen-/Pausenwahl
+
+Optionale WL/BK-Daten sind echte CP-SAT-Terminvariablen mit gemeinsamen stabilen
+Wochenquoten und getrennten Datums-/Personenvorgaben. Verschiedene WL-Tage,
+WL/BK-Ausschluss, Randwochenprofile und konkrete Pausenvarianten werden zusammen
+gelöst. Nicht existierende lokale WL-Endzeiten werden mit Ursache als unzulässige
+Option gemeldet, nicht verschoben. Gewählte Termine bleiben auch ohne Personal
+als offene Bedarfe erhalten; der Ergebnisprüfer prüft dieselbe Terminauswahl.
+
+Explizite Abdeckungs-Testprofile prüfen tatsächliche Arbeit je UTC-Teilsegment,
+einschließlich dedizierter realer Vertretungstermine. Keine doppelte Person/
+gleichzeitige Vertretungsrolle, keine neuen Halbblöcke. Bei offenen Plätzen ist
+die fehlende Abdeckung ausdrücklich offen; erst Vollbesetzung belegt das ganze
+Abdeckungsprofil. Ohne F03 gibt es keinen produktiven Abdeckungsnachweis.
+
+`tests/test_v2_coupled.py tests/test_v2_solver.py`: **19 bestanden**.
+Gesamtlauf einschließlich DST-Kandidatendiagnose: **279 bestanden in 100,33 s**.
+Q01/Q02/Q05/Q06/Q07 und Z07 sind als kleine integrierte Testprofilfälle abgedeckt;
+Q03/Q04 bleiben gemeinsame Quoten-/Randfunktionen, Q08 folgt als weiches Ziel.
+Keine betriebliche Freigabe der offenen F03/F06/F07, keine vollständige Monatsabnahme.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
 erledigten Klärungen. Donnerstagswünsche bleiben zur Korrektur vorgemerkt, ohne
 aktive/teilweise Importübernahme. Testprofile sind ausdrücklich keine betrieblichen
-Freigaben. Pausenvertretung, vollständige Wunschhistorie und neue
+Freigaben. Vollständige Wunschhistorie und neue
 Oberfläche sind noch nicht implementiert. T-/TS-Erfüllung liegt als
 reine Domainfunktion vor, noch nicht als vollständiges Optimierungsziel.
 
 ## Nächster zusammenhängender Schritt
 
-D2: gemeinsame WL-/BK-Termin-/Personenwahl und konkrete Pausenkandidaten mit
-expliziten Wochen-/Abdeckungs-Testprofilen; keine stillschweigende F03/F06/F07-Wahl.
+E1: unveränderliche bestätigte Rohhistorie, Wünsche und physische Stunden-/
+Zulagenmengen mit expliziten Auswertungsprofilen. Keine erfundene Tarifbewertung.

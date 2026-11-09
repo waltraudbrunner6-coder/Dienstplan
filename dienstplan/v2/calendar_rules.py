@@ -132,6 +132,12 @@ class WeekQuota:
     required: int
     owner_month: str
 
+    def __post_init__(self):
+        if not self.id or self.code not in {'WL','BK'} or type(self.required) is not int or self.required<0:
+            raise DomainError('Wochenquote benötigt Kennung, WL/BK und nicht negative ganze Terminzahl.')
+        if self.required>(self.dates.end-self.dates.start).days:
+            raise DomainError('Mehr verschiedene Wochentermine als zulässige Kalendertage.')
+
 
 def week_quotas(year,month,*,policy: WeekPolicy) -> tuple[WeekQuota, ...]:
     first=date(year,month,1);last=date(year,month,calendar.monthrange(year,month)[1])
