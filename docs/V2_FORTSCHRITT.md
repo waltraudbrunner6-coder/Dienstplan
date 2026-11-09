@@ -38,16 +38,39 @@ keine Anwendungskonten/Fairness), L03/L04 (übergebene Feiertagsmenge, keine Tar
 Alle anderen der 125 Fälle sind zunächst späteren Etappen zugeordnet, keine
 aufgeschobenen Tests als bestanden gezählt.
 
+## B2 – Katalog, Rechte und Korrekturverfahren
+
+Umgesetzt: alle 17 Kürzel mit getrennten R-Fenstern/LB-Varianten, feste Personen,
+Donnerstagsersatz, LB-Rhythmus mit explizitem Anker, Reserveperiode, W16 als
+derselbe Außendienstbedarf mit Grund. Kalender nennt fehlende WL/BK-/FK-/Reserve-
+Profile und fehlende INT/N17-Daten, statt Termine/Personen zu erfinden.
+Zeitgültige Rechte und N17-Führerschein, Außendienstprofil inklusive T/TS,
+explizite Team-Erfüllung und geschützte Fenster. Keine Teilnahme aus zufälliger
+Überlappung. Konkrete B1-Pausen bleiben Pflichtinput, kein Pausenoptimierer.
+
+CSV-Format 2 mit typisierten Einträgen, vollständigen Korrekturstapeln,
+gemeinsamer Budgetprüfung, Identitäts-/Gutschrift-Deduplizierung und Bearbeitung.
+Fehlerhafte Stapel können nie aktive Teilmengen liefern. Strukturfehler bleiben
+auch nach Bearbeiten einer vorherigen gültigen Zeile erhalten. Speicherung der
+Vormerkung folgt in B3; die Legacy-UI bleibt unverändert.
+
+Prüfung: `tests/test_v2_catalog_entries.py tests/test_v2_foundation.py`:
+**73 bestanden**. Gesamtlauf: **231 bestanden in 71,78 s**.
+Zusätzlich abgedeckt als Domain-/Kalenderfunktion: D01–D06, D08, D10–D12,
+P01–P04/P08, Q09/Q10, W02/W04–W07, I01–I05; teilweise D07/D09,
+Q05–Q07/Q11, W01/W03/W08–W10 und Z02/Z05/Z06. Speicher-/Solver-/UI-Anteile
+dieser Fälle bleiben offen und sind keine Ende-zu-Ende-Abnahme.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
 erledigten Klärungen. Donnerstagswünsche bleiben zur Korrektur vorgemerkt, ohne
 aktive/teilweise Importübernahme. Testprofile sind ausdrücklich keine betrieblichen
-Freigaben. Pausenvertretung, T-/TS-Erfüllung, Wünsche/Historienspeicher, Migration,
-V2-Solver und neue Oberfläche sind nach B1 noch nicht implementiert.
+Freigaben. Pausenvertretung, vollständige Wunschhistorie, Migration, V2-Solver
+und neue Oberfläche sind noch nicht implementiert. T-/TS-Erfüllung liegt als
+reine Domainfunktion vor, noch nicht als vollständiges Optimierungsziel.
 
 ## Nächster zusammenhängender Schritt
 
-B2: Katalog/Veranstaltungen/Bedarfe, zeitgültige Rechte und T-/TS-Erfüllungsbezüge;
-danach echte CSV-Korrekturstapel. Fehlende Quoten-/Reserve-/LB-/FK-Profile werden
-als fehlend ausgewiesen, nicht durch versteckte Produktstandards ersetzt.
+B3: versionierte Profile, schreibgeschützter Legacy-Reader, transaktionale
+Kopienmigration mit Abbruch-/Rollbacktests und persistente Korrekturvormerkung.
