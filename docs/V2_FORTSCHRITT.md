@@ -154,16 +154,52 @@ Q01/Q02/Q05/Q06/Q07 und Z07 sind als kleine integrierte Testprofilfälle abgedec
 Q03/Q04 bleiben gemeinsame Quoten-/Randfunktionen, Q08 folgt als weiches Ziel.
 Keine betriebliche Freigabe der offenen F03/F06/F07, keine vollständige Monatsabnahme.
 
+## E1 – Rohhistorie, Wünsche und getrennte Rechenmengen
+
+Implementiert: relevante eindeutige Wunschmengen, zwei explizite Varianten für
+die Freitags-W17-Wunschbehandlung, getrennte aktuelle/historische/kumulierte
+Belastung und sichtbare Historienlücken. Bestätigungsfakten enthalten damalige
+Eingaben/Verträge, Wunschschlüssel, Roh-/Rundungswerte, Konten, berechtigte
+Sollanteile und physische Mengen. Kein Entwurf erhöht die Historie; gleiche
+Testbestätigung ist idempotent, spätere Blocker-/Vertragsänderungen schreiben
+die Vergangenheit nicht um. Monatsübergreifende Wunschschlüssel werden kumuliert
+vereinigt. Gemeinsame Randwochenbindungen werden transaktional erhalten.
+
+Bestätigungen bleiben derzeit **ausschließlich synthetische Testbestätigungen**.
+Produktive Bestätigung und stilles Ersetzen bestätigter Monate sind gesperrt.
+Revision, unabhängige Regeln, Vollbesetzung und Datenfingerprints werden geprüft;
+Speicherfehler rollen Revision und Bestätigungszeiger vollständig zurück.
+Eine Aufhebungs-/Ablösungsbedienung ist noch nicht implementiert.
+
+Exakte S0-/M0-Prognosen mit expliziten Konten und deduplizierten Urlaubstagen,
+getrennte Nacht-/Sonntags-/Feiertagsmengen, berechtigte Vertrags-/Absolutanteile
+und eingefrorene historische Sollanteile. Bei ausschließlich Nullstunden erzeugt
+das Vertragsprofil keine erfundenen Anteile; ein absoluter Vergleich ist separat
+wählbar. Nationale AT-Daten nur als technischer Testkalender. Zeitgültige
+synthetische Einzelraten sind berechenbar; fehlende KV-/BV-Basis ergibt Euro
+„ungeklärt“, keine Nullbewertung oder automatische Kumulationsregel.
+
+`tests/test_v2_history_reporting.py tests/test_v2_persistence.py`: **23 bestanden
+in 1,98 s**, einschließlich eingefrorener historischer Sollanteile.
+Gesamtlauf: **291 bestanden in 63,80 s**, keine Fehler oder Skips.
+H01–H03, W03/W10 und U03/U04/K05/K09 sind als Domain-/Testbestätigungsfunktionen
+abgedeckt; L01/L02/L05/L06 nur mit ausdrücklich synthetischen Kalender-/Tarifdaten.
+H04–H06 sind noch keine optimierte Fairnessabnahme. E2 und UI-Anbindung fehlen.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
 erledigten Klärungen. Donnerstagswünsche bleiben zur Korrektur vorgemerkt, ohne
 aktive/teilweise Importübernahme. Testprofile sind ausdrücklich keine betrieblichen
-Freigaben. Vollständige Wunschhistorie und neue
+Freigaben. Produktive Wunschhistorie, mehrstufige V2-Fairnessoptimierung und neue
 Oberfläche sind noch nicht implementiert. T-/TS-Erfüllung liegt als
-reine Domainfunktion vor, noch nicht als vollständiges Optimierungsziel.
+Domain-/Prüferfunktion vor, noch nicht als vollständiges Optimierungsziel.
 
 ## Nächster zusammenhängender Schritt
 
-E1: unveränderliche bestätigte Rohhistorie, Wünsche und physische Stunden-/
-Zulagenmengen mit expliziten Auswertungsprofilen. Keine erfundene Tarifbewertung.
+**Auf ausdrücklichen Nutzerwunsch pausiert. Erst nach neuer Nachricht fortsetzen.**
+Bei Wiederaufnahme zuerst diese Datei, Git-Stand und aktuelle Prüfungen lesen.
+Nächste Etappe ist E2: benannte lexikografische Zielstufen mit expliziten
+Testprofilen, Erhalt des besten gültigen Entwurfs, geprüfte Nachbarschaften und
+reproduzierbare Benchmarks. Danach F1-App-Anbindung/Exporte und F2-Plattformprüfungen;
+keine produktive Umschaltung oder echte Datenmigration ohne gesonderten Auftrag.

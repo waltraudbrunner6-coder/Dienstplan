@@ -26,7 +26,7 @@ DDL=(
 
 
 def encoded(value):
-    return json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':'))
+    return json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':'),allow_nan=False)
 
 
 def _readonly(path):
@@ -207,3 +207,45 @@ class V2Store:
 
     def save_draft_revision(self,id,payload):
         with self.transaction():self._immutable('v2_revisions',id,encoded(payload))
+
+    def confirmations(self):
+        from .history import checked_payload
+        result=[]
+        for key,id in self.connection.execute("SELECT key,value FROM v2_meta WHERE key LIKE 'confirmation:%' ORDER BY key"):
+            row=self.connection.execute('SELECT payload FROM v2_revisions WHERE id=?',(id,)).fetchone()
+            if row is None:raise DomainError('Bestätigte Revision fehlt.')
+            value=checked_payload(row[0])
+            if value['month']!=key.removeprefix('confirmation:'):raise DomainError('Bestätigungsmonat ist widersprüchlich.')
+            result.append((id,value))
+        return tuple(result)
+
+    def wish_history(self,month,*,policy):
+        from .history import wish_history
+        legacy=self.connection.execute("SELECT value FROM v2_meta WHERE key='legacy_fingerprint'").fetchone()
+        return wish_history(self.confirmations(),month,policy=policy,
+                            legacy_missing=('Legacy-Wunsch-/Zulagenhistorie nicht belegt; keine Umdeutung.',) if legacy else ())
+
+    def confirm(self,id,inputs,blocks,events,*,accounts,wish_policy,fairness_policy,holidays=frozenset(),
+                target_profile,month_profile,expected_revision,synthetic=False):
+        from .history import confirmation,request_key
+        month=f'{inputs.year:04d}-{inputs.month:02d}';key='confirmation:'+month
+        blocks,events,accounts=tuple(blocks),tuple(events),tuple(accounts)
+        request=request_key(inputs,blocks,events,accounts,wish_policy,fairness_policy,holidays,target_profile,month_profile)
+        with self.transaction():
+            current=dict((v['month'],(rid,v)) for rid,v in self.confirmations())
+            if month in current:
+                rid,value=current[month]
+                if rid==id and value['request_fingerprint']==request:return value
+                raise DomainError('Der Monat ist bereits unveränderlich bestätigt; keine stille Ersetzung.')
+            if expected_revision!=self.input_revision:raise DomainError('Eingaben/Historie geändert; vor Bestätigung erneut prüfen.')
+            value=confirmation(inputs,blocks,events,accounts=accounts,wish_policy=wish_policy,fairness_policy=fairness_policy,
+                               holidays=holidays,history=self.wish_history(month,policy=wish_policy),target_profile=target_profile,
+                               month_profile=month_profile,synthetic=synthetic)
+            for _,old in self.confirmations():
+                for quota,choices in value['quota_reservations'].items():
+                    prior=old.get('quota_reservations',{}).get(quota)
+                    if prior is not None and prior!=choices:raise DomainError(f'Bestätigte Randwochenbindung {quota} widerspricht der neuen Terminwahl.')
+            self._immutable('v2_revisions',id,encoded(value))
+            self.connection.execute('INSERT INTO v2_meta VALUES(?,?)',(key,id))
+            self.connection.execute("UPDATE v2_meta SET value=CAST(value AS INTEGER)+1 WHERE key='input_revision'")
+            return value
