@@ -99,6 +99,23 @@ Grenze, Jahresrand und manipulierter Pause in Teamzeit. Gesamtlauf: **252 Tests 
 R01–R08, U07, P01–P07 und O09 sind damit auf Kernprüferebene abgedeckt;
 Wochenenden/Quoten, komplette UI und produktive Profile bleiben separat.
 
+## C2 – Wochenenden, Randdaten und Quoten
+
+Vollständiger technischer Horizont mit Vor-/Nachlauf, explizit bekannte Tage,
+unbekannte Zukunft statt angenommener Freizeit, zusammenhängendes Mo–Fr-Freipaar
+vor beobachteter Wochenendarbeit und enge W17-Zählausnahme. Die Ausnahme ändert
+keine Arbeitstags-/Vorwochenbelegung. Historische Konflikte ohne Beteiligung neuer
+Zuteilungen werden nicht rückwirkend beanstandet.
+
+Monats-Wochenendquote mit ausdrücklich benanntem Testprofil; Besitzer/Teilmonats-
+quote/Zuordnung nicht automatisch gewählt. Gemeinsame stabile Wochenquoten-IDs,
+parametrisierter Saisonanker, eindeutige WL-Tage und WL/BK-Ausschluss. Fehlende
+Profile/Randdaten ergeben „nicht vollständig geprüft“, keinen Gesamtnachweis.
+
+`tests/test_v2_calendar_rules.py`: 8 Fälle; zusammen mit C1 18 bestanden.
+Gesamtlauf: **260 Tests bestanden**. R09–R17 und Q01–Q04/Q07 sind als Prüfer-/Quotenfunktionen
+abgedeckt, nicht als bereits fertige automatische Terminwahl. D2 bleibt getrennt.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
@@ -110,5 +127,5 @@ reine Domainfunktion vor, noch nicht als vollständiges Optimierungsziel.
 
 ## Nächster zusammenhängender Schritt
 
-C2: Wochenenden, zusammenhängende arbeitsfreie Kalendertage, bekannte/unbekannte
-Randdaten, Planungshorizont und explizit profilierte Wochenquoten.
+D1: echte kleine CP-SAT-Machbarkeitsmodelle für konkret konfigurierte Termine,
+feste Vorgaben und offene Plätze; jede Lösung durch C1/C2 nachprüfen.
