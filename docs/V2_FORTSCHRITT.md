@@ -116,16 +116,33 @@ Profile/Randdaten ergeben „nicht vollständig geprüft“, keinen Gesamtnachwe
 Gesamtlauf: **260 Tests bestanden**. R09–R17 und Q01–Q04/Q07 sind als Prüfer-/Quotenfunktionen
 abgedeckt, nicht als bereits fertige automatische Terminwahl. D2 bleibt getrennt.
 
+## D1 – Kleine echte Machbarkeitsmodelle
+
+CP-SAT wählt aus konkreten gültigen Personen-/Pausenkandidaten, erhält feste
+Personen und lässt unbesetzbare Plätze offen. Startdatum, Ruhe und Fünferfolgen
+sind modelliert; unabhängige Kern-/Kalenderprüfung verwirft ungültige Ergebnisse
+mit exakten Ausschlussschnitten. Das ist für kleine Modelle vorgesehen, noch
+kein skalierter Monatscompiler. Fehlende Randdaten/Produktprofile bleiben sichtbar.
+Gültiger Altentwurf als Startpunkt, Abbruch/Zeitlimit, unveränderlicher
+Eingabefingerprint einschließlich tzdata und abschließende Ergebnisprüfung.
+„Besetzung optimal“ belegt nur diese Stufe, keine globale Fairness-/Rechtsoptimalität.
+
+`tests/test_v2_solver.py`: 9 bestanden. Gesamtlauf mit konkretisierten
+Fixierungsdiagnosen: **269 bestanden in 69,28 s**.
+O01/O02/O05/O09 sind auf kleiner Solver-/Prüferebene abgedeckt; O06 teilweise
+(Besetzungsbeweis, noch keine mehrstufige Optimierung). Noch keine produktive
+V2-App-Anbindung, keine Pausenvertretung oder automatische Wochen-Terminauswahl.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
 erledigten Klärungen. Donnerstagswünsche bleiben zur Korrektur vorgemerkt, ohne
 aktive/teilweise Importübernahme. Testprofile sind ausdrücklich keine betrieblichen
-Freigaben. Pausenvertretung, vollständige Wunschhistorie, V2-Solver und neue
+Freigaben. Pausenvertretung, vollständige Wunschhistorie und neue
 Oberfläche sind noch nicht implementiert. T-/TS-Erfüllung liegt als
 reine Domainfunktion vor, noch nicht als vollständiges Optimierungsziel.
 
 ## Nächster zusammenhängender Schritt
 
-D1: echte kleine CP-SAT-Machbarkeitsmodelle für konkret konfigurierte Termine,
-feste Vorgaben und offene Plätze; jede Lösung durch C1/C2 nachprüfen.
+D2: gemeinsame WL-/BK-Termin-/Personenwahl und konkrete Pausenkandidaten mit
+expliziten Wochen-/Abdeckungs-Testprofilen; keine stillschweigende F03/F06/F07-Wahl.
