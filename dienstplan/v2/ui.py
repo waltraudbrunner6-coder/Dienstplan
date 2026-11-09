@@ -186,7 +186,7 @@ class Workbench(QDialog):
                              '; '.join(p.start.astimezone(vienna()).strftime('%d.%m. %H:%M')+'–'+p.end.astimezone(vienna()).strftime('%d.%m. %H:%M') for p in b.breaks) if b else ''))
         self.table(self.plan,('Termin','Dienst','Platz','Person','Arbeitsminuten','Fixierung','Konkrete Pause'),rows)
         hours=hours_rows(self.inputs.people,self.blocks+self.inputs.boundary,self.inputs.absences,self.inputs.year,self.inputs.month,accounts=self.profile.accounts,target_profile='S0',month_profile='M0')
-        self.table(self.hours,('Person','Soll min','Anfang','Wunschende','Urlaub','Arbeitsziel','Geplant','Prognose Ende','Abweichung'),[(r.person_id,r.target,r.opening,r.desired,r.credits,r.goal,r.work,r.projected,r.deviation) for r in hours])
+        self.table(self.hours,('Person','Soll min','Anfang','Wunschende','Urlaub','Arbeitsziel','Geplant','Prognose Ende','Abweichung'),[(r.person_id,r.target,r.opening,r.desired,r.credits if r.credits_known else 'ungeklärt',r.goal if r.credits_known else 'ungeklärt',r.work,r.projected if r.credits_known else 'ungeklärt',r.deviation if r.credits_known else 'ungeklärt') for r in hours])
         distribution=shares(self.inputs.people,events,self.blocks,policy=self.profile.fairness_policy,absences=self.inputs.absences)
         self.table(self.distribution,('Person','Dienst','Anzahl','Minuten','Fairer Anteil Anzahl','Fairer Anteil Minuten'),[(r.person_id,r.code,r.count,r.work_minutes,str(r.expected_count),str(r.expected_minutes)) for r in distribution])
         wishes=wish_rows(self.inputs.people,self.inputs.absences,events,self.blocks+self.inputs.boundary,policy=self.profile.wish_policy,history=self.profile.history)
@@ -197,6 +197,9 @@ class Workbench(QDialog):
             status+=' | '.join(i.message for i in core.issues+calendar.issues)
             status+=' | '+' | '.join(dict.fromkeys(self.inputs.unchecked+calendar.unchecked+self.profile.history.missing))
         else:status='Eingaben ohne berechneten Entwurf; Profile und Monatsvollständigkeit nicht produktiv freigegeben.'
+        required=sum((e.service.staff or 0)*(e.attendance.minutes-(30 if e.attendance.minutes>360 else 0)) for e in events if e.service.code!='R')
+        target=sum(max(0,r.goal) for r in hours) if all(r.credits_known for r in hours) else None
+        status+=f' | Operativer Bedarf ohne ungeklärte R-Bewertung: {required} min; nicht negatives Arbeitsziel gesamt: '+(f'{target} min.' if target is not None else 'ungeklärt.')
         self.status.setText(status)
 
     def save(self):

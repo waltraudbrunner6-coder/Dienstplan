@@ -121,11 +121,11 @@ class Store:
         self.connection.row_factory = sqlite3.Row
         self.connection.execute("PRAGMA busy_timeout=10000")
         self.connection.execute("PRAGMA foreign_keys=ON")
-        self.connection.execute("PRAGMA journal_mode=WAL")
         version = self.connection.execute("PRAGMA user_version").fetchone()[0]
         if version > SCHEMA_VERSION:
             self.close()
             raise ValidationError("Diese Datendatei stammt aus einer neueren Programmversion.")
+        self.connection.execute("PRAGMA journal_mode=WAL")
         with self.connection:
             # Additive Migration: bestehende JSON-Monatsstände, Kennungen und
             # Dezimalstunden werden nicht neu geschrieben. _decode ergänzt nur

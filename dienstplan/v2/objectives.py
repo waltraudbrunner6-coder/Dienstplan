@@ -76,6 +76,8 @@ def evaluate(inputs,blocks,events,profile):
     all_blocks=tuple({(b.id,b.person_id):b for b in inputs.boundary+blocks}.values())
     hours=hours_rows(inputs.people,all_blocks,inputs.absences,inputs.year,inputs.month,accounts=profile.accounts,
                      target_profile=profile.target_profile,month_profile=profile.month_profile)
+    if any(not r.credits_known for r in hours) and any(f.startswith('hours_') for f in profile.order):
+        raise DomainError('Anrechenbare Urlaubstage sind ungeklärt; Stundenoptimierung benötigt ausdrückliche Gutschrifttage.')
     errors=[_ceil(abs(r.deviation)*profile.scale,max(r.target,profile.minimum_denominator)) for r in hours]
     values['hours_max']=max(errors,default=0);values['hours_spread']=sum(e*e for e in errors)
     targets=share_targets(inputs,events,profile)
@@ -165,6 +167,8 @@ def compile_objectives(inputs,candidates,x,y,model,profile,coverage):
         bound=len(profile.history.violated)+len(wishes)
         values[f'burden/{n}/max']=b.maximum(burdens,bound);values[f'burden/{n}/squares']=sum(squares)
     baseline=hours_rows(inputs.people,inputs.boundary,inputs.absences,inputs.year,inputs.month,accounts=profile.accounts,target_profile=profile.target_profile,month_profile=profile.month_profile)
+    if any(not r.credits_known for r in baseline) and any(f.startswith('hours_') for f in profile.order):
+        raise DomainError('Anrechenbare Urlaubstage sind ungeklärt; Stundenoptimierung benötigt ausdrückliche Gutschrifttage.')
     normalized=[];squares=[];ratio_bounds=[]
     for row in baseline:
         amounts=[(i,sum(q.work_minutes for q in quantities(c) if (q.day.year,q.day.month)==(inputs.year,inputs.month))) for i,c in enumerate(candidates) if c.person_id==row.person_id and c not in inputs.boundary]

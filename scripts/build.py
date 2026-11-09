@@ -78,6 +78,7 @@ def main() -> int:
     result = {
         "version": __version__,
         "platform": platform_name, "architecture": architecture,
+        "os_version": platform.mac_ver()[0] if sys.platform=='darwin' else platform.version(),
         "python": platform.python_version(), "artifact": str(artifact),
         "bytes": byte_count, "mib": round(byte_count / (1024 * 1024), 2),
         "archive": str(archive), "archive_bytes": archive.stat().st_size,

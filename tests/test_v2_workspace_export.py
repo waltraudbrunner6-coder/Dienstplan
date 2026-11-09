@@ -2,6 +2,7 @@ from dataclasses import replace
 from datetime import date
 from fractions import Fraction
 from hashlib import sha256
+from pathlib import Path
 import json
 import zipfile
 
@@ -100,3 +101,38 @@ def test_atomic_export_flush_uses_writable_descriptor_on_all_platforms(tmp_path,
     monkeypatch.setattr(os,'fsync',fsync)
     data,p,old=technical_demo();export_package(tmp_path/'export.zip',data,p,old,data.events)
     assert checked==[True]
+
+
+def test_unspecified_leave_credit_is_unknown_not_confirmed_zero(tmp_path):
+    from dienstplan.v2.entries import Entry
+    from dienstplan.v2.time import Interval
+    from dienstplan.v2.reporting import hours_rows
+    from dienstplan.v2.objectives import evaluate
+    data,p,old=technical_demo()
+    leave=Entry('unknown-credit','A','urlaub',Interval.local('2026-11-23T00:00','2026-11-30T00:00'))
+    data=replace(data,absences=(leave,))
+    rows=hours_rows(data.people,old,data.absences,2026,11,accounts=p.accounts,target_profile='S0',month_profile='M0')
+    assert not rows[0].credits_known and all(r.credits_known for r in rows[1:])
+    with pytest.raises(DomainError,match='ungeklärt'):evaluate(data,old,data.events,p)
+    manifest=export_package(tmp_path/'unknown.zip',data,p,old,data.events)
+    assert manifest['objective_status']=='Urlaubsgutschrifttage ungeklärt' and not manifest['objectives']
+    with zipfile.ZipFile(tmp_path/'unknown.zip') as archive:
+        import csv,io
+        rows=list(csv.DictReader(io.StringIO(archive.read('stunden.csv').decode('utf-8-sig')),delimiter=';'))
+        assert rows[0]['credits']=='null' and rows[0]['projected']=='null' and rows[0]['credits_known']=='false'
+    with V2Store(tmp_path/'unknown.sqlite3',create=True) as store:
+        store.save_workspace(data,p,old,data.events,expected_revision=0)
+        with pytest.raises(DomainError,match='ungeklärt'):
+            store.confirm('bad',data,old,data.events,accounts=p.accounts,wish_policy=p.wish_policy,fairness_policy=p.fairness_policy,
+                          target_profile='S0',month_profile='M0',expected_revision=store.input_revision,synthetic=True)
+        assert not store.confirmations()
+
+
+def test_legacy_app_rejects_v2_before_changing_journal_or_file_bytes(tmp_path):
+    from dienstplan.storage import Store
+    path=tmp_path/'v2.sqlite3'
+    with V2Store(path,create=True) as store:
+        data,p,old=technical_demo();store.save_workspace(data,p,old,data.events,expected_revision=0)
+    before=path.read_bytes()
+    with pytest.raises(ValueError,match='neueren Programmversion'):Store(path)
+    assert path.read_bytes()==before and not Path(str(path)+'-wal').exists()

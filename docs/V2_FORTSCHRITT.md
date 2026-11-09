@@ -283,6 +283,27 @@ fokussierter Editor/Workspace/Persistenzlauf vorher **26 bestanden in 4,95 s**.
 Keine Anforderungen oder Tests gelockert. Nächster nativer Lauf prüft genau den
 folgenden gepushten Commit, Ergebnisse werden anschließend ergänzt.
 
+## Abnahmeprüfung und letzter Schutzsatz
+
+Run `42723146880` auf `1d25a47` ist auf Windows x64 sowie macOS Sequoia ARM64/Intel
+vollständig grün, jeweils inklusive gebautem Programm und Legacy-/V2-Selbsttest.
+Der Windows-Exportfehler ist damit nativ nachgeprüft behoben.
+
+Zusätzliche Abnahmegegenprobe U05: Urlaub ohne ausgewählte Gutschrifttage ist
+verbindliche Abwesenheit mit **ungeklärter** Gutschrift, keine bestätigte Null.
+Anzeige/CSV kennzeichnen unbekannte Werte; Stundenoptimierung und Bestätigung
+werden zurückgestellt. Pläne/physische Mengen bleiben exportierbar. Dies
+entscheidet weder die anrechenbaren Tage F05 noch die Feiertagsregel F04.
+Die Alt-App lehnt Schema 3 jetzt vor der Journalumschaltung ab; eine synthetische
+V2-Datei bleibt dabei bytegleich, ohne neu erzeugtes WAL. Keine echte Datei geändert.
+
+**325 Tests bestanden in 73,36 s**; gezielte abschließende Qt-/Workspace-Prüfung
+**17 bestanden in 3,71 s**. [V2_ABNAHMESTATUS.md](V2_ABNAHMESTATUS.md) ordnet alle
+125 Fälle einzeln zu und präzisiert frühere gruppierte Etappenaussagen. Vollständige
+Fachfunktion/Testprofil, Teilprüfung und noch fehlende Produktintegration sind
+getrennt. Insbesondere ist X04 kein bereits bestandener vollständiger Betriebsmonat.
+Ein abschließender nativer Lauf des folgenden Schutzsatzes wird separat belegt.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits

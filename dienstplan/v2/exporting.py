@@ -45,13 +45,16 @@ def export_package(target,inputs,profile,blocks,events,*,proofs=(),fault=None):
     for name,rows in report_rows.items():
         rows=tuple(rows)
         header=tuple(asdict(rows[0])) if rows else ('person_id',)
-        files[name]=_csv(('revision_id',)+header,[(revision,)+tuple(json.dumps(plain(getattr(r,key)),ensure_ascii=False) for key in header) for r in rows])
+        files[name]=_csv(('revision_id',)+header,[(revision,)+tuple(json.dumps(plain(None if name=='stunden.csv' and not r.credits_known and key in {'credits','goal','projected','deviation','raw_credits'} else getattr(r,key)),ensure_ascii=False) for key in header) for r in rows])
+    unknown_credits=any(not r.credits_known for r in report_rows['stunden.csv'])
     manifest=dict(revision_id=revision,scope=inputs.profile_label,input_fingerprint=inputs.fingerprint,
-                  versions=saved['snapshot']['versions'],objective_profile=plain(profile),objectives=plain(evaluate(inputs,blocks,events,profile)),
-                  proofs=plain(proofs),issues=plain(core.issues+calendar.issues),open_slots=plain(core.open_slots),
+                  versions=saved['snapshot']['versions'],objective_profile=plain(profile),objectives=[] if unknown_credits else plain(evaluate(inputs,blocks,events,profile)),
+                  objective_status='Urlaubsgutschrifttage ungeklärt' if unknown_credits else 'bewertet',
+                  proofs=[] if unknown_credits else plain(proofs),issues=plain(core.issues+calendar.issues),open_slots=plain(core.open_slots),
                   unchecked=list(dict.fromkeys(inputs.unchecked+calendar.unchecked+profile.history.missing)),
                   euro_status='ungeklärt – kein freigegebener KV-/BV-Tarif',
                   files={name:sha256(content).hexdigest() for name,content in files.items()})
+    if unknown_credits:manifest['unchecked'].append('Urlaubsgutschrifttage ungeklärt; keine angenommene Nullgutschrift.')
     files['arbeitsstand.json']=(json.dumps(saved,ensure_ascii=False,indent=2)+'\n').encode('utf-8')
     manifest['files']['arbeitsstand.json']=sha256(files['arbeitsstand.json']).hexdigest()
     files['pruefmanifest.json']=(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode('utf-8')

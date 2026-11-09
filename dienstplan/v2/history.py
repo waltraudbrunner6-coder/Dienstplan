@@ -48,6 +48,8 @@ def confirmation(inputs,blocks,events,*,accounts,wish_policy,fairness_policy,hol
                quantities=plain(tuple(q for q in quantity_rows(all_blocks,holidays) if (q.day.year,q.day.month)==(year,month))),
                unchecked=tuple(dict.fromkeys(inputs.unchecked+calendar.unchecked)),
                quota_reservations={q.id:sorted(e.id for e in events if e.service.code==q.code and q.dates.includes(e.attendance.start_day)) for q in inputs.quotas})
+    if any(not r['credits_known'] for r in facts['hours']):
+        raise DomainError('Urlaubsgutschrifttage sind ungeklärt; keine Bestätigung mit angenommener Nullgutschrift.')
     facts=plain(facts)
     facts['content_fingerprint']=fingerprint(facts)
     return facts

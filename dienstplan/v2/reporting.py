@@ -1,10 +1,12 @@
 """Exakte Prognosemengen und Sollanteile; keine implizite Tarif-/Sollwahl."""
 from dataclasses import dataclass
+from datetime import date
 from fractions import Fraction
 
 from .accounting import MonthAccount,leave_credits,s0_target
 from .errors import DomainError
 from .work import quantities
+from .time import Interval,midnight
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,6 +22,7 @@ class HoursRow:
     deviation: int
     raw_target: Fraction
     raw_credits: Fraction
+    credits_known: bool = True
 
 
 def hours_rows(people,blocks,entries,year,month,*,accounts,target_profile,month_profile):
@@ -30,6 +33,7 @@ def hours_rows(people,blocks,entries,year,month,*,accounts,target_profile,month_
     if len(account_map)!=len(accounts) or set(account_map)!={p.id for p in people}:
         raise DomainError('Für jede Person genau ein ausdrückliches Monatskonto angeben.')
     rows=[];key=f'{year:04d}-{month:02d}'
+    month_span=Interval(midnight(date(year,month,1)),midnight(date(year+int(month==12),month%12+1,1)))
     for p in people:
         account=account_map[p.id];target=s0_target(p.contracts,p.employment,year,month,profile=target_profile)
         credit_days=frozenset(d for e in entries if e.person_id==p.id and e.kind=='urlaub' for d in e.credit_days)
@@ -37,8 +41,9 @@ def hours_rows(people,blocks,entries,year,month,*,accounts,target_profile,month_
         raw_g=credits.raw_minutes if credits else Fraction(0);g=credits.minutes if credits else 0
         work=sum(q.work_minutes for b in blocks if b.person_id==p.id for q in quantities(b) if (q.day.year,q.day.month)==(year,month))
         goal=account.goal(target.minutes,g).raw_minutes
+        known=not any(e.person_id==p.id and e.kind=='urlaub' and not e.credit_days and e.span.overlaps(month_span) for e in entries)
         rows.append(HoursRow(p.id,target.minutes,account.opening_minutes,account.desired_minutes,g,goal,work,
-                             account.projected(target.minutes,work,g),work-goal,target.raw_minutes,raw_g))
+                             account.projected(target.minutes,work,g),work-goal,target.raw_minutes,raw_g,known))
     return tuple(rows)
 
 
