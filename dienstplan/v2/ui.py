@@ -77,6 +77,9 @@ class Workbench(QDialog):
         self.corrections=QTableWidget();import_layout.addWidget(self.corrections)
         self.import_status=QLabel('CSV-Format 2; unzulässige Donnerstagsanteile bleiben bearbeitbar vorgemerkt.');self.import_status.setWordWrap(True);import_layout.addWidget(self.import_status)
         self.active=QTableWidget();import_layout.addWidget(self.active);self.tabs.addTab(import_page,'Urlaub, Wünsche und Korrekturen')
+        active_bar=QHBoxLayout();import_layout.addLayout(active_bar)
+        for text,handler in (('Eintrag manuell vormerken',self.manual_entry),('Aktiven Eintrag bearbeiten',self.edit_entry),('Aktiven Eintrag löschen',self.delete_entry)):
+            button=QPushButton(text);button.clicked.connect(lambda checked=False,f=handler:self.guard(f));active_bar.addWidget(button)
         self.plan=QTableWidget();self.tabs.addTab(self.plan,'Dienstplan')
         self.hours=QTableWidget();self.tabs.addTab(self.hours,'Stundenprognose')
         self.distribution=QTableWidget();self.tabs.addTab(self.distribution,'Schichtverteilung')
@@ -386,20 +389,21 @@ class Workbench(QDialog):
         fields=tuple(dict(self.batch.rows[0].fields)) if self.batch.rows else ()
         self.correction_fields=fields
         self.table(self.corrections,('Zeile',)+fields+('Fehler',),[(r.line,)+tuple(dict(r.fields).get(key,'') for key in fields)+('; '.join(r.errors),) for r in self.batch.rows],True)
-        self.import_status.setText('Korrekturvormerkung – keine aktive Teilübernahme. '+'; '.join(self.batch.errors+self.batch.parse_errors))
+        replacement=self.store.correction_replaces('ui-current')
+        self.import_status.setText('Korrekturvormerkung – keine aktive Teilübernahme. '+(f'Ersetzt nach vollständiger Prüfung: {replacement}. ' if replacement else '')+'; '.join(self.batch.errors+self.batch.parse_errors))
 
     def import_csv(self):
         path,_=QFileDialog.getOpenFileName(self,'CSV-Format 2 vormerken','','CSV (*.csv)')
         if not path:return
         self.batch=preview(Path(path).read_text(encoding='utf-8-sig'),existing=self.inputs.absences+self.store.entries(),budgets=self.budgets(),month=f'{self.inputs.year:04d}-{self.inputs.month:02d}')
-        self.store.save_correction('ui-current',self.batch);self.fill_batch()
+        self.store.save_correction('ui-current',self.batch,replaces='');self.fill_batch()
 
     def promote(self):
         if not self.batch:return
         self.ensure_team_saved()
         for i,row in enumerate(self.batch.rows):
             changes={key:self.corrections.item(i,j+1).text() for j,key in enumerate(self.correction_fields)}
-            self.batch=correct(self.batch,row.line,changes,existing=self.inputs.absences+self.store.entries(),budgets=self.budgets(),month=f'{self.inputs.year:04d}-{self.inputs.month:02d}')
+            self.batch=correct(self.batch,row.line,changes,existing=self.store.correction_existing('ui-current',self.inputs.absences),budgets=self.budgets(),month=f'{self.inputs.year:04d}-{self.inputs.month:02d}')
         self.store.save_correction('ui-current',self.batch);self.fill_batch()
         if not self.batch.ready:raise ValueError('Stapel bleibt zur Korrektur vorgemerkt; Fehler bitte vollständig beheben.')
         if not self.clear_plan(confirm_only=True):return
@@ -409,6 +413,45 @@ class Workbench(QDialog):
 
     def discard(self):
         self.store.discard_correction('ui-current');self.batch=None;self.fill_batch();self.import_status.setText('Vormerkung verworfen. Aktive Eingaben unverändert.')
+
+    def selected_entry(self):
+        row=self.active.currentRow()
+        if row<0:raise ValueError('Zuerst einen aktiven Eintrag wählen.')
+        id=self.active.item(row,0).text()
+        return next(e for e in self.inputs.absences if e.id==id)
+
+    def edit_entry(self):self.manual_entry(self.selected_entry())
+
+    def manual_entry(self,old=None):
+        import csv,io,uuid
+        from .entries import HEADER
+        self.ensure_team_saved()
+        dialog=QDialog(self);dialog.setWindowTitle('Urlaub/Freiwunsch zur vollständigen Prüfung vormerken');box=QVBoxLayout(dialog)
+        person=QComboBox()
+        for p in self.inputs.people:person.addItem(f'{p.name} ({p.id})',p.id)
+        if old:person.setCurrentIndex(person.findData(old.person_id));person.setEnabled(False)
+        kind=QComboBox();kind.addItems(['urlaub','freiwunschtag','wochenendwunsch']);kind.setCurrentText(old.kind if old else 'freiwunschtag')
+        start=QLineEdit(old.span.start.astimezone(vienna()).isoformat() if old else '')
+        end=QLineEdit(old.span.end.astimezone(vienna()).isoformat() if old else '')
+        credits=QLineEdit('|'.join(map(str,sorted(old.credit_days))) if old else '')
+        comment=QLineEdit(old.comment if old else '')
+        for label,widget in (('Person',person),('Art',kind),('Beginn ISO, z. B. 2026-11-11T00:00',start),('Ende ausgeschlossen, Datum und Uhrzeit',end),('Nur Urlaub: ausdrücklich anrechenbare Daten YYYY-MM-DD mit | trennen',credits),('Kommentar',comment)):
+            box.addWidget(QLabel(label));box.addWidget(widget)
+        save=QPushButton('Zur Korrektur/Übernahme vormerken');box.addWidget(save)
+        def stage():
+            output=io.StringIO();writer=csv.writer(output,delimiter=';');writer.writerow(HEADER)
+            writer.writerow(('2',person.currentData(),str(uuid.uuid4()),kind.currentText(),start.text(),end.text(),credits.text(),comment.text()))
+            existing=tuple(e for e in self.inputs.absences+self.store.entries() if old is None or e.id!=old.id)
+            batch=preview(output.getvalue(),existing=existing,budgets=self.budgets(),month=f'{self.inputs.year:04d}-{self.inputs.month:02d}')
+            self.store.save_correction('ui-current',batch,replaces=old.id if old else '')
+            self.batch=batch;self.fill_batch();dialog.accept()
+        save.clicked.connect(lambda:self.guard(stage));dialog.resize(720,450);dialog.exec()
+
+    def delete_entry(self):
+        self.ensure_team_saved();entry=self.selected_entry()
+        if QMessageBox.question(self,'Aktiven Eintrag löschen','Diesen aktiven Eintrag löschen? Bestätigte historische Snapshots bleiben erhalten. Der aktuelle Entwurf wird verworfen.')!=QMessageBox.StandardButton.Yes:return
+        updated=self.store.delete_entry(entry.id,self.inputs,self.profile,expected_revision=self.store.input_revision)
+        self.inputs=updated;self.blocks=();self.events=None;self.proofs=();self.dirty();self.fill()
 
     def export(self):
         self.ensure_team_saved()

@@ -4,7 +4,7 @@ from fractions import Fraction
 
 import pytest
 from PySide6.QtCore import QEventLoop,QTimer
-from PySide6.QtWidgets import QApplication,QFileDialog,QMessageBox,QInputDialog,QDialog,QTableWidget,QPushButton
+from PySide6.QtWidgets import QApplication,QFileDialog,QMessageBox,QInputDialog,QDialog,QTableWidget,QPushButton,QLineEdit
 
 from dienstplan.v2.entries import preview
 from dienstplan.v2.errors import DomainError
@@ -107,3 +107,27 @@ def test_person_contract_editor_and_following_month_use_confirmed_facts(workbenc
     w.person_details()
     assert w.inputs.people[0].contracts.versions[0].weekly_hours==Fraction(297,8)
     assert w.store.load_workspace(2026,12)[0]==w.inputs
+
+
+def test_manual_wish_edit_stays_staged_then_replaces_without_double_budget(workbench,monkeypatch):
+    w=workbench
+    def stage_dates(start,end):
+        def edit(dialog):
+            lines=dialog.findChildren(QLineEdit);lines[0].setText(start);lines[1].setText(end)
+            next(b for b in dialog.findChildren(QPushButton) if b.text()=='Zur Korrektur/Übernahme vormerken').click()
+            return 1
+        monkeypatch.setattr(QDialog,'exec',edit)
+    w.day_budget.setValue(1)
+    stage_dates('2026-11-10T00:00','2026-11-11T00:00');w.manual_entry();w.promote()
+    old=w.inputs.absences[0];w.active.setCurrentCell(0,0)
+    stage_dates('2026-11-12T00:00','2026-11-13T00:00');w.edit_entry()
+    assert w.inputs.absences==(old,) and not w.batch.ready
+    assert w.store.correction_replaces('ui-current')==old.id
+    fields=w.correction_fields
+    w.corrections.item(0,fields.index('von')+1).setText('2026-11-11T00:00')
+    w.corrections.item(0,fields.index('bis')+1).setText('2026-11-12T00:00')
+    w.promote()
+    assert len(w.store.entries())==len(w.inputs.absences)==1 and w.inputs.absences[0].id!=old.id
+    assert w.inputs.absences[0].span.start_day.isoformat()=='2026-11-11'
+    w.active.setCurrentCell(0,0);w.delete_entry()
+    assert not w.inputs.absences and not w.store.entries() and not w.store.load_workspace(2026,11)[0].absences

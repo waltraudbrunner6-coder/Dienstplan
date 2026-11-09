@@ -156,23 +156,33 @@ class V2Store:
     def entries(self):
         return tuple(restore_entry(json.loads(r[0])) for r in self.connection.execute('SELECT payload FROM v2_entries ORDER BY id'))
 
-    def save_correction(self,id,batch):
+    def save_correction(self,id,batch,*,replaces=None):
+        if replaces is None:replaces=self.correction_replaces(id)
         value=dict(original_text=batch.original_text,parse_errors=batch.parse_errors,
-                   rows=[dict(line=r.line,fields=r.fields) for r in batch.rows])
+                   rows=[dict(line=r.line,fields=r.fields) for r in batch.rows],replaces=replaces or None)
         with self.transaction():
             self.connection.execute('INSERT INTO v2_corrections VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload',(id,encoded(value)))
+
+    def correction_replaces(self,id):
+        row=self.connection.execute('SELECT payload FROM v2_corrections WHERE id=?',(id,)).fetchone()
+        return json.loads(row[0]).get('replaces') if row else None
+
+    def correction_existing(self,id,additional=()):
+        old=self.correction_replaces(id)
+        return tuple(e for e in self.entries()+tuple(additional) if e.id!=old)
 
     def load_correction(self,id,*,budgets,month,additional_existing=()):
         row=self.connection.execute('SELECT payload FROM v2_corrections WHERE id=?',(id,)).fetchone()
         if not row:raise DomainError("Korrekturstapel fehlt oder wurde bereits übernommen.")
         value=json.loads(row[0]);rows=tuple(DraftRow(r['line'],tuple(tuple(x) for x in r['fields'])) for r in value['rows'])
-        return _check_rows(value['original_text'],rows,self.entries()+tuple(additional_existing),budgets,month,tuple(value['parse_errors']))
+        return _check_rows(value['original_text'],rows,self.correction_existing(id,additional_existing),budgets,month,tuple(value['parse_errors']))
 
     def discard_correction(self,id):
         with self.transaction():self.connection.execute('DELETE FROM v2_corrections WHERE id=?',(id,))
 
     def promote(self,id,*,budgets,month,expected_revision):
         with self.transaction():
+            if self.correction_replaces(id):raise DomainError('Eintragsersetzung benötigt den geprüften Arbeitsstand und apply_correction.')
             if expected_revision!=self.input_revision:
                 raise DomainError("Eingaben wurden geändert; Stapel erneut prüfen.")
             batch=self.load_correction(id,budgets=budgets,month=month)
@@ -239,14 +249,36 @@ class V2Store:
             if self.connection.execute('SELECT 1 FROM v2_meta WHERE key=?',('confirmation:'+month,)).fetchone():raise DomainError('Bestätigter Testmonat bleibt geschützt.')
             batch=self.load_correction(id,budgets=budgets,month=month,additional_existing=inputs.absences)
             entries=batch.promote()
+            replaces=self.correction_replaces(id)
+            if replaces:
+                old=next((e for e in inputs.absences if e.id==replaces),None)
+                if old is None or len(entries)!=1 or entries[0].person_id!=old.person_id:
+                    raise DomainError('Ersetzter Eintrag fehlt oder Person wurde geändert; Korrektur erneut vormerken.')
+                self.connection.execute('DELETE FROM v2_entries WHERE id=?',(replaces,))
             for entry in entries:
                 self.connection.execute('INSERT INTO v2_entries VALUES(?,?,?) ON CONFLICT(id) DO NOTHING',(entry.id,encoded(entry.identity),encoded(entry_payload(entry))))
-            merged={e.identity:e for e in inputs.absences+entries}
+            merged={e.identity:e for e in tuple(e for e in inputs.absences if e.id!=replaces)+entries}
             updated=replace(inputs,absences=tuple(merged.values()))
             value=workspace(updated,profile);revision_id='workspace/'+value['revision_id']
             self._immutable('v2_revisions',revision_id,encoded(value))
             self.connection.execute('INSERT INTO v2_meta VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',('workspace:'+month,revision_id))
             self.connection.execute('DELETE FROM v2_corrections WHERE id=?',(id,))
+            self.connection.execute("UPDATE v2_meta SET value=CAST(value AS INTEGER)+1 WHERE key='input_revision'")
+            return updated
+
+    def delete_entry(self,id,inputs,profile,*,expected_revision):
+        from dataclasses import replace
+        from .codec import workspace
+        month=f'{inputs.year:04d}-{inputs.month:02d}'
+        with self.transaction():
+            if self.input_revision!=expected_revision:raise DomainError('Eingaben geändert; aktiven Eintrag erneut laden.')
+            if self.connection.execute('SELECT 1 FROM v2_meta WHERE key=?',('confirmation:'+month,)).fetchone():raise DomainError('Bestätigter Testmonat bleibt geschützt.')
+            if not any(e.id==id for e in inputs.absences):raise DomainError('Aktiver Eintrag fehlt.')
+            updated=replace(inputs,absences=tuple(e for e in inputs.absences if e.id!=id))
+            value=workspace(updated,profile);revision='workspace/'+value['revision_id']
+            self.connection.execute('DELETE FROM v2_entries WHERE id=?',(id,))
+            self._immutable('v2_revisions',revision,encoded(value))
+            self.connection.execute('INSERT INTO v2_meta VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',('workspace:'+month,revision))
             self.connection.execute("UPDATE v2_meta SET value=CAST(value AS INTEGER)+1 WHERE key='input_revision'")
             return updated
 

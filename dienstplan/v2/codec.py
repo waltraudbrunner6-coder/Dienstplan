@@ -56,6 +56,11 @@ def objective_profile(v):
 
 def workspace(inputs,profile,blocks=(),events=None):
     blocks=tuple(blocks);events=None if events is None else tuple(events)
+    from .reporting import hours_rows
+    # Auch reine Eingaben benötigen gültige Konten/Sollverträge und zulässige
+    # explizite Urlaubsgutschriften, bevor ein Import aktiv werden darf.
+    hours_rows(inputs.people,tuple({(b.id,b.person_id):b for b in inputs.boundary+blocks}.values()),inputs.absences,
+               inputs.year,inputs.month,accounts=profile.accounts,target_profile=profile.target_profile,month_profile=profile.month_profile)
     if events is not None:
         core,calendar=verify(inputs,blocks,active_events=events)
         if not core.hard_ok or not calendar.hard_ok:raise DomainError('; '.join(i.message for i in core.issues+calendar.issues))

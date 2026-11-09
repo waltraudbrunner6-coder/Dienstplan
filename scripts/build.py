@@ -89,6 +89,10 @@ def main() -> int:
     )
     print(f"Erstellt: {artifact}\nUnkomprimierte Paketgröße: {result['mib']:.2f} MiB ({byte_count} Bytes)"
           f"\nArchiv: {archive} ({result['archive_mib']:.2f} MiB)")
+    if os.environ.get('GITHUB_ACTIONS')=='true':
+        # Auch ohne Zugriff auf den externen Log-/Artefaktspeicher aus der
+        # GitHub-API ablesbare tatsächliche Messwerte, keine Größenprognose.
+        print('::notice title=Gemessene Desktop-Paketgröße::'+json.dumps(result,ensure_ascii=False).replace('%','%25'))
     return 0
 
 

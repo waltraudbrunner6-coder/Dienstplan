@@ -74,3 +74,29 @@ def test_export_mid_write_failure_publishes_nothing_and_cleans_temporary_files(t
     def fail(name):raise OSError('Test: Medium voll')
     with pytest.raises(OSError,match='Medium voll'):export_package(tmp_path/'export.zip',data,p,old,data.events,fault=fail)
     assert list(tmp_path.iterdir())==[]
+
+
+def test_invalid_credit_cannot_be_promoted_even_when_csv_structure_is_valid(tmp_path):
+    from dienstplan.v2.entries import preview
+    data,p,old=technical_demo()
+    text='format_version;person_id;entry_id;typ;von;bis;gutschrifttage;kommentar\n2;A;vac;urlaub;2025-11-10T00:00;2025-11-11T00:00;2025-11-10;vor Beschäftigung\n'
+    batch=preview(text,existing=(),budgets={},month='2026-11')
+    assert batch.ready
+    with V2Store(tmp_path/'test.sqlite3',create=True) as store:
+        store.save_correction('invalid-credit',batch)
+        with pytest.raises(DomainError,match='Beschäftigung'):
+            store.apply_correction('invalid-credit',data,p,budgets={},expected_revision=0)
+        assert store.input_revision==0 and not store.entries()
+        assert store.load_correction('invalid-credit',budgets={},month='2026-11').ready
+
+
+def test_atomic_export_flush_uses_writable_descriptor_on_all_platforms(tmp_path,monkeypatch):
+    import os
+    original=os.fsync;checked=[]
+    def fsync(fd):
+        # Auch auf Linux die Windows-Voraussetzung erzwingen: dieser Handle
+        # muss schreibbar sein. Der Nullbyte-Schreibaufruf verändert die ZIP nicht.
+        assert os.write(fd,b'')==0;checked.append(True);original(fd)
+    monkeypatch.setattr(os,'fsync',fsync)
+    data,p,old=technical_demo();export_package(tmp_path/'export.zip',data,p,old,data.events)
+    assert checked==[True]

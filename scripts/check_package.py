@@ -51,6 +51,8 @@ def check_v2_package(executable: Path) -> int:
         valid=(values.get('selbsttest')=='bestanden' and values.get('personen')==12 and values.get('zuteilungen')==8
                and all(values.get(key) is True for key in ('dst','solver_pruefer','sqlite','exportpaket','qt')))
         if result.returncode or not valid:error_annotation(values.get('details') or 'V2-Paketprüfung unvollständig/fehlgeschlagen.')
+        elif os.environ.get('GITHUB_ACTIONS')=='true':
+            print('::notice title=V2-Paketprüfung bestanden::'+json.dumps(values,ensure_ascii=False).replace('%','%25'))
         return result.returncode or (0 if valid else 1)
 
 

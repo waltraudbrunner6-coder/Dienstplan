@@ -13,7 +13,7 @@ def main() -> int:
     if result.returncode and report.exists():
         for case in ET.parse(report).iter("testcase"):
             for failure in list(case.findall("failure")) + list(case.findall("error")):
-                message = f"{case.get('classname')}::{case.get('name')}\n{failure.text or failure.get('message', '')}"
+                message = f"{case.get('classname')}::{case.get('name')}\n{failure.get('message', '')}\n{failure.text or ''}"
                 escaped = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
                 print("::error title=Automatisierter Regressionstest fehlgeschlagen::" + escaped)
     return result.returncode

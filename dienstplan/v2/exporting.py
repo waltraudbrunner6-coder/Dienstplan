@@ -61,7 +61,8 @@ def export_package(target,inputs,profile,blocks,events,*,proofs=(),fault=None):
             for name,content in sorted(files.items()):
                 archive.writestr(name,content)
                 if fault:fault(name)
-        with open(temporary,'rb') as stream:os.fsync(stream.fileno())
+        # Windows _commit/fsync benötigt einen schreibbar geöffneten Handle.
+        with open(temporary,'r+b') as stream:os.fsync(stream.fileno())
         os.link(temporary,target)  # atomar, fremdes Ziel niemals überschreiben
     finally:Path(temporary).unlink(missing_ok=True)
     return manifest

@@ -239,8 +239,8 @@ Gesamtlauf: **317 bestanden in 72,89 s**. X01–X03 sind für den ausdrücklich 
 Testbereich abgedeckt, kein fertiger produktiver Konfigurationsablauf. X04 teilweise:
 Monatswechsel/Prognosesalden/Historie geprüft, noch keine vollständige
 R-/Randwochen-/Urlaubsintegration oder betriebliche Vollmonatsmachbarkeit.
-Ein vollständiger aktiver Abwesenheitseditor, Bestätigungsaufhebung und die
-produktive Profilführung bleiben offen; CSV-Korrektur ist funktional angebunden.
+Bestätigungsaufhebung und die produktive Profilführung bleiben offen.
+Der aktive Abwesenheitseditor wurde im nachfolgenden Änderungssatz ergänzt.
 
 ## F2 – Paketierter Selbsttest und native Prüfabläufe
 
@@ -259,6 +259,29 @@ Keine Windows-/macOS-Abnahme aus diesen Linux-Ergebnissen abgeleitet.
 Native Actions-Läufe werden nach dem Push gestartet und anschließend separat
 mit tatsächlichem Commit/Architektur/Ergebnis dokumentiert. X05 bleibt bis zu
 diesen Prüfungen und manueller Offline-/Signierungsabnahme teilweise offen.
+
+## Nachprüfung: aktive Einträge und Windows-Export
+
+Manuelle Erfassung/Bearbeitung/Löschung von Urlaub und Wünschen ist jetzt im
+Prüfbereich angeschlossen. Ungültige Bearbeitung erhält den alten aktiven Eintrag
+und die editierbare Vormerkung. Ersetzung prüft das Budget ohne Doppelverbrauch
+und aktualisiert Eintrag/Workspace/Vormerkung atomar. Bestätigte Snapshots bleiben
+geschützt. Beschäftigung und Vertragsgrundlage expliziter Gutschriften werden
+auch bei reinen Eingaben vor Aktivierung geprüft; Fehlimport rollt vollständig zurück.
+
+Native Erstprüfung von `4a04315`, Run `42722171266`: beide macOS-Sequoia-Builds
+bestanden einschließlich Paket-/V2-Selbsttest; Windows scheiterte in zwei
+ZIP-Exporttests. Der Flush verwendet jetzt ausdrücklich einen schreibbar geöffneten
+Handle, wie Windows fsync/_commit verlangt. Regression erzwingt diese Voraussetzung
+auch auf Linux. Fehlerursache steht künftig vor dem langen Traceback in der
+CI-Annotation. Native Größen/V2-Nachweise werden als API-lesbare Notices ausgegeben,
+weil der externe Blob-Logspeicher hier mit HTTP 403 gesperrt ist; GitHub-API-Checks
+und Annotationen sind regulär erreichbar.
+
+Abschluss vor erneutem nativen Lauf: **323 Tests bestanden in 70,62 s**;
+fokussierter Editor/Workspace/Persistenzlauf vorher **26 bestanden in 4,95 s**.
+Keine Anforderungen oder Tests gelockert. Nächster nativer Lauf prüft genau den
+folgenden gepushten Commit, Ergebnisse werden anschließend ergänzt.
 
 ## Offene Fachentscheidungen und Grenzen
 

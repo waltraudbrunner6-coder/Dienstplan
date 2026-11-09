@@ -18,11 +18,16 @@ keine produktive V2-Planung frei und öffnet die normale Benutzerdatenbank nicht
    Offset angeben. W16 braucht einen Ersatzgrund. R erhält ohne geklärtes Profil
    keine Arbeitskandidaten. Die gesamten Kataloghäufigkeiten sind in diesem
    kleinen Prüfdatensatz nicht als Betriebsmonat freigegeben.
-4. CSV-Format 2 aus den Fachregeln importieren. Ein fehlerhafter Stapel bleibt
+4. Urlaub/Wünsche manuell vormerken oder CSV-Format 2 aus den Fachregeln importieren. Ein fehlerhafter Stapel bleibt
    vollständig sichtbar/bearbeitbar. Änderungen in den Spalten vornehmen und
    den gesamten Stapel erneut prüfen. Erst die vollständige erfolgreiche Übernahme
    aktiviert Einträge. Die daneben angezeigten Wunschbudgets sind ausdrückliche
    Testeingaben. Bestehende bestätigte Vergangenheit bleibt unverändert.
+   Aktive Einträge lassen sich über die eigene Schaltfläche bearbeiten oder
+   löschen. Eine Bearbeitung erhält den bisherigen aktiven Eintrag, bis die
+   vollständige korrigierte Ersetzung atomar gelingt. Der alte Eintrag verbraucht
+   während dieser Prüfung nicht zusätzlich das Wunschbudget. Ungültige
+   Donnerstagsänderungen bleiben zur Korrektur vorgemerkt, der alte Stand aktiv.
 5. **Testplan berechnen** startet die Optimierung im Hintergrund. **Abbrechen**
    erhält den besten gültigen Zwischenstand. Änderungen während des Laufs machen
    dessen Ergebnis veraltet. **Ergebnis übernehmen** übernimmt ausdrücklich den
@@ -59,9 +64,9 @@ Optimum unter unbewiesenem Präfix ist bedingt, kein Gesamtoptimum. Bei manuelle
 die zuerst untersuchte Skala 100 war zu grob und wurde vor Auslieferung korrigiert.
 
 Das Fenster bietet noch keine vollständige produktive Monatskonfiguration aller
-Wochen-/Reserve-/Tarifprofile, keine Aufhebung bestätigter Teststände und keinen
-vollständigen aktiven Abwesenheitseditor. Einzelne neue/zu korrigierende Einträge
-können über denselben CSV-Stapel erfasst werden. Bekannte Randtage sind Teil des
+Wochen-/Reserve-/Tarifprofile und keine Aufhebung bestätigter Teststände.
+Manuelle Einträge und CSV verwenden denselben vollständigen Korrekturstapel.
+Bekannte Randtage sind Teil des
 gespeicherten Testprofils; fehlende Randdaten werden nicht als Freizeit angenommen.
 Die offenen F01–F14 bleiben verbindlich sichtbar. Linux-Qt-Tests sind kein nativer
 Windows-/macOS-Sequoia-Nachweis.
