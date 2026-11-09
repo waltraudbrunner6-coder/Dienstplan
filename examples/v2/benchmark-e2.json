@@ -1,0 +1,1935 @@
+{
+  "scope": "Synthetischer Vier-Termine-Test; kein vollständiger Betriebsmonat",
+  "python": "3.12.14",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "processor": "",
+  "ortools": "9.15.6755",
+  "seed": 202611,
+  "workers": 1,
+  "input_fingerprint": "4c225d4fba0047b18bf38fadf1d392898b4f1a26b460b4d362f14ba1d3b2764f",
+  "profile_fingerprint": "4d3f6d31e9c7f48527aa8c2030d97a291dc47ea3312983666e9b418f57902549",
+  "starting_objectives": [
+    [
+      "coverage",
+      0
+    ],
+    [
+      "wishes",
+      0
+    ],
+    [
+      "hours_max",
+      1000
+    ],
+    [
+      "hours_spread",
+      11039682
+    ],
+    [
+      "shifts",
+      6106666752
+    ],
+    [
+      "late_break",
+      0
+    ]
+  ],
+  "runs": [
+    {
+      "limit_seconds": "5",
+      "elapsed_seconds": "5.042373966000014",
+      "status": "conditional",
+      "open_slots": [],
+      "objectives": [
+        [
+          "coverage",
+          0
+        ],
+        [
+          "wishes",
+          0
+        ],
+        [
+          "hours_max",
+          1000
+        ],
+        [
+          "hours_spread",
+          10934088
+        ],
+        [
+          "shifts",
+          610666752
+        ],
+        [
+          "late_break",
+          0
+        ]
+      ],
+      "proofs": [
+        {
+          "name": "coverage",
+          "value": 0,
+          "proven": true,
+          "prefix": [],
+          "conditional": false
+        },
+        {
+          "name": "wishes",
+          "value": 0,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ]
+          ],
+          "conditional": false
+        },
+        {
+          "name": "hours_max",
+          "value": 1000,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ]
+          ],
+          "conditional": false
+        },
+        {
+          "name": "hours_spread",
+          "value": 10934088,
+          "proven": false,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ],
+            [
+              "hours_max",
+              1000
+            ]
+          ],
+          "conditional": false
+        },
+        {
+          "name": "shifts",
+          "value": 610666752,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ],
+            [
+              "hours_max",
+              1000
+            ],
+            [
+              "hours_spread",
+              10934088
+            ]
+          ],
+          "conditional": true
+        },
+        {
+          "name": "late_break",
+          "value": 0,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ],
+            [
+              "hours_max",
+              1000
+            ],
+            [
+              "hours_spread",
+              10934088
+            ],
+            [
+              "shifts",
+              610666752
+            ]
+          ],
+          "conditional": true
+        }
+      ],
+      "global_optimal": false,
+      "assignments": [
+        {
+          "id": "2026-11-02/WL",
+          "person_id": "B",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-02T17:00:00+00:00",
+            "end": "2026-11-03T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-02T20:00:00+00:00",
+              "end": "2026-11-02T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-02/WL",
+          "person_id": "E",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-02T17:00:00+00:00",
+            "end": "2026-11-03T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-02T20:00:00+00:00",
+              "end": "2026-11-02T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-04/WL",
+          "person_id": "F",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-04T17:00:00+00:00",
+            "end": "2026-11-05T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-04T20:00:00+00:00",
+              "end": "2026-11-04T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-04/WL",
+          "person_id": "L",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-04T17:00:00+00:00",
+            "end": "2026-11-05T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-04T20:00:00+00:00",
+              "end": "2026-11-04T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-09/WL",
+          "person_id": "J",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-09T17:00:00+00:00",
+            "end": "2026-11-10T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-09T20:00:00+00:00",
+              "end": "2026-11-09T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-09/WL",
+          "person_id": "K",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-09T17:00:00+00:00",
+            "end": "2026-11-10T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-09T20:00:00+00:00",
+              "end": "2026-11-09T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-11/WL",
+          "person_id": "A",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-11T17:00:00+00:00",
+            "end": "2026-11-12T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-11T20:00:00+00:00",
+              "end": "2026-11-11T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-11/WL",
+          "person_id": "I",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-11T17:00:00+00:00",
+            "end": "2026-11-12T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-11T20:00:00+00:00",
+              "end": "2026-11-11T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        }
+      ],
+      "quantities": [
+        {
+          "person_id": "A",
+          "day": "2026-11-11",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "A",
+          "day": "2026-11-12",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "B",
+          "day": "2026-11-02",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "B",
+          "day": "2026-11-03",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "E",
+          "day": "2026-11-02",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "E",
+          "day": "2026-11-03",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "F",
+          "day": "2026-11-04",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "F",
+          "day": "2026-11-05",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "I",
+          "day": "2026-11-11",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "I",
+          "day": "2026-11-12",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "J",
+          "day": "2026-11-09",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "J",
+          "day": "2026-11-10",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "K",
+          "day": "2026-11-09",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "K",
+          "day": "2026-11-10",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "L",
+          "day": "2026-11-04",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "L",
+          "day": "2026-11-05",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        }
+      ],
+      "hours": [
+        {
+          "person_id": "A",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "B",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "C",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "D",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "E",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "F",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "G",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "H",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "I",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "J",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "K",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "L",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        }
+      ]
+    },
+    {
+      "limit_seconds": "20",
+      "elapsed_seconds": "9.340829654000117",
+      "status": "conditional",
+      "open_slots": [],
+      "objectives": [
+        [
+          "coverage",
+          0
+        ],
+        [
+          "wishes",
+          0
+        ],
+        [
+          "hours_max",
+          1000
+        ],
+        [
+          "hours_spread",
+          10934088
+        ],
+        [
+          "shifts",
+          610666752
+        ],
+        [
+          "late_break",
+          0
+        ]
+      ],
+      "proofs": [
+        {
+          "name": "coverage",
+          "value": 0,
+          "proven": true,
+          "prefix": [],
+          "conditional": false
+        },
+        {
+          "name": "wishes",
+          "value": 0,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ]
+          ],
+          "conditional": false
+        },
+        {
+          "name": "hours_max",
+          "value": 1000,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ]
+          ],
+          "conditional": false
+        },
+        {
+          "name": "hours_spread",
+          "value": 10934088,
+          "proven": false,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ],
+            [
+              "hours_max",
+              1000
+            ]
+          ],
+          "conditional": false
+        },
+        {
+          "name": "shifts",
+          "value": 610666752,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ],
+            [
+              "hours_max",
+              1000
+            ],
+            [
+              "hours_spread",
+              10934088
+            ]
+          ],
+          "conditional": true
+        },
+        {
+          "name": "late_break",
+          "value": 0,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ],
+            [
+              "hours_max",
+              1000
+            ],
+            [
+              "hours_spread",
+              10934088
+            ],
+            [
+              "shifts",
+              610666752
+            ]
+          ],
+          "conditional": true
+        }
+      ],
+      "global_optimal": false,
+      "assignments": [
+        {
+          "id": "2026-11-02/WL",
+          "person_id": "B",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-02T17:00:00+00:00",
+            "end": "2026-11-03T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-02T20:00:00+00:00",
+              "end": "2026-11-02T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-02/WL",
+          "person_id": "E",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-02T17:00:00+00:00",
+            "end": "2026-11-03T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-02T20:00:00+00:00",
+              "end": "2026-11-02T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-04/WL",
+          "person_id": "F",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-04T17:00:00+00:00",
+            "end": "2026-11-05T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-04T20:00:00+00:00",
+              "end": "2026-11-04T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-04/WL",
+          "person_id": "L",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-04T17:00:00+00:00",
+            "end": "2026-11-05T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-04T20:00:00+00:00",
+              "end": "2026-11-04T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-09/WL",
+          "person_id": "J",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-09T17:00:00+00:00",
+            "end": "2026-11-10T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-09T20:00:00+00:00",
+              "end": "2026-11-09T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-09/WL",
+          "person_id": "K",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-09T17:00:00+00:00",
+            "end": "2026-11-10T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-09T20:00:00+00:00",
+              "end": "2026-11-09T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-11/WL",
+          "person_id": "A",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-11T17:00:00+00:00",
+            "end": "2026-11-12T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-11T20:00:00+00:00",
+              "end": "2026-11-11T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-11/WL",
+          "person_id": "I",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-11T17:00:00+00:00",
+            "end": "2026-11-12T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-11T20:00:00+00:00",
+              "end": "2026-11-11T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        }
+      ],
+      "quantities": [
+        {
+          "person_id": "A",
+          "day": "2026-11-11",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "A",
+          "day": "2026-11-12",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "B",
+          "day": "2026-11-02",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "B",
+          "day": "2026-11-03",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "E",
+          "day": "2026-11-02",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "E",
+          "day": "2026-11-03",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "F",
+          "day": "2026-11-04",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "F",
+          "day": "2026-11-05",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "I",
+          "day": "2026-11-11",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "I",
+          "day": "2026-11-12",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "J",
+          "day": "2026-11-09",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "J",
+          "day": "2026-11-10",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "K",
+          "day": "2026-11-09",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "K",
+          "day": "2026-11-10",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "L",
+          "day": "2026-11-04",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "L",
+          "day": "2026-11-05",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        }
+      ],
+      "hours": [
+        {
+          "person_id": "A",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "B",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "C",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "D",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "E",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "F",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "G",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "H",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "I",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "J",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "K",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "L",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        }
+      ]
+    },
+    {
+      "limit_seconds": "60",
+      "elapsed_seconds": "23.868879312998615",
+      "status": "conditional",
+      "open_slots": [],
+      "objectives": [
+        [
+          "coverage",
+          0
+        ],
+        [
+          "wishes",
+          0
+        ],
+        [
+          "hours_max",
+          1000
+        ],
+        [
+          "hours_spread",
+          10934088
+        ],
+        [
+          "shifts",
+          610666752
+        ],
+        [
+          "late_break",
+          0
+        ]
+      ],
+      "proofs": [
+        {
+          "name": "coverage",
+          "value": 0,
+          "proven": true,
+          "prefix": [],
+          "conditional": false
+        },
+        {
+          "name": "wishes",
+          "value": 0,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ]
+          ],
+          "conditional": false
+        },
+        {
+          "name": "hours_max",
+          "value": 1000,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ]
+          ],
+          "conditional": false
+        },
+        {
+          "name": "hours_spread",
+          "value": 10934088,
+          "proven": false,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ],
+            [
+              "hours_max",
+              1000
+            ]
+          ],
+          "conditional": false
+        },
+        {
+          "name": "shifts",
+          "value": 610666752,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ],
+            [
+              "hours_max",
+              1000
+            ],
+            [
+              "hours_spread",
+              10934088
+            ]
+          ],
+          "conditional": true
+        },
+        {
+          "name": "late_break",
+          "value": 0,
+          "proven": true,
+          "prefix": [
+            [
+              "coverage",
+              0
+            ],
+            [
+              "wishes",
+              0
+            ],
+            [
+              "hours_max",
+              1000
+            ],
+            [
+              "hours_spread",
+              10934088
+            ],
+            [
+              "shifts",
+              610666752
+            ]
+          ],
+          "conditional": true
+        }
+      ],
+      "global_optimal": false,
+      "assignments": [
+        {
+          "id": "2026-11-02/WL",
+          "person_id": "B",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-02T17:00:00+00:00",
+            "end": "2026-11-03T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-02T20:00:00+00:00",
+              "end": "2026-11-02T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-02/WL",
+          "person_id": "E",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-02T17:00:00+00:00",
+            "end": "2026-11-03T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-02T20:00:00+00:00",
+              "end": "2026-11-02T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-04/WL",
+          "person_id": "F",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-04T17:00:00+00:00",
+            "end": "2026-11-05T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-04T20:00:00+00:00",
+              "end": "2026-11-04T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-04/WL",
+          "person_id": "L",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-04T17:00:00+00:00",
+            "end": "2026-11-05T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-04T20:00:00+00:00",
+              "end": "2026-11-04T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-09/WL",
+          "person_id": "J",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-09T17:00:00+00:00",
+            "end": "2026-11-10T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-09T20:00:00+00:00",
+              "end": "2026-11-09T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-09/WL",
+          "person_id": "K",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-09T17:00:00+00:00",
+            "end": "2026-11-10T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-09T20:00:00+00:00",
+              "end": "2026-11-09T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-11/WL",
+          "person_id": "A",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-11T17:00:00+00:00",
+            "end": "2026-11-12T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-11T20:00:00+00:00",
+              "end": "2026-11-11T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        },
+        {
+          "id": "2026-11-11/WL",
+          "person_id": "I",
+          "code": "WL",
+          "attendance": {
+            "start": "2026-11-11T17:00:00+00:00",
+            "end": "2026-11-12T01:00:00+00:00"
+          },
+          "breaks": [
+            {
+              "start": "2026-11-11T20:00:00+00:00",
+              "end": "2026-11-11T20:30:00+00:00"
+            }
+          ],
+          "protected": []
+        }
+      ],
+      "quantities": [
+        {
+          "person_id": "A",
+          "day": "2026-11-11",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "A",
+          "day": "2026-11-12",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "B",
+          "day": "2026-11-02",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "B",
+          "day": "2026-11-03",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "E",
+          "day": "2026-11-02",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "E",
+          "day": "2026-11-03",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "F",
+          "day": "2026-11-04",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "F",
+          "day": "2026-11-05",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "I",
+          "day": "2026-11-11",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "I",
+          "day": "2026-11-12",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "J",
+          "day": "2026-11-09",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "J",
+          "day": "2026-11-10",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "K",
+          "day": "2026-11-09",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "K",
+          "day": "2026-11-10",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "L",
+          "day": "2026-11-04",
+          "work_minutes": 330,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        },
+        {
+          "person_id": "L",
+          "day": "2026-11-05",
+          "work_minutes": 120,
+          "night_minutes": 120,
+          "sunday_minutes": 0,
+          "holiday_minutes": 0
+        }
+      ],
+      "hours": [
+        {
+          "person_id": "A",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "B",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "C",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "D",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "E",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "F",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "G",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "H",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 0,
+          "projected": -6429,
+          "deviation": -6429,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "I",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "J",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "K",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        },
+        {
+          "person_id": "L",
+          "target": 6429,
+          "opening": 0,
+          "desired": 0,
+          "credits": 0,
+          "goal": 6429,
+          "work": 450,
+          "projected": -5979,
+          "deviation": -5979,
+          "raw_target": {
+            "numerator": 45000,
+            "denominator": 7
+          },
+          "raw_credits": {
+            "numerator": 0,
+            "denominator": 1
+          }
+        }
+      ]
+    }
+  ]
+}

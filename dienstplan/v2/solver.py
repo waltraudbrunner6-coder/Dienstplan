@@ -32,6 +32,7 @@ class PlanningInput:
     quotas: tuple = ()
     week_policy: object | None = None
     coverage: tuple = ()
+    locked: tuple = ()
 
     def __post_init__(self):
         if not self.profile_label:raise DomainError('Das Machbarkeitsmodell benötigt eine explizite Profilbezeichnung.')
@@ -41,6 +42,8 @@ class PlanningInput:
         object.__setattr__(self,'known_days',frozenset(self.known_days))
         object.__setattr__(self,'unchecked',tuple(self.unchecked))
         object.__setattr__(self,'optional_ids',frozenset(self.optional_ids))
+        object.__setattr__(self,'locked',tuple(self.locked))
+        if len({(b.id,b.person_id) for b in self.locked})!=len(self.locked):raise DomainError('Doppelte manuelle Fixierung.')
         for key in ('quotas','coverage'):
             object.__setattr__(self,key,tuple(sorted(getattr(self,key),key=lambda v:getattr(v,'id',getattr(v,'event_id','')))))
         terms={e.id:e for e in self.events}
@@ -79,6 +82,18 @@ class FeasibilityResult:
     input_fingerprint: str
     profile_label: str
     events: tuple = ()
+    objectives: tuple = ()
+    proofs: tuple = ()
+    global_optimal: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class StageProof:
+    name: str
+    value: int
+    proven: bool
+    prefix: tuple
+    conditional: bool
 
 
 def verify(inputs,blocks,*,check_fixed=True,active_events=None):
@@ -94,29 +109,42 @@ def verify(inputs,blocks,*,check_fixed=True,active_events=None):
     core=check_core(inputs.people,active_events,blocks,absences=inputs.absences,boundary=inputs.boundary,check_fixed=check_fixed)
     if inputs.quotas:configuration.extend(check_quotas(inputs.quotas,active_events,policy=inputs.week_policy))
     configuration.extend(check_coverage(active_events,blocks,inputs.coverage))
+    if check_fixed:
+        for fixed in inputs.locked:
+            if fixed not in blocks:configuration.append(Issue('manual_fixed',fixed.person_id,fixed.id,'Die manuell fixierte Zuteilung einschließlich Pause fehlt oder wurde geändert.'))
     if configuration:core=replace(core,issues=core.issues+tuple(configuration))
     calendar=check_calendar(inputs.people,tuple(blocks)+inputs.boundary,inputs.year,inputs.month,
                             known_days=inputs.known_days,policy=inputs.weekend_policy)
     return core,calendar
 
 
-def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, existing=(),existing_events=None) -> FeasibilityResult:
+def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, existing=(),existing_events=None,objective_profile=None) -> FeasibilityResult:
     started=monotonic()
     if type(time_limit) not in (int,float) or not isfinite(time_limit) or time_limit<=0:raise DomainError('Zeitlimit muss endlich und größer null sein.')
     deadline=started+time_limit;existing=tuple(existing)
     key=inputs.fingerprint
     best=None;best_events=None;best_open=None;proved=False;last_issues=();last_unchecked=tuple(inputs.unchecked)
+    best_values=None;proofs=[]
+
+    def score(blocks,events):
+        if objective_profile is None:
+            core,_=verify(inputs,blocks,active_events=events)
+            return (('coverage',sum(n for _,n in core.open_slots)),)
+        from .objectives import evaluate
+        return evaluate(inputs,blocks,events,objective_profile)
 
     def consider(blocks,events=None):
-        nonlocal best,best_events,best_open,last_issues,last_unchecked
+        nonlocal best,best_events,best_open,last_issues,last_unchecked,best_values
         core,calendar=verify(inputs,blocks,active_events=events)
         last_issues=core.issues+calendar.issues
         last_unchecked=tuple(dict.fromkeys(inputs.unchecked+calendar.unchecked))
         if last_issues:return False
         missing=sum(n for _,n in core.open_slots)
-        if best is None or missing<best_open:
+        events=tuple(inputs.events if events is None else events)
+        values=score(blocks,events)
+        if best is None or tuple(v for _,v in values)<tuple(v for _,v in best_values):
             best,best_open=tuple(blocks),missing
-            best_events=tuple(inputs.events if events is None else events)
+            best_events=events;best_values=values
         return True
 
     def finish(fallback_status):
@@ -126,7 +154,11 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
         if core.issues or calendar.issues:raise DomainError('Der beste Zwischenstand bestand die abschließende Prüfung nicht.')
         unchecked=tuple(dict.fromkeys(inputs.unchecked+calendar.unchecked))
         status='incomplete' if core.open_slots else 'conditional' if unchecked else 'feasible'
-        return FeasibilityResult(status,best,core.open_slots,(),unchecked,proved or best_open==0,monotonic()-started,key,inputs.profile_label,best_events)
+        final_values=score(best,best_events)
+        if final_values!=best_values:raise DomainError('Endgültige Zielwerte stimmen nicht mit dem besten Entwurf überein.')
+        current_proofs=tuple(p for i,p in enumerate(proofs) if i<len(final_values) and (p.name,p.value)==final_values[i] and p.prefix==final_values[:i])
+        global_optimal=len(current_proofs)==len(final_values) and all(p.proven and not p.conditional for p in current_proofs)
+        return FeasibilityResult(status,best,core.open_slots,(),unchecked,proved or best_open==0,monotonic()-started,key,inputs.profile_label,best_events,final_values,current_proofs,global_optimal)
 
     if existing or existing_events is not None:consider(existing,existing_events)
     if monotonic()>=deadline or (cancel is not None and cancel.is_set()):return finish('cancelled' if cancel is not None and cancel.is_set() else 'unknown')
@@ -137,13 +169,18 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
     candidates=[]
     # Auch ein Altentwurf mit einer anderen gültigen konkreten Pausenlage bleibt
     # Startpunkt; er wird nicht nur wegen begrenzter neuer Kandidaten verworfen.
-    for b in dict.fromkeys(inputs.candidates+tuple(existing)):
+    for b in dict.fromkeys(inputs.candidates+tuple(existing)+inputs.locked):
         if monotonic()>=deadline or (cancel is not None and cancel.is_set()):return finish('cancelled' if cancel is not None and cancel.is_set() else 'unknown')
         if b.person_id not in persons or b.id not in terms:continue
         local=check_core((persons[b.person_id],),(terms[b.id],),(b,),absences=inputs.absences,
                          boundary=tuple(p for p in inputs.boundary if p.person_id==b.person_id),check_fixed=False)
         if local.hard_ok:candidates.append(b)
     model=cp_model.CpModel();x=[model.new_bool_var(f'candidate_{i}') for i in range(len(candidates))]
+    for fixed in inputs.locked:
+        if fixed not in candidates:
+            last_issues=(Issue('manual_fixed',fixed.person_id,fixed.id,'Manuelle Fixierung ist mit Beschäftigung, Rechten, Urlaub, Ruhe oder Pausenregeln unvereinbar.'),)
+            return finish('infeasible')
+        model.add(x[candidates.index(fixed)]==1)
     y={e.id:model.new_bool_var(f'term_{e.id}') for e in inputs.events}
     for e in inputs.events:
         if e.id not in inputs.optional_ids:model.add(y[e.id]==1)
@@ -200,7 +237,10 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
             model.add(sum(x[i] for i in working)>=filled-(term.service.staff-rule.minimum_working)*y[term.id])
     required=sum((e.service.staff or 0)*y[e.id] for e in inputs.events)
     assigned=sum(x[i] for i,b in enumerate(candidates) if terms[b.id].service.staff is not None)
-    model.minimize(required-assigned)
+    if objective_profile is None:goals=(('coverage',required-assigned),)
+    else:
+        from .objectives import compile_objectives
+        goals=compile_objectives(inputs,candidates,x,y,model,objective_profile,required-assigned)
     if best is not None:
         for i,b in enumerate(candidates):model.add_hint(x[i],int(b in best))
         for e in inputs.events:model.add_hint(y[e.id],int(e in best_events))
@@ -212,15 +252,28 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
     if cancel is not None:thread.start()
     fallback='unknown'
     try:
-        while monotonic()<deadline and not (cancel is not None and cancel.is_set()):
-            solver=cp_model.CpSolver();solver.parameters.max_time_in_seconds=max(.00001,deadline-monotonic())
+      for stage,(name,expression) in enumerate(goals):
+        if monotonic()>=deadline or (cancel is not None and cancel.is_set()):break
+        model.minimize(expression)
+        if best is not None:model.add(expression<=best_values[stage][1])
+        # Späte Fairness erhält eigenes Budget; lokale Prüfung 15 Prozent.
+        weights=[3 if n in {'hours_max','hours_spread','shifts'} else 1 for n,_ in goals[stage:]]
+        local_reserve=.15*time_limit if objective_profile is not None else 0
+        stage_deadline=min(deadline-local_reserve,monotonic()+max(0,deadline-local_reserve-monotonic())*weights[0]/sum(weights))
+        stage_proved=False
+        while monotonic()<stage_deadline and not (cancel is not None and cancel.is_set()):
+            solver=cp_model.CpSolver()
+            solver.parameters.max_time_in_seconds=max(.00001,stage_deadline-monotonic())
             solver.parameters.num_search_workers=1;solver.parameters.random_seed=202611
             active[0]=solver;status=solver.solve(model);active[0]=None
             if status in (cp_model.OPTIMAL,cp_model.FEASIBLE):
                 selected=tuple(b for i,b in enumerate(candidates) if solver.boolean_value(x[i]))
                 active_events=tuple(e for e in inputs.events if solver.boolean_value(y[e.id]))
                 if consider(selected,active_events):
-                    proved=status==cp_model.OPTIMAL
+                    # Direkte Nachbewertung muss dieselben Ganzzahlwerte liefern.
+                    evaluated=score(selected,active_events)
+                    if solver.value(expression)!=evaluated[stage][1]:raise DomainError(f'Zielabweichung zwischen Modell und Ergebnis: {name}.')
+                    stage_proved=status==cp_model.OPTIMAL
                     break
                 # Kalenderregeln werden unabhängig direkt am Ergebnis geprüft.
                 # Der Schnitt entfernt genau dieses ungültige Ergebnis, keine
@@ -232,6 +285,19 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
             elif status==cp_model.MODEL_INVALID:
                 fallback='invalid';break
             else:break
+        if best is None:break
+        value=best_values[stage][1]
+        if stage==0:proved=stage_proved or value==0
+        proofs.append(StageProof(name,value,stage_proved or (stage==0 and value==0),best_values[:stage],not all(p.proven and not p.conditional for p in proofs)))
+        model.add(expression==value)
+        model.clear_hints()
+        for i,c in enumerate(candidates):model.add_hint(x[i],int(c in best))
+        for e in inputs.events:model.add_hint(y[e.id],int(e in best_events))
+        if fallback in {'invalid','infeasible'}:break
+      if objective_profile is not None and best is not None and monotonic()<deadline and not (cancel is not None and cancel.is_set()):
+        from .improvement import improve
+        changed=improve(inputs,best,best_events,objective_profile,deadline=deadline,cancel=cancel)
+        consider(changed,best_events)
     finally:
         stopped.set()
         if thread.is_alive():thread.join(timeout=.1)

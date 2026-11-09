@@ -186,20 +186,47 @@ H01–H03, W03/W10 und U03/U04/K05/K09 sind als Domain-/Testbestätigungsfunktio
 abgedeckt; L01/L02/L05/L06 nur mit ausdrücklich synthetischen Kalender-/Tarifdaten.
 H04–H06 sind noch keine optimierte Fairnessabnahme. E2 und UI-Anbindung fehlen.
 
+## E2 – Stufen, bessere Entwürfe und Nachbarschaften
+
+Am 10.11.2026 wiederaufgenommen; Ausgang erneut **291 Tests bestanden in 65,05 s**.
+Benannte explizite Testzielprofile; Besetzung immer zuerst, danach konfigurierbare
+Teilnahme/Wünsche/Gruppen/Belastung/Stunden/Schichten/Termin-/Pausenpräferenz.
+Höhere beste Werte werden festgehalten. Direkte Bewertung wird mit jedem CP-Ziel
+verglichen. Getrennte Präfix-/Stufenbeweise, bedingte spätere Optima und abschließende
+Neubewertung. Kein globaler Optimalitätsanspruch aus Besetzungsnull/Teilbeweisen.
+Gültiger Altentwurf, Einzel-Fixierungen und konkrete Pausen bleiben erhalten.
+Geprüfte Transfers, Zweiertausche und Dreierzyklen akzeptieren nur lexikografisch
+bessere zulässige Ergebnisse; dadurch veraltete Beweise werden entfernt.
+
+Technisches E0: Skala 1000, Stundenfehler ceil(1000×|P−Ziel|/max(S,60)); erst
+Maximum, danach Quadratsumme. Schichtziel: Quadrate von Anzahlfehler×1000 und
+auf Stunden umgerechneten Minutenfehlern, WL/BK vierfach. Sollanteile je Termin
+aus berechtigtem Pool, danach einmal auf Skaleneinheiten gerundet; eingefrorene
+Historie wird addiert. Offene Plätze verkleinern die Sollanteile nicht. Nullsoll
+hat ausdrücklich Mindestnenner 60, keine Division durch null. Diese Reihenfolge
+ist Testprofil, keine Entscheidung von F12/F13. Randbelegung bleibt echte Anwesenheit.
+
+`tests/test_v2_objectives.py`: **14 bestanden**, einschließlich A=2/B=6 Wünsche,
+historischer Belastung, Mehrfachtreffer, Stundenmangel, Tausch/Dreierzyklus,
+Einzelfixierung, Nullsoll, bedingtem Nachweis und acht Einsätzen für zwölf Personen.
+Gesamtprüfung: **305 bestanden in 67,60 s**. O04–O07/H04–H06 sowie Q08/Z04 sind
+damit als kleine Testprofilfälle (keine Produkt-/Monatsabnahme) geprüft.
+`scripts/v2_benchmark.py` vergleicht 5/20/60 s mit identischem gültigem Startplan,
+Snapshot/Profil/Seed/Worker; tatsächliche Läufe in `examples/v2/benchmark-e2.json`.
+Es sind ausdrücklich nur vier WL-Testtermine, kein rekonstruierter Betriebsmonat.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
 erledigten Klärungen. Donnerstagswünsche bleiben zur Korrektur vorgemerkt, ohne
 aktive/teilweise Importübernahme. Testprofile sind ausdrücklich keine betrieblichen
-Freigaben. Produktive Wunschhistorie, mehrstufige V2-Fairnessoptimierung und neue
-Oberfläche sind noch nicht implementiert. T-/TS-Erfüllung liegt als
-Domain-/Prüferfunktion vor, noch nicht als vollständiges Optimierungsziel.
+Freigaben. Produktive Wunschhistorie und neue Oberfläche sind noch nicht
+angebunden. Testprofiloptimierung ersetzt keine betriebliche Rechts-/Tarifprüfung.
+Monatsskalierung des Kalenders mit Ausschlussschnitten ist weiterhin begrenzt.
 
 ## Nächster zusammenhängender Schritt
 
-**Auf ausdrücklichen Nutzerwunsch pausiert. Erst nach neuer Nachricht fortsetzen.**
-Bei Wiederaufnahme zuerst diese Datei, Git-Stand und aktuelle Prüfungen lesen.
-Nächste Etappe ist E2: benannte lexikografische Zielstufen mit expliziten
-Testprofilen, Erhalt des besten gültigen Entwurfs, geprüfte Nachbarschaften und
-reproduzierbare Benchmarks. Danach F1-App-Anbindung/Exporte und F2-Plattformprüfungen;
+Nutzer hat am 10.11.2026 selbstständige Fortsetzung bestätigt.
+Nächster Schritt F1: geprüfte persistente Arbeitsstände, atomare Exportpakete und
+expliziter Qt-Prüfbereich innerhalb der bestehenden Anwendung. Danach F2-Plattformprüfungen;
 keine produktive Umschaltung oder echte Datenmigration ohne gesonderten Auftrag.
