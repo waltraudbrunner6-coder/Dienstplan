@@ -20,7 +20,7 @@ from .history import historical_shares
 from .objectives import evaluate
 from .pauses import PausePolicy,pause_candidates
 from .persistence import V2Store
-from .reporting import hours_rows,shares
+from .reporting import hours_rows,shares,required_work_range
 from .serialization import fingerprint
 from .solver import solve_feasibility,verify
 from .time import Interval,vienna,day_segments
@@ -182,7 +182,7 @@ class Workbench(QDialog):
         for i in range(self.team.rowCount()):
             for j in (0,5,6):self.team.item(i,j).setFlags(self.team.item(i,j).flags()&~Qt.ItemFlag.ItemIsEditable)
             if len(self.inputs.people[i].contracts.versions)>1:self.team.item(i,2).setFlags(self.team.item(i,2).flags()&~Qt.ItemFlag.ItemIsEditable)
-        self.table(self.term_table,('Termin','Beginn Wien','Ende Wien','Plätze','Feste Personen','W16-Grund'),[(e.id,e.attendance.start.astimezone(vienna()).isoformat(),e.attendance.end.astimezone(vienna()).isoformat(),e.service.staff or 'Teilnahme',','.join(e.fixed_people),e.replacement_reason) for e in self.inputs.events])
+        self.table(self.term_table,('Termin','Beginn Wien','Ende Wien','Plätze','Feste Personen','W16-Grund','Status'),[(e.id,e.attendance.start.astimezone(vienna()).isoformat(),e.attendance.end.astimezone(vienna()).isoformat(),e.service.staff or 'Teilnahme',','.join(e.fixed_people),e.replacement_reason,'Datumsoption (automatisch)' if e.id in self.inputs.optional_ids else 'Regulärer / fester Termin') for e in self.inputs.events])
         self.month_label.setText(f'Monat {self.inputs.month:02d}/{self.inputs.year} · {len(self.inputs.people)} Personen · Änderungen mit „Arbeitsstand speichern“ sichern')
         self.calculation_profile.setCurrentIndex(0 if self.inputs.profile_label==OPEN_PROFILE else 1)
         recurring={'T':'jeden Donnerstag','TS':'ausgewählte Donnerstage','KC10':'täglich außer Donnerstag','KC16':'täglich außer Donnerstag','W17':'täglich außer Donnerstag','KCT10':'jeden Donnerstag','KCT':'jeden Donnerstag','TW':'jeden Donnerstag','W16':'begründeter Ersatz für W17','WL':'2 Termine/Woche – automatische Wahl','BK':'1 Termin/Woche – automatische Wahl','LB':'14-tägig ab Referenzdatum; feste Personen','VN':'feste Tage und Personen','INT':'2 feste Termine im Monat','N17':'1 fester Termin und Person; Führerschein','R':'24.12.–06.01.; Bewertung fehlt','FK':'individuelle Zeit und feste Person'}
@@ -260,10 +260,14 @@ class Workbench(QDialog):
 
     def refresh_results(self):
         blocks,active_events,proofs=self.displayed_result()
+        provisional_dates=False
         events=self.inputs.events if active_events is None else active_events
+        if active_events is None and self.inputs.optional_ids:
+            from .plan_import import selected_events
+            events=selected_events(self.inputs);provisional_dates=True
         preview=self.pending is not None
         self.plan_state.setText('BERECHNETER VORSCHLAG – noch nicht gespeichert. Zum Behalten „Ergebnis übernehmen“ wählen. Der bisherige Plan bleibt bis dahin erhalten.' if preview else
-                               'Gespeicherter Plan / Entwurf.' if active_events is not None else 'Noch kein berechneter Plan. Angezeigt werden die vorgesehenen Plätze.')
+                               'Gespeicherter Plan / Entwurf.' if active_events is not None else 'Vorläufige automatische Termine, noch ohne Zuteilung. BK/WL-Daten bleiben für den Solver verschiebbar.' if provisional_dates else 'Noch kein berechneter Plan. Angezeigt werden die vorgesehenen Plätze.')
         self.discard_preview.setVisible(preview)
         names={p.id:f'{p.name} ({p.id})' for p in self.inputs.people}
         self.plan_rows=[];rows=[]
@@ -313,7 +317,10 @@ class Workbench(QDialog):
         else:status='Noch kein berechneter Entwurf. Offene Planungsangaben siehe „Dienste und Planungsangaben“.'
         required=sum((e.service.staff or 0)*(e.attendance.minutes-(30 if e.attendance.minutes>360 else 0)) for e in events if e.service.code!='R')
         target=sum(max(0,r.goal) for r in hours) if all(r.credits_known for r in hours) else None
-        status+=f' | Operativer Bedarf ohne ungeklärte R-Bewertung: {hours_text(required)} h; nicht negatives Arbeitsziel gesamt: '+(f'{hours_text(target)} h.' if target is not None else 'ungeklärt.')
+        status+=(' | Vorläufige Datumswahl; tatsächliche Dauer kann sich durch Terminwahl an Zeitumstellungstagen ändern.' if provisional_dates else '')
+        lower,upper=required_work_range(events,blocks,self.inputs.year,self.inputs.month,boundary=self.inputs.boundary)
+        monthly=hours_text(lower) if lower==upper else hours_text(lower)+'–'+hours_text(upper)
+        status+=f' | Operativer Bedarf im Planungshorizont ohne ungeklärte R-Bewertung: {hours_text(required)} h. Im Kalendermonat inkl. bekannter Randdienste: {monthly} h; nicht negatives Arbeitsziel im Monat: '+(f'{hours_text(target)} h.' if target is not None else 'ungeklärt.')
         self.status.setText(status)
 
     def save(self):

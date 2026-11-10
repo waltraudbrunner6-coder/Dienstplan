@@ -113,3 +113,36 @@ def quantity_rows(blocks,holidays=frozenset()):
             key=b.person_id,q.day;values=totals.setdefault(key,[0,0,0,0])
             for i,n in enumerate((q.work_minutes,q.night_minutes,q.sunday_minutes,q.holiday_minutes)):values[i]+=n
     return tuple(QuantityRow(*key,*values) for key,values in sorted(totals.items()))
+
+
+def required_work_range(events,blocks,year,month,*,boundary=()):
+    """Operativer Monatsbedarf; noch freie Pausen über Monatsgrenzen als Bandbreite.
+
+    Freiwillige T/TS-Teilnahme und ungeklärte Reservebewertung sind ausgenommen.
+    Bereits bekannte, hineinragende Randdienste werden einmal berücksichtigt.
+    """
+    events=tuple(events);blocks=tuple(blocks)
+    span=Interval(midnight(date(year,month,1)),midnight(date(year+int(month==12),month%12+1,1)))
+    minimum=maximum=0;event_ids={e.id for e in events}
+    for term in events:
+        if term.service.staff is None or term.service.code=='R':continue
+        assigned={b.person_id:b for b in blocks if b.id==term.id}
+        known=sum(hit.minutes for b in assigned.values() for part in b.work if (hit:=part.intersection(span)) is not None)
+        minimum+=known;maximum+=known
+        hit=term.attendance.intersection(span)
+        inside=hit.minutes if hit else 0
+        pause=30 if term.attendance.minutes>360 else 0
+        if inside==term.attendance.minutes:low=high=inside-pause
+        elif inside==0:low=high=0
+        else:
+            outside=max((p.minutes for p in term.attendance.difference((span,))),default=0)
+            low=max(0,inside-min(pause,inside));high=inside-max(0,pause-outside)
+        missing=max(0,term.service.staff-len(assigned))
+        minimum+=missing*low;maximum+=missing*high
+    seen=set()
+    for b in boundary:
+        if b.id in event_ids or b.code in {'R','T','TS'} or (b.id,b.person_id) in seen:continue
+        seen.add((b.id,b.person_id))
+        value=sum(hit.minutes for part in b.work if (hit:=part.intersection(span)) is not None)
+        minimum+=value;maximum+=value
+    return minimum,maximum

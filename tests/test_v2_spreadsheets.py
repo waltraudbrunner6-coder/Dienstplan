@@ -295,3 +295,15 @@ def test_existing_neighbour_without_week_profile_supplies_real_rest_boundaries()
     early=event('KC10',date(2026,12,1)).assign('P01')
     chosen=selected_events(dec)
     assert any(i.rule=='rest' for i in verify(dec,fixed+(early,),active_events=chosen)[0].issues)
+
+
+def test_required_month_work_excludes_outside_month_and_bounds_unplaced_breaks():
+    from dienstplan.v2.reporting import required_work_range
+    term=event('W17',date(2026,11,30))
+    assert required_work_range((term,),(),2026,11)==(780,840)
+    assert required_work_range((term,),(),2026,12)==(60,120)
+    outside=event('W17',date(2026,11,10))
+    assert required_work_range((outside,),(),2026,12)==(0,0)
+    blocks=tuple(automatic_pause_choices(term,pid)[0] for pid in ('P01','P02'))
+    assert required_work_range((term,),blocks,2026,12)==(120,120)
+    assert required_work_range((),(),2026,12,boundary=blocks+blocks)==(120,120)

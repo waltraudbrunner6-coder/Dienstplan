@@ -264,3 +264,17 @@ def test_first_manual_assignment_uses_real_selected_week_dates(app=None):
         assert verify(w.inputs,w.blocks,active_events=w.events)[0].hard_ok
         assert not any(a.service.code=='BK' and b.service.code=='WL' and a.attendance.start_day==b.attendance.start_day for a in w.events for b in w.events)
         w.close();qt.processEvents()
+
+
+def test_unplanned_weekly_view_counts_required_slots_not_all_date_options(tmp_path):
+    from dienstplan.v2.automatic_weekly import automatic_weekly
+    qt=QApplication.instance() or QApplication([])
+    w=Workbench(database=tmp_path/'open-weekly.sqlite3',year=2026,month=11)
+    w.inputs=automatic_weekly(w.inputs);w.fill()
+    assert len(w.inputs.optional_ids)==84
+    assert sum(e.service.code=='BK' for e,b in w.plan_rows)==12
+    assert sum(e.service.code=='WL' for e,b in w.plan_rows)==24
+    assert w.plan.rowCount()==156  # 120 regular slots + 6 weeks × 6 weekly slots.
+    assert 'Vorläufige automatische Termine' in w.plan_state.text()
+    assert any(w.term_table.item(i,6).text()=='Datumsoption (automatisch)' for i in range(w.term_table.rowCount()))
+    w.close();qt.processEvents()

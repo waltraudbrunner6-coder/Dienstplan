@@ -67,6 +67,8 @@ def automatic_weekly(inputs,*,snapshots=(),full_weeks_only=False):
     if full_weeks_only:unchecked+=('Randwochen sind ausdrücklich aus der automatischen Quote ausgeschlossen.',)
     updated=replace(inputs,events=tuple(terms.values()),optional_ids=frozenset(optional),quotas=tuple(quotas),week_policy=policy,
                     locked=tuple(locks.values()),boundary=tuple(boundary.values()),known_days=frozenset(known),unchecked=unchecked)
+    from .plan_import import selected_events
+    selected_events(updated)  # Widersprüchliche feste Datumsquoten vor jeder Speicherung abweisen.
     return replace(updated,candidates=service_candidates(updated.events,updated.people)+updated.locked)
 
 

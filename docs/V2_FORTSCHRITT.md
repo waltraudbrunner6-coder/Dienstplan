@@ -91,7 +91,29 @@ Das schließt die neue normale Erstzuteilung ein; kein technischer Vier-Termine-
 Datensatz als Ersatz dieses Ablaufs. Neue finale Pakete werden aus dem gesamten
 nachfolgenden Code gebaut. Keine privaten Tabellen ins Repository aufgenommen.
 
-Nächster Schritt: finalen geprüften Stand pushen und native Pakete verlinken. Die von Fachantworten abhängigen Importzeilen
+Vor Berechnung werden jetzt eine vorläufige gültige 2-WL-/1-BK-Datumswahl
+und entsprechend benötigte Plätze gezeigt, keine Summe aller Kandidatentage.
+Die Eingabetabelle kennzeichnet weitere Termine ausdrücklich als Datumsoptionen;
+für den Solver bleiben sie unverändert frei wählbar. Regression November 2026:
+84 Datumsoptionen, aber nur 156 operative Plätze im gesamten Randwochenhorizont
+(120 regulär + sechs ISO-Wochen mit je sechs Mitarbeiterplätzen).
+
+Bedarf wird getrennt für den Planungshorizont und den tatsächlichen lokalen
+Kalendermonat gezeigt. Offene Pausen über Monatsgrenzen ergeben eine Bandbreite,
+konkrete Pausen und bekannte Randdienste exakte Minuten; keine Vier-Wochen- oder
+Dienststart-Abrechnungsannahme. Ein W17 vom 30.11. 17:00 bis 01.12. 01:00 benötigt
+für zwei Personen im Dezember 1–2 Stunden, mit konkreter Pause vor 22 Uhr genau
+2 Stunden. Randdienste zählen nicht doppelt. Die Wochen-/R-/Abrechnungsprofile
+bleiben davon unabhängig ausdrücklich dokumentiert.
+
+Die zusätzlichen Bedarfs-/Datumsoptionsregressionen sind bestanden.
+Abschließender vollständiger Lauf des jetzt eingefrorenen Codes:
+**401 bestanden in 106,16 s**. Keine Fehler/Skips. Der vorangehende Randdatenstand
+0c30111 ist bereits auf allen drei nativen Zielen vollständig erfolgreich
+geprüft (Run 42892087768); die aktuelle zusätzliche Bedarfsanzeige wird vor
+Verlinkung nochmals in den tatsächlich gebauten Paketen geprüft.
+
+Nächster Schritt: geprüften Code pushen und endgültige Paketlinks/Messwerte sichern. Die von Fachantworten abhängigen Importzeilen
 bleiben bis zur Klärung vorgemerkt.
 
 

@@ -78,7 +78,7 @@ Monat. BK und WL dürfen niemals am selben lokalen Startdatum stattfinden; dies
 wird auch ohne Wochenkonfiguration als harte Regel geprüft.
 
 **BK/WL automatisch: 2 WL + 1 BK** konfiguriert die Woche ausdrücklich. Im normalen
-Monatsablauf wird diese Auswahl vor der ersten Berechnung angefordert. Angeboten:
+Monatsablauf wird diese Auswahl vor der ersten Berechnung oder manuellen Zuteilung angefordert. Angeboten:
 
 - Montag–Sonntag mit gemeinsam geplanten Randwochen: die komplette ISO-Woche,
   gegebenenfalls mit Terminen im Nachbarmonat. Keine unabhängige doppelte Quote.
@@ -89,8 +89,11 @@ Die globale betriebliche Randwochenentscheidung wird nicht stillschweigend gerat
 Die gewählte Einstellung wird gespeichert und in neue Folgemonate übernommen.
 Der Solver wählt Termine und Personen gemeinsam, keine vorab festgezurrten Tage.
 Offene Personenplätze bleiben erlaubt; verbindliche Termine, Zuteilungen und Regeln
-bleiben erhalten. Die Eingabetabelle enthält Datumsoptionen, der fertige Plan nur
-die tatsächlich gewählten Termine.
+bleiben erhalten. Die Eingabetabelle kennzeichnet Datumsoptionen ausdrücklich. Vor der Berechnung zeigt
+die Detailliste eine vorläufige gültige Terminwahl mit korrekter Platzzahl; sie
+fixiert keine Solvervariablen. Der fertige Plan enthält nur tatsächlich gewählte
+Termine. Der Bedarf im gesamten Planungshorizont und im ausgewählten Kalendermonat
+wird getrennt gezeigt; noch freie Pausen über Monatsgrenzen ergeben eine Bandbreite.
 
 Bei bereits gespeicherten Nachbarmonaten werden gemeinsame Termine und vorhandene
 Zuteilungen übernommen. Widersprüchliche nachträgliche Änderungen werden abgelehnt;
