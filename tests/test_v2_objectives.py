@@ -58,8 +58,12 @@ def test_same_wish_hit_by_two_duties_is_once_in_cp_and_direct_report():
     terms=tuple(event('W17',date(2026,11,d)) for d in (9,10))
     candidates=tuple(e.assign(p,(pause(e.attendance.start_day),)) for e in terms for p in 'AB')
     data=inputs(terms,candidates,absences=(wish('A',10),));p=profile(data,('wishes',))
-    result=solve_feasibility(data,time_limit=2,objective_profile=p)
-    assert not result.open_slots and dict(result.objectives)['wishes']==1
+    # Dieser Fall prüft eindeutige Wunschzählung, keine garantierte Wallclock-
+    # Leistung. Langsame native Runner dürfen den gültigen Startplan erhalten.
+    # Der CP-Nachweis bleibt zusätzlich Pflicht: kein Pass nur aus Nachbewertung.
+    result=solve_feasibility(data,time_limit=10,existing=candidates,objective_profile=p)
+    assert len(result.blocks)==4 and not result.open_slots and dict(result.objectives)['wishes']==1
+    assert any(proof.name=='wishes' and proof.proven for proof in result.proofs)
 
 
 def test_hours_normalization_distinguishes_all_below_target_and_local_transfer():

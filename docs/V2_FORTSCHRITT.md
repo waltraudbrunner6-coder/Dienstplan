@@ -341,6 +341,19 @@ Monatsskalierung des Kalenders mit Ausschlussschnitten ist weiterhin begrenzt.
 
 ## Nächster zusammenhängender Schritt
 
+Nativer Lauf `42726096163` von `527d639`: Windows und ARM64 bestanden, Intel
+meldete im Wunschzähltest einen leeren Ergebnisbericht (`KeyError: wishes`).
+Der identische Solverfall war in den vorherigen nativen Läufen grün; eine
+garantierte Lösung innerhalb des dortigen Zwei-Sekunden-Limits ist keine
+Fachanforderung und widerspricht der erlaubten Zeitlimit-Klassifikation.
+Der fachliche Zähltest verwendet jetzt einen gültigen unveränderlichen Startplan
+und 10 s; zusätzlich muss ein **bewiesener CP-Wunschzielwert** vorliegen. So kann
+er nicht allein durch die direkte Nachbewertung des Startplans bestehen. Alle
+bisherigen Kardinalitäts-/Zählassertionen bleiben erhalten; separate kontrollierte
+Abbruch-/Zeitlimitfälle bleiben unverändert. Gezielte Ziel-/Teamprüfung hierzu:
+**18 bestanden in 13,70 s**. Nächster nativer Lauf führt diese Präzisierung aus.
+Gesamtlauf nach dieser Präzisierung: **330 bestanden in 94,71 s**.
+
 Nutzer hat am 10.11.2026 selbstständige Fortsetzung bestätigt.
 Nächster Schritt: native Prüfungen ausführen und konkrete Fehler korrigieren;
 keine produktive Umschaltung oder echte Datenmigration ohne gesonderten Auftrag.
