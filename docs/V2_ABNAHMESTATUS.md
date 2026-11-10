@@ -1,5 +1,11 @@
 # V2 – Zuordnung aller 125 Abnahmefälle
 
+Folgeauftrag 0.4.0: Tabellenimport/-export, Monatsmatrix, automatische manuelle
+Pausen und ausdrücklich konfigurierte 2-WL-/1-BK-Wochen ergänzt. Neue separate
+Regressionen stehen im Fortschritt; die 125 Fälle werden dadurch nicht pauschal
+als bestanden eingestuft. Ungeklärte Excel-Kürzel, Donnerstagsausnahmen und
+Randwochenstandard sowie offene Produktprofile bleiben ausdrücklich offen.
+
 Aktualisierung 10.11.2026: Die V2-Hauptoberfläche ersetzt auf ausdrücklichen Auftrag die alte UI (Version 0.3.0). Ausschlussauswahl, Stundenanzeige, dauerhafte Arbeitsstände und automatisch erzeugte Standard-Tagesmuster sind ergänzt. Dies stuft keine offenen Profil-, Team-/Vertretungs-, Migrations- oder Abrechnungsfälle pauschal auf „bestanden“ hoch; die 125 Einzelfallzuordnungen bleiben bestehen. Aktuelle zusätzliche Regressionen und Grenzen: [Fortschritt](V2_FORTSCHRITT.md).
 
 Stand 10.11.2026. Die folgenden Angaben präzisieren die Etappenübersicht. Ein grüner

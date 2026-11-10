@@ -1,5 +1,14 @@
 # Dienstplan
 
+**Neu in 0.4.0:** XLSX-/CSV-Import für Termine, einzelne oder vollständige
+Dienstzuteilungen sowie gemischte Wünsche/Urlaub; bearbeitbare Gesamtvorschau mit
+zentraler Personen-ID-Zuordnung. Monatsübersicht mit Wochentagen, Excel-Tabellenexport
+und automatische Pausenwahl bei manueller Zuteilung. BK/WL: zwei WL und ein BK pro
+Woche, niemals am selben Startdatum; Wochen-/Randprofil einmal ausdrücklich wählen.
+Die erste normale Berechnung fordert diese Auswahl an; Folgemonate übernehmen sie.
+Details und offene Zuordnungen: [Tabellenimport und Excel-Export](docs/TABELLENIMPORT.md).
+Unbekannte Kürzel oder widersprüchliche Altangaben werden nicht still umgedeutet.
+
 Lokale, deutschsprachige Desktop-Anwendung für Monatsdienstpläne mit Python/Qt,
 OR-Tools CP-SAT und SQLite. Planung und Speicherung funktionieren offline.
 Ergebnisse sind Planprognosen, keine tatsächlich erfassten Arbeitszeiten.

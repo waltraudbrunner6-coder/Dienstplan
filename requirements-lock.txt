@@ -1,8 +1,10 @@
 absl-py==2.5.1
 altgraph==0.17.5
+et_xmlfile==2.0.0
 immutabledict==4.3.1
 iniconfig==2.3.1
 numpy==2.5.4
+openpyxl==3.1.5
 ortools==9.15.6755
 packaging==26.3
 pandas==3.0.6

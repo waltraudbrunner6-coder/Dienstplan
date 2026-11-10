@@ -159,7 +159,7 @@ class CalendarResult:
 
 def month_calendar(year: int, month: int, settings: CalendarInput) -> CalendarResult:
     days = [date(year,month,n) for n in range(1,calendar.monthrange(year,month)[1]+1)]
-    events, missing = [], ["F06/F07: WL/BK-Wochenprofil fehlt; keine Wochenquote erzeugt."]
+    events, missing = [], ["F06: WL/BK-Wochenprofil noch ausdrücklich wählen; keine Wochenquote erzeugt."]
     changes = dict(settings.w16_reasons)
     if any(d not in days or d.weekday()==3 for d in changes):
         raise DomainError("W16 ersetzt nur einen W17-Termin des gewählten Monats.")

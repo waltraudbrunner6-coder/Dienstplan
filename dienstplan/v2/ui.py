@@ -23,7 +23,7 @@ from .persistence import V2Store
 from .reporting import hours_rows,shares
 from .serialization import fingerprint
 from .solver import solve_feasibility,verify
-from .time import Interval,vienna
+from .time import Interval,vienna,day_segments
 from .wishes import wish_rows
 
 
@@ -67,6 +67,9 @@ class Workbench(QDialog):
         top=QHBoxLayout();layout.addLayout(top)
         for text,handler in (('Neue Datei',self.new_file),('Datei öffnen',self.open_file),('Monat wählen',self.new_month),('Arbeitsstand speichern',self.save),('Exportpaket',self.export),('Monat bestätigen',self.confirm)):
             button=QPushButton(text);button.clicked.connect(lambda checked=False,f=handler:self.guard(f));top.addWidget(button)
+        imports=QHBoxLayout();layout.addLayout(imports)
+        for text,handler in (('Termine / Dienstplan / Wünsche importieren',self.import_sheet),('Vorgemerkten Tabellenimport fortsetzen',self.resume_sheet),('Monatstabelle als Excel exportieren',self.export_grid),('BK/WL automatisch: 2 WL + 1 BK',self.configure_weekly)):
+            button=QPushButton(text);button.clicked.connect(lambda checked=False,f=handler:self.guard(f));imports.addWidget(button)
         self.month_label=QLabel();layout.addWidget(self.month_label)
         self.tabs=QTabWidget();layout.addWidget(self.tabs)
         settings_page=QWidget();settings_box=QVBoxLayout(settings_page)
@@ -112,6 +115,7 @@ class Workbench(QDialog):
         self.discard_preview=QPushButton('Vorschlag verwerfen und bisherigen Plan anzeigen')
         self.discard_preview.clicked.connect(self.discard_result);plan_box.addWidget(self.discard_preview)
         self.plan=QTableWidget();plan_box.addWidget(self.plan);self.tabs.addTab(plan_page,'Dienstplan')
+        self.month_grid=QTableWidget();self.tabs.addTab(self.month_grid,'Monatsübersicht')
         self.hours=QTableWidget();self.tabs.addTab(self.hours,'Stundenprognose')
         self.distribution=QTableWidget();self.tabs.addTab(self.distribution,'Schichtverteilung')
         self.wishes=QTableWidget();self.tabs.addTab(self.wishes,'Freiwünsche')
@@ -181,7 +185,7 @@ class Workbench(QDialog):
         self.table(self.term_table,('Termin','Beginn Wien','Ende Wien','Plätze','Feste Personen','W16-Grund'),[(e.id,e.attendance.start.astimezone(vienna()).isoformat(),e.attendance.end.astimezone(vienna()).isoformat(),e.service.staff or 'Teilnahme',','.join(e.fixed_people),e.replacement_reason) for e in self.inputs.events])
         self.month_label.setText(f'Monat {self.inputs.month:02d}/{self.inputs.year} · {len(self.inputs.people)} Personen · Änderungen mit „Arbeitsstand speichern“ sichern')
         self.calculation_profile.setCurrentIndex(0 if self.inputs.profile_label==OPEN_PROFILE else 1)
-        recurring={'T':'jeden Donnerstag','TS':'ausgewählte Donnerstage','KC10':'täglich außer Donnerstag','KC16':'täglich außer Donnerstag','W17':'täglich außer Donnerstag','KCT10':'jeden Donnerstag','KCT':'jeden Donnerstag','TW':'jeden Donnerstag','W16':'begründeter Ersatz für W17','WL':'automatisch nach bestätigtem Wochenprofil','BK':'automatisch nach bestätigtem Wochenprofil','LB':'14-tägig ab Referenzdatum; feste Personen','VN':'feste Tage und Personen','INT':'2 feste Termine im Monat','N17':'1 fester Termin und Person; Führerschein','R':'24.12.–06.01.; Bewertung fehlt','FK':'individuelle Zeit und feste Person'}
+        recurring={'T':'jeden Donnerstag','TS':'ausgewählte Donnerstage','KC10':'täglich außer Donnerstag','KC16':'täglich außer Donnerstag','W17':'täglich außer Donnerstag','KCT10':'jeden Donnerstag','KCT':'jeden Donnerstag','TW':'jeden Donnerstag','W16':'begründeter Ersatz für W17','WL':'2 Termine/Woche – automatische Wahl','BK':'1 Termin/Woche – automatische Wahl','LB':'14-tägig ab Referenzdatum; feste Personen','VN':'feste Tage und Personen','INT':'2 feste Termine im Monat','N17':'1 fester Termin und Person; Führerschein','R':'24.12.–06.01.; Bewertung fehlt','FK':'individuelle Zeit und feste Person'}
         def times(t):
             if t.start is None:return 'individuell'
             return f'{t.start:%H:%M}–{t.end:%H:%M}'+(' (Folgetag)' if t.end<=t.start else '')
@@ -235,6 +239,10 @@ class Workbench(QDialog):
                     removed.add(old.id)
                     additions.append(event('LB_TS' if key=='TS' else 'LB',day,people=old.fixed_people))
         candidates=service_candidates(additions,self.inputs.people)
+        from .validation import check_core
+        mandatory=tuple(e for e in self.inputs.events if e.id not in self.inputs.optional_ids and e.id not in removed)+tuple(additions)
+        structure=check_core(self.inputs.people,mandatory,(),check_fixed=False)
+        if structure.issues:raise ValueError('; '.join(i.message for i in structure.issues))
         if not self.clear_plan():return
         self.inputs=replace(self.inputs,events=tuple(e for e in self.inputs.events if e.id not in removed)+tuple(additions),
                             candidates=tuple(b for b in self.inputs.candidates if b.id not in removed)+candidates,
@@ -263,10 +271,33 @@ class Workbench(QDialog):
             selected=[b for b in blocks if b.id==e.id]
             for i in range(max(e.service.staff or 0,len(selected))):
                 b=selected[i] if i<len(selected) else None;self.plan_rows.append((e,b))
-                rows.append((e.id,e.service.code,i+1,names.get(b.person_id,b.person_id) if b else 'OFFEN',hours_text(b.work_minutes) if b else '',
+                rows.append((e.attendance.start_day.strftime('%d.%m.%Y'),e.service.code,i+1,names.get(b.person_id,b.person_id) if b else 'OFFEN',hours_text(b.work_minutes) if b else '',
                              'fixiert' if b in self.inputs.locked else '',
-                             '; '.join(p.start.astimezone(vienna()).strftime('%d.%m. %H:%M')+'–'+p.end.astimezone(vienna()).strftime('%d.%m. %H:%M') for p in b.breaks) if b else ''))
-        self.table(self.plan,('Termin','Dienst','Platz','Person','Arbeitsstunden (h)','Fixierung','Konkrete Pause'),rows)
+                             '; '.join(p.start.astimezone(vienna()).strftime('%d.%m. %H:%M')+'–'+p.end.astimezone(vienna()).strftime('%d.%m. %H:%M') for p in b.breaks) if b else '',
+                             ('Mo','Di','Mi','Do','Fr','Sa','So')[e.attendance.start_day.weekday()],
+                             e.attendance.start.astimezone(vienna()).strftime('%H:%M'),e.attendance.end.astimezone(vienna()).strftime('%d.%m. %H:%M')))
+        self.table(self.plan,('Termin','Dienst','Platz','Person','Arbeitsstunden (h)','Fixierung','Konkrete Pause','Wochentag','Beginn','Ende'),rows)
+        from .spreadsheets import WEEKDAYS
+        import calendar
+        from PySide6.QtGui import QColor
+        days=[date(self.inputs.year,self.inputs.month,n) for n in range(1,calendar.monthrange(self.inputs.year,self.inputs.month)[1]+1)]
+        grid=[]
+        for person in self.inputs.people:
+            values=[]
+            for day in days:
+                codes=[b.code for b in blocks if b.person_id==person.id and b.attendance.start_day==day]
+                leave=any(e.person_id==person.id and e.kind=='urlaub' and day in {d for d,_ in day_segments(e.span)} for e in self.inputs.absences)
+                values.append(' / '.join(codes) if codes else 'U' if leave else '')
+            grid.append([person.name+' ('+person.id+')']+values)
+        self.table(self.month_grid,('Person',)+tuple(d.strftime('%d.%m.')+' '+WEEKDAYS[d.weekday()] for d in days),grid)
+        self.month_grid.setColumnHidden(0,True)
+        self.month_grid.setVerticalHeaderLabels([p.name+' ('+p.id+')' for p in self.inputs.people])
+        self.month_grid.verticalHeader().setVisible(True)
+        for j,day in enumerate(days,1):
+            if day.weekday()>=5:
+                for i in range(self.month_grid.rowCount()):self.month_grid.item(i,j).setBackground(QColor('#e7eef5'))
+        for i,(_,b) in enumerate(self.plan_rows):
+            if b is None:self.plan.item(i,3).setBackground(QColor('#ffe4d6'))
         hours=hours_rows(self.inputs.people,blocks+self.inputs.boundary,self.inputs.absences,self.inputs.year,self.inputs.month,accounts=self.profile.accounts,target_profile='S0',month_profile='M0')
         profile_selected=self.calculation_profile.currentIndex()==1
         self.table(self.hours,('Person','Monatssoll (h)','Anfang (h)','Wunschende (h)','Urlaub (h)','Arbeitsziel (h)','Geplant (h)','Prognose Ende (h)','Abweichung (h)'),[(r.person_id,hours_text(r.target) if profile_selected else 'Profil wählen',hours_text(r.opening),hours_text(r.desired),hours_text(r.credits) if r.credits_known and profile_selected else 'ungeklärt',hours_text(r.goal) if r.credits_known and profile_selected else 'ungeklärt',hours_text(r.work),hours_text(r.projected) if r.credits_known and profile_selected else 'ungeklärt',hours_text(r.deviation) if r.credits_known and profile_selected else 'ungeklärt') for r in hours])
@@ -332,6 +363,9 @@ class Workbench(QDialog):
         if loaded:self.inputs,self.profile,self.blocks,self.events=loaded
         else:
             inputs,profile,_=standard_month(year,month,people=self.inputs.people,accounts=tuple(replace(a,desired_minutes=0) for a in self.profile.accounts),absences=self.inputs.absences)
+            if self.inputs.week_policy is not None and self.inputs.week_policy.label.startswith('Betriebliche Eingabe:'):
+                from .automatic_weekly import automatic_weekly
+                inputs=automatic_weekly(inputs,snapshots=self.store.month_snapshots(inputs.year,inputs.month),full_weeks_only='nur volle' in self.inputs.week_policy.label)
             records=self.store.confirmations();month_key=f'{year:04d}-{month:02d}'
             history=self.store.wish_history(month_key,policy=profile.wish_policy)
             earlier=[v for _,v in records if v['month']<month_key]
@@ -432,6 +466,9 @@ class Workbench(QDialog):
         if not self.inputs.people:raise ValueError('Zuerst mindestens eine Person erfassen.')
         if self.calculation_profile.currentIndex()==0:raise ValueError('Unter „Dienste und Planungsangaben“ ein Rechenprofil ausdrücklich auswählen. Offene Fachprofile werden dadurch nicht freigegeben.')
         if self.save() is False:return
+        if self.inputs.profile_label in (OPEN_PROFILE,SELECTED_PROFILE) and self.inputs.week_policy is None:
+            self.configure_weekly()
+            if self.inputs.week_policy is None:return
         self.discard_result()
         token=(self.generation,self.store.input_revision,self.inputs.fingerprint,fingerprint(self.profile))
         events=self.events if self.events is not None else (self.inputs.events if not self.inputs.optional_ids else None)
@@ -482,11 +519,24 @@ class Workbench(QDialog):
         self.inputs,self.blocks,self.events=inputs,tuple(blocks),events;self.proofs=();self.dirty();self.refresh_results()
 
     def change_assignment(self):
-        term,old=self.selected();choices=[b for b in self.inputs.candidates if b.id==term.id]
-        labels=[f'{b.person_id}: Pause '+('; '.join(p.start.astimezone(vienna()).strftime('%H:%M')+'–'+p.end.astimezone(vienna()).strftime('%H:%M') for p in b.breaks) or 'keine') for b in choices]
-        if not labels:raise ValueError('Keine konkreten Kandidaten vorhanden; Rechte/Pausenprofile prüfen.')
-        label,ok=QInputDialog.getItem(self,'Zuteilung','Person und konkrete Pause:',labels,0,False)
-        if ok:self.manual(tuple(b for b in self.blocks if b!=old)+(choices[labels.index(label)],))
+        term,old=self.selected()
+        if old in self.inputs.locked:raise ValueError('Fixierung zuerst lösen, bevor diese Zuteilung geändert wird.')
+        occupied={b.person_id for b in self.blocks if b.id==term.id and b!=old}
+        people=[p for p in self.inputs.people if p.id not in occupied and not p.eligibility_errors(term.service.code,term.attendance)
+                and (not term.fixed_people or p.id in term.fixed_people)]
+        labels=[p.name+' ('+p.id+')' for p in people]
+        if not labels:raise ValueError('Keine berechtigte Person verfügbar.')
+        label,ok=QInputDialog.getItem(self,'Zuteilung','Person wählen; Pause wird automatisch passend gesetzt:',labels,0,False)
+        if not ok:return
+        from .pauses import automatic_pause_choices
+        pid=people[labels.index(label)].id
+        base=tuple(b for b in self.blocks if b!=old)
+        for choice in automatic_pause_choices(term,pid):
+            core,calendar=verify(self.inputs,base+(choice,),active_events=self.events or self.inputs.events)
+            if core.hard_ok and calendar.hard_ok:
+                self.manual(base+(choice,));return
+            if calendar.issues or any(i.rule!='working_coverage' for i in core.issues):break
+        raise ValueError('Für diese Person gibt es keine mit den verbindlichen Regeln vereinbare Zuteilung und Pause.')
 
     def remove_assignment(self):
         _,old=self.selected()
@@ -574,6 +624,42 @@ class Workbench(QDialog):
         if QMessageBox.question(self,'Aktiven Eintrag löschen','Diesen aktiven Eintrag löschen? Bestätigte historische Snapshots bleiben erhalten. Der aktuelle Entwurf wird verworfen.')!=QMessageBox.StandardButton.Yes:return
         updated=self.store.delete_entry(entry.id,self.inputs,self.profile,expected_revision=self.store.input_revision)
         self.inputs=updated;self.blocks=();self.events=None;self.proofs=();self.dirty();self.fill()
+
+    def configure_weekly(self):
+        self.ensure_team_saved()
+        label,ok=QInputDialog.getItem(self,'Automatische BK/WL-Termine','Wochenprofil ausdrücklich wählen:',('Montag–Sonntag mit gemeinsamen Randwochen','Nur volle Montag–Sonntag-Wochen im Monat'),0,False)
+        if not ok:return
+        from .automatic_weekly import automatic_weekly
+        updated=automatic_weekly(self.inputs,snapshots=self.store.month_snapshots(self.inputs.year,self.inputs.month),full_weeks_only=label.startswith('Nur'))
+        if not self.clear_plan(confirm_only=True):return
+        self.store.save_workspace(updated,self.profile,expected_revision=self.store.input_revision)
+        self.inputs=updated;self.blocks=();self.events=None;self.proofs=();self.dirty();self.fill()
+
+    def import_sheet(self):
+        self.ensure_team_saved()
+        path,_=QFileDialog.getOpenFileName(self,'Termine, Dienstplan oder Wünsche importieren','','Excel / CSV (*.xlsx *.csv)')
+        if not path:return
+        mode,ok=QInputDialog.getItem(self,'Dateiinhalt','Bei einer ursprünglichen Monatstabelle:',('Dienstplan (X = kein Dienst)','Wünsche (gelbes X = Freiwunsch)'),0,False)
+        if not ok:return
+        from .spreadsheets import read_import
+        rows,mapping,notes=read_import(path,source_kind='wishes' if mode.startswith('Wünsche') else 'plan')
+        self.store.save_sheet_stage(rows,mapping,notes);self.resume_sheet()
+
+    def resume_sheet(self):
+        self.ensure_team_saved()
+        stage=self.store.sheet_stage()
+        if stage is None:raise ValueError('Noch kein Tabellenimport vorgemerkt.')
+        from .import_ui import import_dialog
+        import_dialog(self,stage['rows'],stage['mapping'],stage['notes'])
+
+    def export_grid(self):
+        self.ensure_team_saved()
+        blocks,events,_=self.displayed_result()
+        if events is None:raise ValueError('Zuerst einen Plan erstellen oder importieren.')
+        path,_=QFileDialog.getSaveFileName(self,'Neue Monatsübersicht als Excel','','Excel (*.xlsx)')
+        if path:
+            from .spreadsheets import export_month_grid
+            export_month_grid(path,self.inputs,self.profile,blocks,events)
 
     def export(self):
         self.ensure_team_saved()

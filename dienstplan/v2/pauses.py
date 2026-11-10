@@ -85,3 +85,21 @@ def check_coverage(events, blocks, rules):
                                     f'{len(working)} tatsächlich arbeitend; benötigt {required} '
                                     f'bei {missing} offenem Platz. Profil: {rule.label}.'))
     return tuple(issues)
+
+
+def automatic_pause_choices(term, person_id):
+    """Vor 22 Uhr des Starttages bevorzugen, dann möglichst in der Dienstmitte."""
+    from datetime import datetime, time
+    from .time import local_instant
+    if term.attendance.minutes<=360:
+        return (term.assign(person_id),)
+    cutoff=local_instant(datetime.combine(term.attendance.start_day,time(22)))
+    middle=term.attendance.start+(term.attendance.end-term.attendance.start)/2
+    choices=[]
+    for minute in range(term.attendance.minutes-29):
+        start=term.attendance.start+timedelta(minutes=minute)
+        pause=Interval(start,start+timedelta(minutes=30))
+        if any(pause.overlaps(w) for w in term.protected):continue
+        choices.append(term.assign(person_id,(pause,)))
+    return tuple(sorted(choices,key=lambda b:(b.breaks[0].end>cutoff,
+                abs((b.breaks[0].start+timedelta(minutes=15)-middle).total_seconds()),b.breaks[0].start)))

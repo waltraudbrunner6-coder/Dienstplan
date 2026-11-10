@@ -224,20 +224,64 @@ class V2Store:
         row=self.connection.execute('SELECT r.payload FROM v2_meta m JOIN v2_revisions r ON m.value=r.id WHERE m.key=?',(key,)).fetchone()
         return restore_workspace(json.loads(row[0])) if row else None
 
-    def save_workspace(self,inputs,profile,blocks=(),events=None,*,expected_revision):
+    def month_snapshots(self,year=None,month=None):
+        keys=[r[0].removeprefix('workspace:') for r in self.connection.execute("SELECT key FROM v2_meta WHERE key LIKE 'workspace:%' ORDER BY key")]
+        if year is not None:
+            serial=year*12+month
+            keys=[k for k in keys if abs(int(k[:4])*12+int(k[5:])-serial)<=1]
+        return tuple(self.load_workspace(*map(int,key.split('-'))) for key in keys)
+
+    def _save_workspace(self,inputs,profile,blocks=(),events=None,*,expected_revision):
         from .codec import workspace
+        if self.input_revision!=expected_revision:raise DomainError('Eingaben/Historie geändert; Arbeitsstand erneut laden.')
+        month=f'{inputs.year:04d}-{inputs.month:02d}'
+        if self.connection.execute('SELECT 1 FROM v2_meta WHERE key=?',('confirmation:'+month,)).fetchone():
+            raise DomainError('Bestätigter Testmonat bleibt geschützt; keine stille Bearbeitung.')
+        from .automatic_weekly import check_shared_weeks
+        if events is not None and inputs.week_policy is not None:
+            check_shared_weeks(inputs,blocks,events,self.month_snapshots(inputs.year,inputs.month))
+        value=workspace(inputs,profile,blocks,events);id='workspace/'+value['revision_id']
+        previous=self.connection.execute('SELECT value FROM v2_meta WHERE key=?',('workspace:'+month,)).fetchone()
+        changed=previous is None or previous[0]!=id
+        self._immutable('v2_revisions',id,encoded(value))
+        self.connection.execute('INSERT INTO v2_meta VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',('workspace:'+month,id))
+        if changed:self.connection.execute("UPDATE v2_meta SET value=CAST(value AS INTEGER)+1 WHERE key='input_revision'")
+        return value['revision_id']
+
+    def save_workspace(self,inputs,profile,blocks=(),events=None,*,expected_revision):
         with self.transaction():
-            if self.input_revision!=expected_revision:raise DomainError('Eingaben/Historie geändert; Arbeitsstand erneut laden.')
-            month=f'{inputs.year:04d}-{inputs.month:02d}'
-            if self.connection.execute('SELECT 1 FROM v2_meta WHERE key=?',('confirmation:'+month,)).fetchone():
-                raise DomainError('Bestätigter Testmonat bleibt geschützt; keine stille Bearbeitung.')
-            value=workspace(inputs,profile,blocks,events);id='workspace/'+value['revision_id']
-            previous=self.connection.execute('SELECT value FROM v2_meta WHERE key=?',('workspace:'+month,)).fetchone()
-            changed=previous is None or previous[0]!=id
-            self._immutable('v2_revisions',id,encoded(value))
-            self.connection.execute('INSERT INTO v2_meta VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',('workspace:'+month,id))
-            if changed:self.connection.execute("UPDATE v2_meta SET value=CAST(value AS INTEGER)+1 WHERE key='input_revision'")
-            return value['revision_id']
+            return self._save_workspace(inputs,profile,blocks,events,expected_revision=expected_revision)
+
+    def save_sheet_stage(self,rows,mapping,notes=()):
+        with self.transaction():
+            payload=encoded(dict(rows=rows,mapping=mapping,notes=notes))
+            self.connection.execute("INSERT INTO v2_meta VALUES('sheet-stage',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",(payload,))
+
+    def sheet_stage(self):
+        row=self.connection.execute("SELECT value FROM v2_meta WHERE key='sheet-stage'").fetchone()
+        return json.loads(row[0]) if row else None
+
+    def apply_sheet_import(self,proposal,profile,*,expected_revision):
+        if not proposal.ready:raise DomainError('Import enthält Fehler; keine Teilübernahme.')
+        from dataclasses import replace
+        with self.transaction():
+            canonical=[]
+            for entry in proposal.inputs.absences:
+                old=self.connection.execute('SELECT payload FROM v2_entries WHERE identity=?',(encoded(entry.identity),)).fetchone()
+                if old is not None:
+                    previous=restore_entry(json.loads(old[0]))
+                    if previous.credit_days!=entry.credit_days:raise DomainError('Identischer Zeitraum hat andere Gutschrifttage; Änderung ausdrücklich korrigieren.')
+                    entry=previous
+                canonical.append(entry)
+            proposal=replace(proposal,inputs=replace(proposal.inputs,absences=tuple(canonical)))
+            self._save_workspace(proposal.inputs,profile,proposal.blocks,proposal.events,expected_revision=expected_revision)
+            for entry in proposal.inputs.absences:
+                old=self.connection.execute('SELECT payload FROM v2_entries WHERE id=?',(entry.id,)).fetchone()
+                payload=encoded(entry_payload(entry))
+                if old is not None and old[0]!=payload:raise DomainError('Vorhandene Abwesenheitskennung hat anderen Inhalt.')
+                self.connection.execute('INSERT INTO v2_entries VALUES(?,?,?) ON CONFLICT(id) DO NOTHING',(entry.id,encoded(entry.identity),payload))
+            self.connection.execute("DELETE FROM v2_meta WHERE key='sheet-stage'")
+            return proposal
 
     def apply_correction(self,id,inputs,profile,*,budgets,expected_revision):
         """Stapel, aktive Eingaben und verworfener Altentwurf atomar aktualisieren."""

@@ -210,3 +210,38 @@ def test_invalid_result_is_not_shown_as_preview(workbench):
     assert w.pending is None and w.blocks==old
     assert 'verletzt verbindliche Regeln' in w.status.text()
     assert 'VORSCHLAG' not in w.plan_state.text()
+
+
+def test_manual_person_selection_chooses_pause_without_pause_dialog(workbench,monkeypatch):
+    w=workbench;w.plan.setCurrentCell(0,0);old=w.blocks[0]
+    calls=[]
+    def choose(*args):
+        calls.append(args[2]);choices=args[3]
+        return next(value for value in choices if '(C)' in value),True
+    monkeypatch.setattr(QInputDialog,'getItem',choose)
+    w.change_assignment()
+    assert len(calls)==1 and 'Person wählen' in calls[0]
+    assert any(b.id==old.id and b.person_id=='C' for b in w.blocks)
+    assert all('Pause' not in w.plan.item(r,3).text() for r in range(w.plan.rowCount()))
+
+
+def test_qt_mixed_import_preview_applies_all_or_keeps_previous_plan(workbench,monkeypatch):
+    from dienstplan.v2.import_ui import import_dialog
+    from test_v2_spreadsheets import row
+    w=workbench;old=w.blocks;warnings=[]
+    monkeypatch.setattr(QMessageBox,'warning',lambda *a:warnings.append(a[-1]))
+    def drive(dialog):
+        table=next(t for t in dialog.findChildren(QTableWidget) if t.columnCount()>10)
+        assert table.item(0,4).text()=='dienst'
+        check=next(b for b in dialog.findChildren(QPushButton) if b.text()=='Vorschau prüfen und vormerken');check.click()
+        assert w.blocks==old and w.store.sheet_stage()
+        # The same existing slot is an idempotent import.
+        next(b for b in dialog.findChildren(QPushButton) if b.text()=='Gesamten gültigen Import übernehmen').click()
+        return QDialog.DialogCode.Accepted
+    monkeypatch.setattr(QDialog,'exec',drive)
+    import_dialog(w,[row(day='2026-11-02',code='WL',pid='A')],{})
+    assert not warnings,warnings
+    assert w.store.sheet_stage() is None and w.blocks==old
+    assert w.tabs.currentWidget() is w.plan.parentWidget()
+    assert 'Mo' in w.plan.item(0,7).text()
+    assert w.month_grid.rowCount()==12 and 'So' in w.month_grid.horizontalHeaderItem(1).text()

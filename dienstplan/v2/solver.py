@@ -186,7 +186,8 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
 
     if existing or existing_events is not None:consider(existing,existing_events)
     if monotonic()>=deadline or (cancel is not None and cancel.is_set()):return finish('cancelled' if cancel is not None and cancel.is_set() else 'unknown')
-    structural=check_core(inputs.people,inputs.events,(),check_fixed=False)
+    # Optionale Datumsalternativen sind keine gleichzeitig aktiven Termine.
+    structural=check_core(inputs.people,tuple(e for e in inputs.events if e.id not in inputs.optional_ids),(),check_fixed=False)
     if structural.issues:
         last_issues=structural.issues;return finish('invalid')
     terms={e.id:e for e in inputs.events};persons={p.id:p for p in inputs.people}

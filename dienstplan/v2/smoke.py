@@ -9,6 +9,8 @@ def run(report_path=None):
     values={}
     try:
         from datetime import datetime,timedelta
+        from dataclasses import replace
+        from .time import vienna
         from .time import local_instant,TZDATA_VERSION,IANA_VERSION
         from .errors import DomainError
         spring_rejected=False
@@ -68,11 +70,31 @@ def run(report_path=None):
             assert 'VORSCHLAG' in preview_window.plan_state.text()
             preview_window.accept.click()
             assert preview_window.store.load_workspace(2026,11)[2]==result.blocks
+            from .spreadsheets import export_month_grid,read_import
+            from .plan_import import prepare_plan_import,selected_events
+            from .automatic_weekly import automatic_weekly
+            from .pauses import automatic_pause_choices
+            grid=Path(directory)/'monatsuebersicht.xlsx'
+            export_month_grid(grid,inputs,profile,result.blocks,result.events)
+            rows,_,_=read_import(grid)
+            imported=prepare_plan_import(inputs,rows)
+            assert imported.ready, imported.errors
+            assert set(imported.blocks)==set(result.blocks)
+            with V2Store(Path(directory)/'tabellenimport.sqlite3',create=True) as table_store:
+                table_store.apply_sheet_import(imported,profile,expected_revision=0)
+                assert set(table_store.load_workspace(2026,11)[2])==set(result.blocks)
+            assert preview_window.month_grid.rowCount()==12
+            assert preview_window.plan.item(0,7).text() in ('Mo','Di','Mi','Do','Fr','Sa','So')
+            weekly=automatic_weekly(replace(inputs,people=(),candidates=(),locked=()))
+            assert all(q.required==(2 if q.code=='WL' else 1) for q in weekly.quotas)
+            from .calendar_rules import check_quotas
+            assert not check_quotas(weekly.quotas,selected_events(weekly),policy=weekly.week_policy)
+            assert automatic_pause_choices(inputs.events[0],'A')[0].breaks[0].end.astimezone(vienna()).hour<=22
             preview_window.close()
         values=dict(selbsttest='bestanden',scope='Hauptoberfläche mit Standardmonat; Rechenkette separat mit synthetischer Fixture',
                     personen=12,zuteilungen=8,tzdata=TZDATA_VERSION,iana=IANA_VERSION,
                     dst=True,solver_pruefer=True,sqlite=True,exportpaket=True,qt=True,
-                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,vorschau_anzeige=True,build=identity)
+                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,vorschau_anzeige=True,excel_import_export=True,automatic_pause=True,weekly_configuration=True,build=identity)
         code=0
     except Exception as exc:
         values=dict(selbsttest='fehlgeschlagen',fehler=str(exc),details=traceback.format_exc());code=1

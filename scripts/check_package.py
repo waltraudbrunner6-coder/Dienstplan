@@ -23,7 +23,7 @@ def check_v2_package(executable: Path,expected_commit=None) -> int:
         values=json.loads(report.read_text(encoding='utf-8'));print(json.dumps(values,ensure_ascii=False,indent=2))
         commit=values.get('build',{}).get('commit')
         valid=(values.get('selbsttest')=='bestanden' and values.get('personen')==12 and values.get('zuteilungen')==8
-               and all(values.get(key) is True for key in ('dst','solver_pruefer','sqlite','exportpaket','qt','hauptoberflaeche','standarddienste','ausschlussliste','stundenanzeige','dauerhafte_datei','vorschau_anzeige'))
+               and all(values.get(key) is True for key in ('dst','solver_pruefer','sqlite','exportpaket','qt','hauptoberflaeche','standarddienste','ausschlussliste','stundenanzeige','dauerhafte_datei','vorschau_anzeige','excel_import_export','automatic_pause','weekly_configuration'))
                and isinstance(commit,str) and len(commit)==40 and all(c in '0123456789abcdef' for c in commit)
                and (expected_commit is None or commit==expected_commit))
         if result.returncode or not valid:error_annotation(values.get('details') or 'V2-Paketprüfung unvollständig/fehlgeschlagen.')

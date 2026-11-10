@@ -36,6 +36,11 @@ def check_core(people, events, blocks, *, absences=(), boundary=(), check_fixed=
     if len(terms)!=len(events):error('identity','','','Doppelte Terminkennung.')
     coverage=[e.coverage_id for e in events if e.service.staff is not None]
     if len(coverage)!=len(set(coverage)):error('coverage','','','Mehrere Varianten desselben operativen Bedarfs sind gleichzeitig aktiv.')
+    extra_by_day=defaultdict(set)
+    for e in events:
+        if e.service.code in {'BK','WL'}:extra_by_day[e.attendance.start_day].add(e.service.code)
+    for day,codes in extra_by_day.items():
+        if codes=={'BK','WL'}:error('wl_bk_exclusion','',str(day),'BK und WL dürfen nicht am selben lokalen Startdatum stattfinden.')
     team_by_day=defaultdict(list)
     for e in events:
         if e.service.code in {'T','TS'}:team_by_day[e.attendance.start_day].append(e)

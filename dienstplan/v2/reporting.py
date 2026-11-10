@@ -28,7 +28,13 @@ class HoursRow:
 def hours_rows(people,blocks,entries,year,month,*,accounts,target_profile,month_profile):
     if target_profile!='S0' or month_profile!='M0':
         raise DomainError('Diese Rechenfunktion benötigt ausdrücklich S0 und M0 als Testprofile.')
-    people=tuple(people);blocks=tuple(blocks);entries=tuple(entries);accounts=tuple(accounts)
+    people=tuple(people);entries=tuple(entries);accounts=tuple(accounts)
+    unique={}
+    for b in blocks:
+        key=b.id,b.person_id
+        if key in unique and unique[key]!=b:raise DomainError('Widersprüchliche Versionen desselben Dienstes in der Stundenrechnung.')
+        unique[key]=b
+    blocks=tuple(unique.values())
     account_map={a.person_id:a for a in accounts}
     if len(account_map)!=len(accounts) or set(account_map)!={p.id for p in people}:
         raise DomainError('Für jede Person genau ein ausdrückliches Monatskonto angeben.')

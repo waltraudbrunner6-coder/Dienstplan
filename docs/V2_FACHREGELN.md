@@ -1,5 +1,13 @@
 # V2 – Fachregeln
 
+**Folgeauftrag Tabellenimport (10.11.2026):** zwei WL und ein BK pro Woche
+unabhängig von der Saison; BK/WL niemals am selben lokalen Startdatum. Die
+Randwochenentscheidung bleibt ausdrücklich auszuwählen. Manuelle Zuteilungen
+wählen ihre konkrete Pause automatisch vor 22 Uhr, sonst möglichst in der
+Dienstmitte, jeweils unter allen harten Regeln. Donnerstagswünsche/KC15/R und
+KC10 am Donnerstag werden aus unklaren Excel-Angaben nicht neu interpretiert.
+Siehe [Tabellenimport](TABELLENIMPORT.md).
+
 **Aktualisierung 10.11.2026:** Der ausdrückliche Folgeauftrag ersetzt ab Version 0.3.0 die alte Oberfläche durch die V2-Hauptanwendung. Es gibt keinen zusätzlichen Testbereich mehr. Dienstrechte werden als zeitgültige **Ausschlüsse** bedient; gespeicherte Rechte bleiben durch verlustfreie Komplementdarstellung erhalten. Zeitmengen erscheinen in Stunden, intern bleiben Minuten/Brüche. Neue Monate erhalten den Standardkatalog und die bestimmten Tagesmuster automatisch. Dieser Oberflächenauftrag entscheidet keine offenen Fach-/Tarifprofile und autorisiert keine Migration echter Altdateien. Historische Aussagen zum parallelen Altbetrieb weiter unten beschreiben den vorherigen Stand. Details: [Bedienung](V2_BEDIENUNG.md), [Fortschritt](V2_FORTSCHRITT.md).
 
 Aktueller Implementierungs- und Prüfstand: [Fortschritt](V2_FORTSCHRITT.md),
@@ -47,7 +55,7 @@ voller Arbeitsbewertung. Die Pause ist bereits in der Anwesenheit enthalten.
 | W17 | 17:00–01:00 +1 | Täglich außer Donnerstag, Außendienst, 2 verschiedene Personen | 30 / 450 min je Person |
 | TW | 14:30–00:00 +1 | Jeden Donnerstag, Außendienst mit vollständigem T, 2 verschiedene Personen; anstelle W17 | 30 / 540 min je Person |
 | W16 | 16:00–00:00 +1 | Dokumentierte Ausnahmealternative zu W17; derselbe Außendienstbedarf, 2 verschiedene Personen | 30 / 450 min je Person |
-| WL | 18:00–02:00 +1 | Zusatz-Außendienst; Dezember/Jänner 2, sonst 1 verschiedener Termin je Bezugswoche; je 2 Personen | 30 / 450 min je Person |
+| WL | 18:00–02:00 +1 | Zusatz-Außendienst; **Neue Vorgabe 10.11.2026: 2 verschiedene Termine je Bezugswoche in jedem Monat**; je 2 Personen | 30 / 450 min je Person |
 | BK | 20:00–04:00 +1 | Zusatz-Außendienst; 1 Termin je Bezugswoche, 2 Personen | 30 / 450 min je Person |
 | VN | 10:00–12:00 | Festgelegte Tage, jeweils festgelegte Person, 1 Platz | 0 / 120 min |
 | LB | 12:00–17:30; an TS-Tagen bis 19:30 | Jeder zweite Donnerstag ab Referenzdatum, 2 festgelegte Personen; enthält T bzw. gesamte TS-Veranstaltung | regulär 0 / 330 min; TS-Tag 30 / 420 min |

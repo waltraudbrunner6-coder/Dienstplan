@@ -1,5 +1,13 @@
 # V2 – Offene Entscheidungen und begrenzte Auswirkungen
 
+**Folgeauftrag 10.11.2026:** F07 ist hinsichtlich der betrieblichen Ausschlussregel
+geklärt: BK und WL niemals am selben lokalen Startdatum. WL-Anzahl jetzt zwei
+pro Woche in jedem Monat, BK einmal. Die Randwochenabgrenzung aus F06 bleibt als
+explizite Auswahl gespeichert; bisher kein globaler Standard bestätigt. Für die
+übergebenen Tabellen wurden Donnerstag-X, KC15/R/U und KC10 am Donnerstag gezielt
+nachgefragt; bis zur Antwort bleiben deren abhängige Angaben Korrekturfälle.
+Die früheren Fragen unten dokumentieren den bisherigen Entscheidungsstand.
+
 Aktueller Implementierungs- und Prüfstand: [Fortschritt](V2_FORTSCHRITT.md),
 [Zuordnung aller 125 Abnahmefälle](V2_ABNAHMESTATUS.md) und
 [Bedienung des technischen Prüfbereichs](V2_BEDIENUNG.md). Die nachfolgende
@@ -21,8 +29,8 @@ einzuführen. Testvarianten werden ausdrücklich als Testprofile gekennzeichnet.
 | F03 | Muss eine Mindestbesetzung während Pausen/Teamteilnahme durchgehend tatsächlich arbeiten? Wer darf real vertreten, an welchem Ort und mit welchen Einschränkungen? | Starttermin-Besetzung ohne ununterbrochene Arbeitsabdeckung oder zeitlich lückenlose Mindestabdeckung mit bestätigten Vertretungsrollen. Bei Letzterem reicht keine nominelle Zweierbesetzung mit gleichzeitigen Pausen. Vertretung darf keine verbotenen zusätzlichen Blöcke erzeugen. | Pausenkandidaten und Abdeckungsconstraints; echte Pausenobjekte und Zeitrechnung unabhängig fertigstellen |
 | F04 | Welches Soll-/Durchrechnungsprofil gilt bei Vertragswechsel, Teilmonat und Feiertag; welchem Abrechnungsmonat werden über Mitternacht/Monatsgrenzen laufende Arbeit und Ausgleichsgutschriften zugerechnet? | Technische Tagesanteilsregel `Σ W_d/7` versus belegter Dienst-/Sollkalender; tatsächlicher Arbeitsmonat versus ausdrückliche Dienststart-Zuordnung. Physische Kalender-/Nacht-/Feiertagsmengen bleiben in allen Varianten tatsächlich segmentiert. | Exaktes `S`, monatliches `P/G`, Salden; Verträge, Rohmengen und Beispielrechnungen mit benanntem Testprofil unabhängig |
 | F05 | Welche Datumsmenge innerhalb eines mehrtägigen Urlaubs ist als anrechenbare Urlaubstage zu erfassen? | Explizit ausgewählte Tage oder nachvollziehbar vorgeschlagene Tage aus einem bestätigten individuellen Arbeits-/Urlaubskalender. Nicht ungeprüft alle Kalendertage und nicht ungefragt Montag–Freitag annehmen. Feiertagsbehandlung aus F04/F01. | Tagesmenge der Gutschrift; die Formel **gültiges W/5**, harte Abwesenheit, Urlaub als frei und Deduplizierung sind entschieden |
-| F06 | Welche Bezugswoche besitzt WL/BK-Quoten, wie wird eine nur teilweise im Monat liegende Woche gemeinsam geplant, und woran hängt die saisonale WL-Zahl? | Vorschlag: gemeinsame ISO-Mo–So-Woche und eindeutiger Wochenbesitzer; Saison anhand Wochenbeginn oder ausdrücklich anderem Anker/anteiliger Regel. Beispiel 30.11.–06.12.2026 führt je nach bestätigtem Anker zu 1 oder 2 WL, aber nie zu zwei unabhängigen Monatsquoten. | Wochenkandidatengenerator, verbindliche Quoten und Randreservierungen; gemeinsame Termin-/Personenvariablen und Datumsfixierungen unabhängig |
-| F07 | Heißt WL/BK-Ausschluss gleicher lokaler Starttag, irgendeine tatsächliche Überschneidung oder beides? | Gleiches Startdatum verhindert z. B. beide am Freitag; Intervallregel prüft zusätzlich alle UTC-Überlappungen über Mitternacht. Nicht die Bedingung aus bloßem Dienstnamen erraten. | Zulässige Kandidatenpaare; Quoten-/Datums-/Personenmodell bleibt nutzbar |
+| F06 | Welche Bezugswoche und Randwochenabgrenzung gilt global? | Zwei WL und ein BK ganzjährig sind jetzt bestätigt. Die App bietet explizit gemeinsame ISO-Mo–So-Randwochen oder nur volle Monatswochen; kein stiller globaler Standard. | Gemeinsame Quoten/Reservierungen sind implementiert; die betriebliche Profilwahl bleibt ausdrücklich. |
+| F07 – geklärt 10.11.2026 | BK und WL dürfen niemals dasselbe lokale Startdatum haben. | Neue ausdrückliche Nutzervorgabe; als harte Regel unabhängig vom Wochenprofil geprüft. | Keine offene Variantenwahl mehr; F06 zur Randwochenabgrenzung bleibt gesondert. |
 | F10 | Welcher Monat zählt ein Samstag/Sonntag-Wochenende über der Monatsgrenze? Wie werden Eintritt/Austritt mitten im Monat und nur teilweise aktive Wochenenden gezählt? | Samstag- oder Sonntagbesitzer beziehungsweise ein bestätigtes anderes, eindeutiges Verfahren; Teilmonat unveränderte zwei Wochenenden oder explizite anteilige/anders geregelte Quote. Niemals dasselbe Wochenende zweimal als Ressource verplanen. | Monatsquote; tatsächliche Tagesbelegung, W17-Zählausnahme und Vorwochen-Freipaare unabhängig prüfen |
 | F14 | Ab welchem Planmonat/Datum wird V2 für neue Planstände wirksam? | Expliziter Stichtag, frühere bestätigte Monate bleiben Legacy; Übergangsmonate gegebenenfalls nur mit ausdrücklich versioniertem Profil. Kein automatischer Stichtag aus dem Programmdownload. | Profilwahl/Übernahme; additive Migration und Legacy-Archiv unabhängig |
 

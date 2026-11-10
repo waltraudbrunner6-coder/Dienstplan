@@ -1,5 +1,82 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
+## Aktueller Folgeauftrag: Excel-Import, Monatsansicht, Pausen und BK/WL (0.4.0)
+
+Implementiert: lokale XLSX-/CSV-Bediengrenze mit openpyxl 3.1.5 und festgelegter
+et_xmlfile-Abhängigkeit. Formate, Zuordnung und Grenzen: [TABELLENIMPORT.md](TABELLENIMPORT.md).
+Termine ohne Person, Dienstzuteilungen mit Fixierung, Urlaub, Einzel- und
+Wochenendwünsche können gemeinsam als vollständig geprüfter Stapel übernommen
+werden. Korrekturen/ID-Zuordnungen bleiben in SQLite vorgemerkt. Aktiver Plan,
+Abwesenheiten und Staging werden in einer Transaktion übernommen; Fehler rollen
+alles zurück. Bestätigte Monate bleiben geschützt; keine echte Datenmigration.
+
+Die bereitgestellten privaten Quelldateien wurden lokal ausgewertet, nicht ins
+Repository übernommen. Vorbereitete XLSX-Dateien liegen ausschließlich außerhalb
+des Repositories unter `/workspace/artifacts/dienstplan-import/`. November enthält
+172 importierte Zeilen plus drei Einträge der ursprünglichen 01.12.-Spalte in einer
+separaten Datei; zwei NH wurden wie erlaubt ignoriert. 13 Personenreferenzen werden
+erhalten, weil außerhalb der zwölf Hauptzeilen in Zeile 17 noch ein W17 steht.
+Dezember: 60 Zeilen, davon 48 gelbe Einzelwünsche, acht Dienstzuteilungen und vier
+ungeklärte U-Einträge, ohne vorweggenommene Urlaubszuordnung. Grüne Markierungen werden ignoriert.
+Keine Personenidentität zwischen Dateien aus identischen Zeilennummern geraten.
+
+Offen und gezielt nachgefragt: Donnerstagswünsche (bisher verboten), globale
+Randwochenabgrenzung, KC15-Zeiten, R-Zeitfenster/-Bewertung und U-Bedeutung sowie
+KC10 am Donnerstag 31.12. (kurzer KC10 oder KCT10). Unklare Werte bleiben erhalten,
+aber fehlerhafte Stapel werden nicht teilweise aktiv übernommen. Einige alte
+Besetzungs-/Zeitangaben können außerdem den aktuellen harten Regeln widersprechen;
+Einlesen ist keine Behauptung eines regelkonformen neuen Plans. IDs ergänzt die
+Bedienperson. Diese offenen Inhalte wurden nicht als „fertig importiert“ ausgegeben.
+
+Neue bestätigte Regel: ganzjährig zwei WL und ein BK pro Woche, keine BK/WL am
+selben lokalen Startdatum. F07 damit für den neuen Pfad geklärt; die alte saisonale
+Testfunktion bleibt nur als historisches Profil bestehen. Bei erster normaler
+Berechnung wird das Wochenprofil ausdrücklich gewählt (gemeinsame ISO-Randwochen
+oder ausdrücklich nur volle Monatswochen). Folgemonate übernehmen es. CP-SAT wählt
+Termine und Personen gemeinsam, Fixierungen bleiben bestehen; gemeinsame Quoten
+haben dieselbe ISO-ID, Nachbarmonate keine unabhängige zweite Wochenquote.
+Gespeicherte gemeinsame Termine und vorhandene Zuteilungen werden übernommen;
+widersprüchliche Änderungen werden abgelehnt. Kalenderzeiten im Nachbarmonat
+werden weder verborgen noch als nachgewiesene Freizeit angenommen. Stundenrechnung
+dedupliziert identische Zuteilungen in Randdaten und aktuellem Entwurf.
+
+Anzeige: Datum/Wochentag/Beginn/Ende in der Detailliste, zusätzliche Monatsmatrix
+mit festen Personenlabels beim Scrollen, Wochenenden und textlichen offenen
+Plätzen. XLSX-Export wie die Person×Datum-Vorlage mit Drucklayout, Stunden und
+offenen Plätzen sowie reimportierbaren Einzelzeilen. Bestehende Dateien werden
+nicht überschrieben, Fehler veröffentlichen keine halbe Datei. Konkrete Pausen,
+Fixierungsstatus und Budgetbesitz grenzüberschreitender Wochenendwünsche bleiben
+im Reimport erhalten. Im manuellen Ablauf nur Personenauswahl; konkrete Pause
+bevorzugt vor 22 Uhr des Starttags, sonst möglichst mittig, unter allen harten Regeln.
+
+Prüfungen: Ausgang 368 Tests bestanden in 88,80 s. Zwischenstände 384 Tests in
+109,18 s und 390 Tests in 96,35 s. Neue synthetische Regressionen für farbige Wünsche,
+Formelsicherheit, IDs, Duplikate, atomare gemischte Importe/Rollback, Speicherung,
+reale Solverfixierung, Wochenprofile/Randwochen, Stunden-Deduplizierung, Pausen,
+Excel-Reimport, Monatsgrenzen und Exportfehler. Keine privaten Tabellen als Testfixture.
+Paketprobe erweitert um Excel-Import/Export, automatische Pause und Wochenkonfiguration.
+Keine offenen KV-/BV-/Reserve-/Gutschriftprofile hierdurch als entschieden ausgegeben.
+
+Abschließender Gesamtlauf `.venv/bin/python scripts/run_tests.py`:
+**393 bestanden in 100,87 s**, keine Fehler/Skips. Gezielte letzte Prüfungen
+für neue Tabellen-, UI- und gekoppelte Regeln ebenfalls bestanden. `pip check`:
+keine defekten Anforderungen. Neue Abhängigkeiten direkt und im Lock festgelegt:
+openpyxl 3.1.5, et_xmlfile 2.0.0.
+
+Letzter vollständiger Gesamtlauf: **394 bestanden in 101,84 s**. Danach drei
+zusätzliche CSV-Formatfälle (BOM/Trennzeichen/Strukturfehler) mit dem gesamten
+neuen Tabellenmodul geprüft: **24 bestanden in 16,76 s**. Die Erwartung des neu
+angelegten Farbzellentests zu U wurde nach fachlicher Prüfung korrigiert:
+U ist nicht bestätigt, deshalb `u_zuordnung_offen` statt angenommener Urlaub.
+Die Originaleinträge bleiben erhalten und bis zur Entscheidung inaktiv. Keine
+bestehende harte Schutzregel wurde für einen grünen Test abgeschwächt.
+Neue native Paketprobe mit Excel-Roundtrip und echter Speicherübernahme im
+Quellcode bestanden; die native Matrix prüft zusätzlich den gesamten aktuellen Stand.
+
+Nächster Schritt: geprüften Stand committen und pushen, native Pakete bauen. Die von Fachantworten abhängigen Importzeilen
+bleiben bis zur Klärung vorgemerkt.
+
+
 ## Aktueller Fehlerbericht: berechneter Dienstplan bleibt unsichtbar (0.3.1)
 
 Ursache reproduziert: `on_worker_completed()` legte das Ergebnis ausschließlich
