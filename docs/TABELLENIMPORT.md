@@ -150,3 +150,10 @@ unbekannte Dienstkürzel ohne Zeitdefinition, ungültige oder mehrdeutige Zeiten
 widersprüchliche Kennungen und unvollständige Pausenintervalle müssen korrigiert
 werden. Ebenso wird eine ungeklärte Reserve-/Urlaubsgutschrift nicht erfunden.
 Beschädigte Daten und bestätigte historische Snapshots bleiben geschützt.
+
+Ab 0.4.2 wird jede Fixierung anhand von Termin-ID und Personen-ID genau einmal
+geführt. Ein Reimport nutzt die vorhandene Zuteilung mit ihrer konkreten Pause,
+auch wenn nach dem früheren Termin-Löschfehler der sichtbare Entwurf leer ist.
+Solche erhaltenen Fixierungen erscheinen als Wiederherstellungshinweis in der
+Vorschau. Dies ersetzt nicht die strenge Ablehnung tatsächlich widersprüchlicher
+Fixierungen im Datenmodell und lockert keine Solverregel.

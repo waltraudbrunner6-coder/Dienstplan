@@ -69,7 +69,7 @@ Minute. Neue V2-Konten haben Wunschende null; vorhandene Anfangssalden bleiben.
 Die neue Hauptanwendung speichert dauerhaft in `dienstplan-v2.sqlite3` im
 lokalen Anwendungsdatenordner. Beim nächsten Start wird der zuletzt vorhandene
 Monatsarbeitsstand geladen. Über **Datei öffnen** sind bisherige V2-Dateien
-mit Schema 3 weiter nutzbar. **Neue Datei** legt eine getrennte Datei an.
+mit Schema 3 weiter nutzbar. **Datei kopieren** legt eine getrennte Datei an.
 Für Sicherungen die Anwendung schließen und die SQLite-Datei kopieren.
 
 Die frühere `dienstplan.sqlite3` wird weder geöffnet noch verändert, gelöscht

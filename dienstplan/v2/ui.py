@@ -65,7 +65,7 @@ class Workbench(QDialog):
         self.build_identity=QLabel(build_label());self.build_identity.setWordWrap(True);layout.addWidget(self.build_identity)
         self.location=QLabel(str(database));layout.addWidget(self.location)
         top=QHBoxLayout();layout.addLayout(top)
-        for text,handler in (('Neue Datei',self.new_file),('Datei öffnen',self.open_file),('Monat wählen',self.new_month),('Arbeitsstand speichern',self.save),('Exportpaket',self.export),('Monat bestätigen',self.confirm)):
+        for text,handler in (('Datei kopieren',self.new_file),('Datei öffnen',self.open_file),('Monat wählen',self.new_month),('Arbeitsstand speichern',self.save),('Exportpaket',self.export),('Monat bestätigen',self.confirm)):
             button=QPushButton(text);button.clicked.connect(lambda checked=False,f=handler:self.guard(f));top.addWidget(button)
         imports=QHBoxLayout();layout.addLayout(imports)
         for text,handler in (('Termine / Dienstplan / Wünsche importieren',self.import_sheet),('Vorgemerkten Tabellenimport fortsetzen',self.resume_sheet),('Monatstabelle als Excel exportieren',self.export_grid),('BK/WL automatisch: 2 WL + 1 BK',self.configure_weekly)):
@@ -238,25 +238,44 @@ class Workbench(QDialog):
                 if old.attendance.start_day==day and old.service.code=='LB':
                     removed.add(old.id)
                     additions.append(event('LB_TS' if key=='TS' else 'LB',day,people=old.fixed_people))
-        candidates=service_candidates(additions,self.inputs.people)
-        from .validation import check_core
-        mandatory=tuple(e for e in self.inputs.events if e.id not in self.inputs.optional_ids and e.id not in removed)+tuple(additions)
-        structure=check_core(self.inputs.people,mandatory,(),check_fixed=False)
-        if structure.issues:raise ValueError('; '.join(i.message for i in structure.issues))
-        if not self.clear_plan():return
-        self.inputs=replace(self.inputs,events=tuple(e for e in self.inputs.events if e.id not in removed)+tuple(additions),
-                            candidates=tuple(b for b in self.inputs.candidates if b.id not in removed)+candidates,
-                            locked=tuple(b for b in self.inputs.locked if b.id not in removed),optional_ids=self.inputs.optional_ids-removed)
-        self.fill()
+        self.change_terms(removed,tuple(additions))
+
+    def change_terms(self,removed,additions=()):
+        """Nur betroffene Dienste entfernen; erst nach atomarem Speichern anzeigen."""
+        self.require_accepted_result()
+        inputs=replace(self.inputs,
+            events=tuple(e for e in self.inputs.events if e.id not in removed)+tuple(additions),
+            candidates=tuple(b for b in self.inputs.candidates if b.id not in removed)+service_candidates(additions,self.inputs.people),
+            locked=tuple(b for b in self.inputs.locked if b.id not in removed),
+            optional_ids=self.inputs.optional_ids-set(removed))
+        blocks=tuple(b for b in self.blocks if b.id not in removed)
+        events=None if self.events is None else tuple(e for e in self.events if e.id not in removed)+tuple(additions)
+        messages=()
+        if events is None:
+            from .validation import check_core
+            mandatory=tuple(e for e in inputs.events if e.id not in inputs.optional_ids)
+            messages=tuple(i.message for i in check_core(inputs.people,mandatory,(),check_fixed=False).issues)
+        else:
+            core,calendar=verify(inputs,blocks,active_events=events)
+            messages=tuple(i.message for i in core.issues+calendar.issues)
+            from .automatic_weekly import check_shared_weeks
+            try:check_shared_weeks(inputs,blocks,events,self.store.month_snapshots(inputs.year,inputs.month))
+            except ValueError as exc:messages+=(str(exc),)
+        if messages:
+            if not self.confirm_override(messages):return
+            inputs=replace(inputs,manual_override=True,override_notes=messages)
+        self.store.save_workspace(inputs,self.profile,blocks,events,expected_revision=self.store.input_revision)
+        self.inputs,self.blocks,self.events=inputs,blocks,events
+        self.proofs=();self.dirty();self.fill()
 
     def remove_term(self):
-        self.ensure_team_saved()
+        self.ensure_team_saved();self.require_accepted_result()
         row=self.term_table.currentRow()
         if row<0:return
         id=self.term_table.item(row,0).text()
-        if not self.clear_plan():return
-        self.inputs=replace(self.inputs,events=tuple(e for e in self.inputs.events if e.id!=id),candidates=tuple(b for b in self.inputs.candidates if b.id!=id),
-                            locked=tuple(b for b in self.inputs.locked if b.id!=id),optional_ids=self.inputs.optional_ids-{id});self.fill()
+        count=sum(b.id==id for b in self.blocks)
+        if QMessageBox.question(self,'Termin entfernen',f'Termin {id} und seine {count} Zuteilungen entfernen? Alle anderen Zuteilungen und Fixierungen bleiben erhalten.')!=QMessageBox.StandardButton.Yes:return
+        self.change_terms({id})
 
     def refresh_results(self):
         blocks,active_events,proofs=self.displayed_result()
@@ -335,7 +354,7 @@ class Workbench(QDialog):
 
     def new_file(self):
         if self.worker and self.worker.isRunning():raise ValueError('Berechnung zuerst abbrechen.')
-        path,_=QFileDialog.getSaveFileName(self,'Neue Dienstplandatei','','SQLite (*.sqlite3)')
+        path,_=QFileDialog.getSaveFileName(self,'Arbeitsstand in neue Dienstplandatei kopieren','','SQLite (*.sqlite3)')
         if not path:return
         inputs,profile=self.read_team();new=V2Store(path,create=True)
         try:new.save_workspace(inputs,profile,self.blocks,self.events,expected_revision=0)

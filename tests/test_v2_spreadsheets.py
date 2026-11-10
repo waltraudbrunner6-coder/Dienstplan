@@ -323,3 +323,26 @@ def test_native_excel_datetime_cells_preserve_shift_and_pause_times(tmp_path):
     assert block.attendance.start.astimezone(vienna()).hour==15
     assert block.work_minutes==450 and block.breaks[0].start.astimezone(vienna()).hour==19
     assert result.inputs.absences[0].credit_days==frozenset({date(2026,11,10)})
+
+
+def test_reimport_after_old_plan_clear_restores_locks_without_duplicate(tmp_path):
+    # Synthetischer Zustand aus dem bisherigen Termin-Löschpfad: Plan leer,
+    # Fixierungen mit ursprünglicher 21-Uhr-Pause weiterhin vorhanden.
+    data,p,old=technical_demo();data=replace(data,locked=old)
+    with V2Store(tmp_path/'copy.sqlite3',create=True) as store:
+        store.save_workspace(data,p,expected_revision=0)
+        loaded,profile,blocks,events=store.load_workspace(2026,11)
+        assert not blocks and events is None
+        proposal=prepare_plan_import(loaded,[row(day=str(old[0].attendance.start_day),code='WL',pid='A')],blocks=blocks,events=events,allow_rules=True)
+        assert proposal.ready,proposal.errors
+        assert set(proposal.blocks)==set(old)
+        assert proposal.inputs.locked==old
+        assert len({(b.id,b.person_id) for b in proposal.inputs.locked})==len(old)
+        store.apply_sheet_import(proposal,profile,expected_revision=store.input_revision)
+        assert set(store.load_workspace(2026,11)[2])==set(old)
+
+
+def test_conflicting_locks_are_still_rejected_by_domain_model():
+    data,_,old=technical_demo()
+    with pytest.raises(DomainError,match='Doppelte manuelle Fixierung'):
+        replace(data,locked=(old[0],replace(old[0],rule_override=True)))

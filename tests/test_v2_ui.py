@@ -302,3 +302,69 @@ def test_manual_rule_override_requires_confirmation_and_survives_reload(workbenc
     assert loaded[0].manual_override and loaded[2]==w.blocks
     assert not verify(loaded[0],loaded[2],active_events=loaded[3])[0].hard_ok
     assert 'REGELÜBERSTEUERUNG' in w.status.text()
+
+
+def test_remove_one_term_preserves_other_assignments_locks_and_restart(workbench):
+    from dataclasses import replace
+    w=workbench;old=w.blocks
+    w.inputs=replace(w.inputs,locked=old)
+    removed=w.inputs.events[0].id
+    before=tuple(b for b in old if b.id!=removed)
+    row=next(i for i in range(w.term_table.rowCount()) if w.term_table.item(i,0).text()==removed)
+    w.term_table.setCurrentCell(row,0);w.remove_term()
+    assert w.blocks==before
+    assert set(w.inputs.locked)==set(before)
+    assert all(e.id!=removed for e in w.inputs.events+w.events)
+    assert w.store.load_workspace(2026,11)==(w.inputs,w.profile,w.blocks,w.events)
+    from dienstplan.v2.plan_import import prepare_plan_import
+    rows=[dict(art='dienst',datum=str(b.attendance.start_day),dienst=b.code,person_id=b.person_id) for b in old]
+    proposal=prepare_plan_import(w.inputs,rows,blocks=w.blocks,events=w.events,allow_rules=True)
+    assert proposal.ready,proposal.errors
+    assert {(b.id,b.person_id) for b in proposal.blocks}=={(b.id,b.person_id) for b in old}
+    assert len(proposal.inputs.locked)==len(old)
+
+
+def test_term_deletion_rejected_or_failed_save_never_changes_current_plan(workbench,monkeypatch):
+    w=workbench;before=(w.inputs,w.blocks,w.events)
+    w.term_table.setCurrentCell(0,0)
+    monkeypatch.setattr(QMessageBox,'question',lambda *a:QMessageBox.StandardButton.No)
+    w.remove_term();assert (w.inputs,w.blocks,w.events)==before
+    monkeypatch.setattr(QMessageBox,'question',lambda *a:QMessageBox.StandardButton.Yes)
+    def fail(*a,**kw):raise OSError('Synthetisch: Datenträger voll')
+    monkeypatch.setattr(w.store,'save_workspace',fail)
+    with pytest.raises(OSError,match='Datenträger'):w.remove_term()
+    assert (w.inputs,w.blocks,w.events)==before
+    assert w.store.load_workspace(2026,11)==(w.inputs,w.profile,w.blocks,w.events)
+
+
+def test_add_term_keeps_existing_plan_and_saves_immediately(workbench):
+    w=workbench;old=w.blocks
+    w.day.setText('2026-11-10');w.code.setCurrentText('BK');w.add_term()
+    assert w.blocks==old and any(e.id=='2026-11-10/BK' for e in w.events)
+    assert w.store.load_workspace(2026,11)==(w.inputs,w.profile,w.blocks,w.events)
+
+
+def test_old_empty_plan_copied_to_new_database_can_be_reimported(workbench,tmp_path,monkeypatch):
+    from dataclasses import replace
+    from dienstplan.v2.plan_import import prepare_plan_import
+    w=workbench;old=w.blocks
+    w.inputs=replace(w.inputs,locked=old)
+    w.blocks=();w.events=None;w.fill()
+    target=tmp_path/'new-copy.sqlite3'
+    monkeypatch.setattr(QFileDialog,'getSaveFileName',lambda *a:(str(target),'SQLite'))
+    w.new_file()
+    rows=[dict(art='dienst',datum=str(b.attendance.start_day),dienst=b.code,person_id=b.person_id) for b in old]
+    proposal=prepare_plan_import(w.inputs,rows,blocks=w.blocks,events=w.events,allow_rules=True)
+    assert proposal.ready,proposal.errors
+    w.store.apply_sheet_import(proposal,w.profile,expected_revision=w.store.input_revision)
+    assert set(w.store.load_workspace(2026,11)[2])==set(old)
+
+
+def test_term_change_without_active_plan_still_checks_structure(workbench,monkeypatch):
+    w=workbench;w.blocks=();w.events=None;before=w.inputs
+    # WL exists on November 2 in the synthetic fixture; BK conflicts with it.
+    w.day.setText('2026-11-02');w.code.setCurrentText('BK')
+    messages=[]
+    monkeypatch.setattr(w,'confirm_override',lambda issues:messages.extend(issues) or False)
+    w.add_term()
+    assert w.inputs==before and messages and any('BK' in m and 'WL' in m for m in messages)

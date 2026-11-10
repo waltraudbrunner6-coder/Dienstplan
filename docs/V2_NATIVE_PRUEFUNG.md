@@ -1,3 +1,7 @@
+> Folgeversion 0.4.2 korrigiert Planverlust bei Terminänderungen und doppelte
+> Fixierungen beim Reimport. Die folgenden Links gehören noch zu 0.4.1; neue
+> Pakete werden erst nach erfolgreichem nativem Prüflauf ergänzt.
+
 # Dienstplan 0.4.1 – ausdrückliche Regelübersteuerung
 
 Stand 10.11.2026. Programm-/Testcommit **72b168a**. Alle drei nativen Ziele haben Testsuite, Paketbuild und Paket-Selbsttests erfolgreich abgeschlossen.

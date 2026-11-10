@@ -121,7 +121,7 @@ nicht bedienbar. Wiederholen erzeugt keine doppelte Historie.
 Die Standarddatei heißt **dienstplan-v2.sqlite3** im lokalen Anwendungsdatenordner.
 Beim nächsten Start wird der zuletzt vorhandene Monatsarbeitsstand geladen.
 **Datei öffnen** unterstützt bisherige V2-Dateien mit Schema 3.
-**Neue Datei** speichert eine separate Kopie des Arbeitsstands.
+**Datei kopieren** speichert eine separate Kopie des Arbeitsstands.
 Die frühere `dienstplan.sqlite3` wird nicht automatisch geöffnet oder verändert.
 Sie wird nicht ungeprüft als Urlaub/BK/WL umgedeutet.
 
@@ -136,3 +136,24 @@ Stunden. Bestehende Exportdateien werden nicht überschrieben.
 Offene Produktprofile und tatsächliche Prüfstände:
 [offene Fragen](V2_OFFENE_FRAGEN.md), [Fortschritt](V2_FORTSCHRITT.md),
 [native Downloads](V2_NATIVE_PRUEFUNG.md), [Abnahmestatus](V2_ABNAHMESTATUS.md).
+
+### Terminänderungen und erneuter Import (ab 0.4.2)
+
+„Termin entfernen“ löscht ausschließlich den gewählten Termin sowie seine
+Zuteilungen und Fixierungen. Die Bestätigung nennt deren Anzahl. Alle übrigen
+Dienste bleiben sichtbar und werden zusammen mit der Änderung sofort gespeichert.
+Auch beim Ergänzen eines Termins bleibt der übrige Plan erhalten. Verletzt die
+Änderung eine Planungsregel, ist weiterhin die ausdrückliche Übersteuerung nötig.
+Ein abgelehnter Dialog oder Speicherfehler verändert den bisherigen Plan nicht.
+
+War der Plan mit einer früheren Version nach einer Terminänderung verschwunden,
+die bestehende Monatsdatei mit 0.4.2 öffnen und den ursprünglichen Plan erneut
+importieren. Verbliebene Fixierungen werden einschließlich ihrer konkreten
+Pausen wiederverwendet, nicht doppelt angelegt. Die Importvorschau weist auf die
+Wiederherstellung hin. Falls der ursprüngliche Plan Regelverletzungen enthält,
+„Regeln für diesen Import übergehen“ wie bisher ausdrücklich auswählen.
+
+„Datei kopieren“ war früher als „Neue Datei“ beschriftet. Diese Funktion kopiert
+den aktuellen Arbeitsstand einschließlich bestehender Fixierungen in eine
+separate Datei. Sie setzt den Monat nicht zurück. Zur Fehlerbehebung ist keine
+neue Datenbank erforderlich; die Originaldatei kann erhalten bleiben.

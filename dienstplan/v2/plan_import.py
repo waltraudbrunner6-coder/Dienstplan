@@ -58,8 +58,11 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
     errors=[];notes=[];groups={};new_entries=[]
     people={p.id:p for p in inputs.people};terms={e.id:e for e in inputs.events}
     selected=set(e.id for e in (events or ()) if e.id in inputs.optional_ids)
-    requested=set();removed=set();locks=list(inputs.locked)
-    retained=tuple(b for b in blocks if not discard_unfixed or b in locks)
+    requested=set();removed=set();locks={(b.id,b.person_id):b for b in inputs.locked}
+    retained=tuple(b for b in blocks if not discard_unfixed or b in locks.values())
+    if not blocks and events is None and locks:
+        retained=tuple(locks.values())
+        notes.append(f'{len(retained)} vorhandene fixierte Zuteilungen aus dem vorherigen Arbeitsstand wiederhergestellt.')
     absences={e.identity:e for e in inputs.absences}
     for n,row in enumerate(rows,2):
         source=row.get('quelle') or f'Importzeile {n}'
@@ -117,7 +120,7 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
             terms[term.id]=term;requested.add(term.id)
             if service.code=='R' and assigned:raise DomainError('Reserve-Arbeitsbewertung fehlt; Termin kann ohne Zuteilung importiert werden.')
         except (ValueError,KeyError,DomainError) as exc:errors.append(f'{day}/{code}: {exc}')
-    if not allow_rules and any(b.id in removed for b in locks):errors.append('Eine importierte Alternative würde einen fixierten Dienst entfernen; Fixierung ausdrücklich lösen.')
+    if not allow_rules and any(b.id in removed for b in locks.values()):errors.append('Eine importierte Alternative würde einen fixierten Dienst entfernen; Fixierung ausdrücklich lösen.')
     retained=tuple(b for b in retained if b.id not in removed)
     updated=replace(inputs,events=tuple(terms.values()),absences=tuple(absences.values()),optional_ids=inputs.optional_ids-removed-requested)
     for (day,code),items in groups.items():
@@ -131,12 +134,12 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
                 choices=(term.assign(pid,(Interval.local(row['pause_von'],row['pause_bis']),),allow_rules=allow_rules),) if row.get('pause_von') and row.get('pause_bis') else automatic_pause_choices(term,pid,allow_rules=allow_rules)
                 if not choices:raise DomainError('Keine zulässige konkrete Pause möglich.')
                 block=choices[0]
-                prior=next((b for b in retained if b.id==block.id and b.person_id==pid),None)
+                prior=next((b for b in retained if b.id==block.id and b.person_id==pid),None) or locks.get((block.id,pid))
                 if prior is not None:block=prior
-                else:retained+=(block,)
-                if row.get('fixiert','ja').strip().lower() not in {'nein','0','false'} and block not in locks:locks.append(block)
+                if not any(b.id==block.id and b.person_id==pid for b in retained):retained+=(block,)
+                if row.get('fixiert','ja').strip().lower() not in {'nein','0','false'}:locks[(block.id,pid)]=block
             except (ValueError,DomainError) as exc:errors.append(f'{source}: {exc}')
-    updated=replace(updated,locked=tuple(b for b in locks if b.id not in removed))
+    updated=replace(updated,locked=tuple(b for b in locks.values() if b.id not in removed))
     # Persönliche Budgets gemeinsam mit schon gespeicherten Wünschen prüfen.
     if budgets is not None:
         for pid,owner in {(e.person_id,e.budget_month) for e in new_entries if e.kind!='urlaub'}:

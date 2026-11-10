@@ -1,5 +1,9 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
+Aktueller Folgeauftrag: **0.4.2 – Terminänderungen ohne Planverlust und Reimport
+ohne doppelte Fixierung**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
+die folgenden älteren Etappenberichte bleiben als Verlauf erhalten.
+
 ## Aktueller Folgeauftrag: Excel-Import, Monatsansicht, Pausen und BK/WL (0.4.0)
 
 Implementiert: lokale XLSX-/CSV-Bediengrenze mit openpyxl 3.1.5 und festgelegter
@@ -768,3 +772,36 @@ Build und beide gebauten Programmproben je Ziel grün. Rohdaten unter
 Aktuelle Downloads und gemessene Größen: `V2_NATIVE_PRUEFUNG.md`. Nachfolgende
 reine Nachweis-/Dokumentationscommits ändern diesen Programm-/Testcode nicht.
 Keine Datenbankmigration; keine Zusammenführung nach main.
+
+## Fehlerkorrektur: Termin löschen leert Plan / doppelte Fixierung (0.4.2)
+
+Reproduziert mit synthetischen Daten: beide neuen Regressionen scheiterten vor
+der Korrektur (leerer Plan nach `remove_term`, `Doppelte manuelle Fixierung`
+beim Import mit erhaltenen Fixierungen und anderer konkreter Pause/Overrideflag).
+Ursache: globales `clear_plan()` bei einzelnen Terminänderungen; Reimport verglich
+Fixierungen als vollständige Objekte statt nach Termin-/Personenkennung.
+
+Korrektur: Terminergänzung/-entfernung erhält alle unbetroffenen Zuteilungen und
+Fixierungen; transaktionales Speichern vor UI-Änderung; gleiche Regelprüfung und
+explizite Übersteuerung wie zuvor. Löschbestätigung nennt betroffene Einsätze.
+Import verwendet eine eindeutige Fixierungszuordnung; bei früher geleertem
+Entwurf werden verbliebene Fixierungen einschließlich konkreter Pausen in der
+Vorschau wiederhergestellt. Kein Herabsetzen der strengen Domain-Duplikatprüfung.
+Die Kopierfunktion heißt nun eindeutig „Datei kopieren“ (keine neue leere DB).
+
+Neue Regressionen: Löschung plus erneuter Import, Speicher-/Neustartstand,
+Abbruch und künstlicher Schreibfehler ohne Mutation, Terminergänzung ohne
+Planverlust, Wiederherstellung aus kopierter alter Leerfassung, strenge Ablehnung
+widersprüchlicher Fixierungen, Strukturprüfung ohne aktiven Plan. Nur synthetische
+Dateien getestet; keine Benutzerdatenbank geöffnet oder migriert.
+Testergebnisse und native Pakete werden nach Abschluss ergänzt.
+
+Prüfungen: beide Fehler vor Änderung reproduziert (2 fehlgeschlagene neue Tests).
+Gezielte Zwischenläufe: 47 bzw. 50 Tests erfolgreich. Gesamtlauf vor der letzten
+Strukturregression: 417 bestanden in 191,21 s. Abschließender serieller Gesamtlauf
+`QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -q --disable-warnings
+--maxfail=1`: **418 bestanden in 152,68 s**. Ein parallel zum ersten Gesamtlauf
+gestarteter Qt-Lauf erreichte im bestehenden 1-Sekunden-Solvertest keine volle
+Besetzung; unveränderte Erwartung im seriellen Gesamtlauf erfolgreich. Keine
+Testanforderung oder Solverregel abgeschwächt. `git diff --check` fehlerfrei.
+Native Pakete werden nach diesem geprüften Programm-/Testcommit erzeugt.
