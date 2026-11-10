@@ -1,0 +1,21 @@
+Vorbereitete Importdateien – keine Originaldatei verändert
+
+1. November_2026_Import.xlsx: Novemberdaten. Zwei NH wie beauftragt ignoriert.
+2. Dezember_01_aus_November_Import.xlsx: zusätzliche Spalte 01.12. aus dem Novemberblatt separat erhalten.
+3. Dezember_2026_Wuensche_Import.xlsx: gelbe X als Freiwunsch, grüne X ignoriert, Dienstkürzel fixiert, U als ungeklärte Zuordnung (u_zuordnung_offen), ohne vorweggenommene Urlaubsinterpretation.
+
+Im Blatt Personen pro Quellzeile die tatsächliche stabile Personen-ID der App eintragen.
+Die gleichen Zeilennummern in zwei Dateien sind keine bestätigte Identitätszuordnung.
+Die Originale enthalten keine Namen/IDs. November hat einen zusätzlichen Eintrag in Zeile 17.
+Die App: Termine / Dienstplan / Wünsche importieren → Datei öffnen → Vorschau prüfen.
+Gegebenenfalls das gewünschte Wunschbudget ausdrücklich anpassen.
+Nur der vollständig gültige Import wird aktiv; Fehler bleiben zur Korrektur vorgemerkt.
+
+Offene Angaben: KC15-Zeiten, konkrete R-Variante und Reservebewertung,
+Donnerstagswünsche (bisher verboten), KC10 am Donnerstag, erforderliche N17-Führerscheine.
+Die Tabelle ist nicht automatisch ein regelkonformer neuer Plan: auch mehrere gleichzeitige
+Dienste pro Datum/Typ und Ruhezeiten werden in der Vorschau geprüft.
+Für KC15 darf keine Uhrzeit geraten werden. FK mit ausdrücklich eingegebenen Zeiten kann
+als individuelle Zuteilung verwendet werden, falls diese fachlich bestätigt ist.
+
+Die vorbereiteten Dateien wurden auf ausdrücklichen Wunsch ins Repository aufgenommen. Die hochgeladenen Originaldateien bleiben außerhalb des Repositorys.
