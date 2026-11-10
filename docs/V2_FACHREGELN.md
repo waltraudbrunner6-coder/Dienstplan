@@ -1,5 +1,10 @@
 # V2 – Fachregeln
 
+Aktueller Implementierungs- und Prüfstand: [Fortschritt](V2_FORTSCHRITT.md),
+[Zuordnung aller 125 Abnahmefälle](V2_ABNAHMESTATUS.md) und
+[Bedienung des technischen Prüfbereichs](V2_BEDIENUNG.md). Die nachfolgende
+Etappe-A-Spezifikation bleibt die fachliche Grundlage; Testprofile ersetzen sie nicht.
+
 Stand 09.11.2026, Etappe A. **Soll-Spezifikation, keine implementierte V2-Funktion.**
 Die Altversion bleibt nach [Spezifikation 0.2](SPEZIFIKATION.md) bedienbar.
 Feste Anforderungen dieses Dokuments werden nicht erneut zur Entscheidung gestellt.

@@ -304,6 +304,22 @@ Fachfunktion/Testprofil, Teilprüfung und noch fehlende Produktintegration sind
 getrennt. Insbesondere ist X04 kein bereits bestandener vollständiger Betriebsmonat.
 Ein abschließender nativer Lauf des folgenden Schutzsatzes wird separat belegt.
 
+## Gemeinsame Team-Integration und aktueller Gesamtstand
+
+`tests/test_v2_team_integration.py`: **4 bestanden in 8,48 s**. Echte gemeinsame
+CP-SAT-Instanz mit zwölf Personen: D03 genau vier operative Plätze plus acht T,
+3465 Minuten; D04 acht TS und vier enthaltene T-Ausnahmen ohne doppelte Teilnahme;
+D07/O03 lässt BK-Personen bei nur 630 Minuten Ruhe ausgenommen; U04 berechnet
+vorgegebene Urlaubstage über W=37/30 exakt mit 1968 Minuten. Kein bloßes UI-Beispiel.
+Die Zuordnung D03/D04/U04 wurde entsprechend auf vollständige Fach-/Testprofilprüfung
+angehoben. Das ersetzt weiterhin keinen vollständigen Betriebsmonat.
+
+Letzter gesamter lokaler Lauf: **329 bestanden in 84,68 s**. Der Programmcode
+`b358351` hat Run `42724231255` auf allen drei nativen Zielarchitekturen einschließlich
+der 325 damaligen Tests und beider Paket-Selbsttests bestanden. Die vier zusätzlich
+geprüften Teamfälle ändern keinen Programmcode; der anschließende native Lauf
+führt auch diesen erweiterten Teststand aus und wird im nativen Bericht belegt.
+
 ## Offene Fachentscheidungen und Grenzen
 
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits

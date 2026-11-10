@@ -1,5 +1,10 @@
 # V2 – Offene Entscheidungen und begrenzte Auswirkungen
 
+Aktueller Implementierungs- und Prüfstand: [Fortschritt](V2_FORTSCHRITT.md),
+[Zuordnung aller 125 Abnahmefälle](V2_ABNAHMESTATUS.md) und
+[Bedienung des technischen Prüfbereichs](V2_BEDIENUNG.md). Die nachfolgende
+Etappe-A-Spezifikation bleibt die fachliche Grundlage; Testprofile ersetzen sie nicht.
+
 Stand 09.11.2026. Die bestätigten Regeln stehen in
 [V2_FACHREGELN.md](V2_FACHREGELN.md). Eine offene Profilentscheidung blockiert nur
 die hier genannten Teile. Kalender, Personen-/Vertragsmodell, echte Arbeits-/

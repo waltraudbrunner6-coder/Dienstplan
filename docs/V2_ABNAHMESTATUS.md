@@ -10,14 +10,14 @@ ausgeführte Plattformläufe stehen in [V2_FORTSCHRITT.md](V2_FORTSCHRITT.md).
 
 ## D
 
-Prüfbelege: [test_v2_catalog_entries.py](../tests/test_v2_catalog_entries.py), [test_v2_validation.py](../tests/test_v2_validation.py).
+Prüfbelege: [test_v2_catalog_entries.py](../tests/test_v2_catalog_entries.py), [test_v2_validation.py](../tests/test_v2_validation.py), [test_v2_team_integration.py](../tests/test_v2_team_integration.py).
 
 | ID | Abdeckung | Grenze / nächster Nachweis |
 | --- | --- | --- |
 | D01 | Teilweise | Katalog-/Teilnahmefunktion und Kernprüfung vorhanden; keine vollständige betriebliche Monatsinstanz abgenommen. |
 | D02 | Teilweise | Katalog-/Teilnahmefunktion und Kernprüfung vorhanden; keine vollständige betriebliche Monatsinstanz abgenommen. |
-| D03 | Teilweise | Enthaltene Teilnahme geprüft; exakte gemeinsame zwölfköpfige 3465-Minuten-Integration noch nicht als eigener Fall automatisiert. |
-| D04 | Teilweise | TS-Links/Ausnahmen geprüft; vollständige gemeinsame zwölfköpfige Integration bleibt gesondert. |
+| D03 | Vollständig als Fachfunktion/Testprofil | Gemeinsame CP-SAT-Zwölferinstanz: vier operative Plätze plus acht T-Blöcke, genau 3465 Arbeitsminuten, zwölf einmalige Erfüllungen. |
+| D04 | Vollständig als Fachfunktion/Testprofil | Gemeinsame CP-SAT-Zwölferinstanz: vier operative T-/TS-Ausnahmen plus acht TS-Blöcke; keine doppelte Zeit/Teilnahme. |
 | D05 | Teilweise | Katalog-/Teilnahmefunktion und Kernprüfung vorhanden; keine vollständige betriebliche Monatsinstanz abgenommen. |
 | D06 | Teilweise | Katalog-/Teilnahmefunktion und Kernprüfung vorhanden; keine vollständige betriebliche Monatsinstanz abgenommen. |
 | D07 | Teilweise | Katalog-/Teilnahmefunktion und Kernprüfung vorhanden; keine vollständige betriebliche Monatsinstanz abgenommen. |
@@ -86,14 +86,14 @@ Prüfbelege: [test_v2_calendar_rules.py](../tests/test_v2_calendar_rules.py), [t
 
 ## U
 
-Prüfbelege: [test_v2_foundation.py](../tests/test_v2_foundation.py), [test_v2_validation.py](../tests/test_v2_validation.py), [test_v2_workspace_export.py](../tests/test_v2_workspace_export.py).
+Prüfbelege: [test_v2_foundation.py](../tests/test_v2_foundation.py), [test_v2_validation.py](../tests/test_v2_validation.py), [test_v2_workspace_export.py](../tests/test_v2_workspace_export.py), [test_v2_team_integration.py](../tests/test_v2_team_integration.py).
 
 | ID | Abdeckung | Grenze / nächster Nachweis |
 | --- | --- | --- |
 | U01 | Teilweise | Abwesenheit/Gutschrift-/Korrekturteil geprüft; anrechenbare betriebliche Tagesmenge F05 separat. |
 | U02 | Teilweise | Abwesenheit/Gutschrift-/Korrekturteil geprüft; anrechenbare betriebliche Tagesmenge F05 separat. |
 | U03 | Teilweise | Abwesenheit/Gutschrift-/Korrekturteil geprüft; anrechenbare betriebliche Tagesmenge F05 separat. |
-| U04 | Teilweise | Abwesenheit/Gutschrift-/Korrekturteil geprüft; anrechenbare betriebliche Tagesmenge F05 separat. |
+| U04 | Vollständig als Fachfunktion/Testprofil | Exakte vorgegebene Tagesmenge: zweimal 37/5 plus dreimal 30/5 Stunden = 1968 Minuten, zeitgültige Vertragsversionen. |
 | U05 | Teilweise | Fehlende Gutschrifttage ausdrücklich ungeklärt, Bestätigung/Stundenoptimierung blockiert; keine Nullgutschrift angenommen. Betrieblicher Tagesvorschlag F05 offen. |
 | U06 | Teilweise | Abwesenheit/Gutschrift-/Korrekturteil geprüft; anrechenbare betriebliche Tagesmenge F05 separat. |
 | U07 | Teilweise | Abwesenheit/Gutschrift-/Korrekturteil geprüft; anrechenbare betriebliche Tagesmenge F05 separat. |

@@ -1,5 +1,10 @@
 # V2 – Bestandsaufnahme, Etappe A
 
+Aktueller Implementierungs- und Prüfstand: [Fortschritt](V2_FORTSCHRITT.md),
+[Zuordnung aller 125 Abnahmefälle](V2_ABNAHMESTATUS.md) und
+[Bedienung des technischen Prüfbereichs](V2_BEDIENUNG.md). Die nachfolgende
+Etappe-A-Spezifikation bleibt die fachliche Grundlage; Testprofile ersetzen sie nicht.
+
 Stand: 09.11.2026. Geprüfte Basis: `eae8ed882fb597c8f82fe92a6aeca247ffe9c0e1`,
 identisch mit dem beim Audit abgefragten Remote-`main`. Arbeitsbranch:
 `docs/v2-etappe-a`. Vor Arbeitsbeginn war der Arbeitsstand sauber.
