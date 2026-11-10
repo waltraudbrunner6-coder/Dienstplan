@@ -58,10 +58,21 @@ def run(report_path=None):
             assert reopened.inputs.people[0].name=='Dauerhaft gespeicherte Beispielperson'
             assert len(reopened.inputs.events)==94
             reopened.close()
+            preview_window=Workbench(database=Path(directory)/'vorschau.sqlite3',initial=(inputs,profile,old),year=2026,month=11)
+            from .serialization import fingerprint
+            token=(preview_window.generation,preview_window.store.input_revision,inputs.fingerprint,fingerprint(profile))
+            preview_window.on_worker_completed(result,token)
+            assert preview_window.pending and preview_window.tabs.currentWidget() is preview_window.plan.parentWidget()
+            assert preview_window.plan.rowCount()==8
+            assert all(preview_window.plan.item(row,3).text()!='OFFEN' for row in range(8))
+            assert 'VORSCHLAG' in preview_window.plan_state.text()
+            preview_window.accept.click()
+            assert preview_window.store.load_workspace(2026,11)[2]==result.blocks
+            preview_window.close()
         values=dict(selbsttest='bestanden',scope='Hauptoberfläche mit Standardmonat; Rechenkette separat mit synthetischer Fixture',
                     personen=12,zuteilungen=8,tzdata=TZDATA_VERSION,iana=IANA_VERSION,
                     dst=True,solver_pruefer=True,sqlite=True,exportpaket=True,qt=True,
-                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,build=identity)
+                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,vorschau_anzeige=True,build=identity)
         code=0
     except Exception as exc:
         values=dict(selbsttest='fehlgeschlagen',fehler=str(exc),details=traceback.format_exc());code=1

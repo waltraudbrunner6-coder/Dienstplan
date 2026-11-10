@@ -4,6 +4,11 @@ Lokale, deutschsprachige Desktop-Anwendung für Monatsdienstpläne mit Python/Qt
 OR-Tools CP-SAT und SQLite. Planung und Speicherung funktionieren offline.
 Ergebnisse sind Planprognosen, keine tatsächlich erfassten Arbeitszeiten.
 
+**Anzeigekorrektur 0.3.1:** Berechnete Vorschläge erscheinen sofort im Reiter
+**Dienstplan**, einschließlich zugeteilter Namen und zugehöriger Stundenübersichten.
+Erst **Ergebnis übernehmen** speichert den Vorschlag; bestehende Pläne bleiben
+bis dahin erhalten. Die Vorschau lässt sich verwerfen oder direkt exportieren.
+
 ## Start
 
 Windows: den vollständigen Paketordner entpacken und `Dienstplan.exe` öffnen.

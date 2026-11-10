@@ -36,8 +36,14 @@ def test_real_qt_input_solver_explicit_acceptance_storage_and_export(workbench,t
     assert w.inputs.people[0].contracts.versions[0].weekly_hours==Fraction(626,25)
     w.seconds.setValue(1);w.start();wait_worker(w)
     assert w.pending and not w.blocks
+    assert w.tabs.currentWidget() is w.plan.parentWidget()
+    assert all(w.plan.item(row,3).text()!='OFFEN' for row in range(w.plan.rowCount()))
+    assert 'VORSCHLAG' in w.plan_state.text()
+    assert w.store.load_workspace(2026,11)[2]==()
+    assert any(w.hours.item(row,6).text()!='0,00' for row in range(w.hours.rowCount()))
     w.apply_result()
     assert len(w.blocks)==8 and w.store.load_workspace(2026,11)[2]==w.blocks
+    assert 'VORSCHLAG' not in w.plan_state.text()
     target=tmp_path/'export.zip'
     monkeypatch.setattr(QFileDialog,'getSaveFileName',lambda *a:(str(target),'ZIP'))
     w.export();assert target.is_file()
@@ -132,3 +138,75 @@ def test_manual_wish_edit_stays_staged_then_replaces_without_double_budget(workb
     assert w.inputs.absences[0].span.start_day.isoformat()=='2026-11-11'
     w.active.setCurrentCell(0,0);w.delete_entry()
     assert not w.inputs.absences and not w.store.entries() and not w.store.load_workspace(2026,11)[0].absences
+
+
+def preview_result(w,blocks=None):
+    from dienstplan.v2.solver import FeasibilityResult
+    from dienstplan.v2.serialization import fingerprint
+    selected=blocks if blocks is not None else tuple(b for b in w.inputs.candidates if b.person_id in {'C','D'})
+    result=FeasibilityResult('feasible',selected,(),(),(),False,0,w.inputs.fingerprint,w.inputs.profile_label,events=w.inputs.events)
+    token=(w.generation,w.store.input_revision,w.inputs.fingerprint,fingerprint(w.profile))
+    w.on_worker_completed(result,token)
+    return result
+
+
+def test_preview_preserves_old_plan_and_can_be_discarded(workbench):
+    w=workbench;saved=w.store.load_workspace(2026,11);old=w.blocks
+    preview_result(w)
+    assert w.pending and w.blocks==old
+    assert all('(C)' in w.plan.item(r,3).text() or '(D)' in w.plan.item(r,3).text() for r in range(w.plan.rowCount()))
+    assert w.store.load_workspace(2026,11)==saved
+    with pytest.raises(ValueError,match='übernehmen'):w.confirm()
+    with pytest.raises(ValueError,match='übernehmen'):w.selected()
+    w.discard_preview.click()
+    assert w.pending is None and w.blocks==old
+    assert all('(A)' in w.plan.item(r,3).text() or '(B)' in w.plan.item(r,3).text() for r in range(w.plan.rowCount()))
+    assert w.store.load_workspace(2026,11)==saved
+
+
+def test_export_and_acceptance_use_visible_preview_and_survive_restart(workbench,tmp_path,monkeypatch):
+    import zipfile,json
+    from dienstplan.v2.codec import restore_workspace
+    w=workbench;result=preview_result(w);old=w.blocks
+    target=tmp_path/'preview.zip'
+    monkeypatch.setattr(QFileDialog,'getSaveFileName',lambda *a:(str(target),'ZIP'))
+    w.export()
+    with zipfile.ZipFile(target) as archive:
+        assert restore_workspace(json.loads(archive.read('arbeitsstand.json')))[2]==result.blocks
+    assert w.store.load_workspace(2026,11)[2]==old
+    w.accept.click()
+    assert w.blocks==result.blocks and w.pending is None
+    reopened=Workbench(database=w.store.path)
+    try:
+        assert reopened.blocks==result.blocks
+        assert '(C)' in reopened.plan.item(0,3).text() or '(D)' in reopened.plan.item(0,3).text()
+    finally:reopened.close()
+
+
+def test_editing_inputs_removes_preview_and_updates_visible_tables(workbench):
+    w=workbench;preview_result(w)
+    w.team.item(0,1).setText('Neue Eingabe')
+    assert w.pending is None and not w.accept.isEnabled()
+    assert 'VORSCHLAG' not in w.plan_state.text()
+    assert all('(C)' not in w.plan.item(r,3).text() and '(D)' not in w.plan.item(r,3).text() for r in range(w.plan.rowCount()))
+
+
+def test_partial_and_zero_assignment_results_are_visible_and_honest(workbench):
+    from dataclasses import replace
+    w=workbench
+    result=preview_result(w,())
+    assert all(w.plan.item(r,3).text()=='OFFEN' for r in range(w.plan.rowCount()))
+    assert '8 offene Plätze' in w.status.text() and 'Noch keine Person' in w.status.text()
+    w.discard_result()
+    chosen=tuple(b for b in w.inputs.candidates if b.person_id=='C')[:1]
+    preview_result(w,chosen)
+    assert '7 offene Plätze' in w.status.text()
+    assert sum(w.plan.item(r,3).text()!='OFFEN' for r in range(w.plan.rowCount()))==1
+
+
+def test_invalid_result_is_not_shown_as_preview(workbench):
+    w=workbench;old=w.blocks
+    preview_result(w,old+(old[0],))
+    assert w.pending is None and w.blocks==old
+    assert 'verletzt verbindliche Regeln' in w.status.text()
+    assert 'VORSCHLAG' not in w.plan_state.text()

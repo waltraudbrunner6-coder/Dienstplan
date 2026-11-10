@@ -98,8 +98,14 @@ Kalendermonat zu. Urlaub berücksichtigt nur ausdrücklich anrechenbare Tage
 mit gültigem W/5. Ziel `S+E−B−G`, Prognoseende `B+P+G−S`.
 Fehlende Urlaubsgutschrifttage bleiben ungeklärt, keine angenommene Nullgutschrift.
 
-Die Berechnung läuft im Hintergrund und ist abbrechbar. **Ergebnis übernehmen**
-übernimmt einen unabhängig geprüften Vorschlag. Geänderte Eingaben machen ein
+Die Berechnung läuft im Hintergrund und ist abbrechbar. Nach der Berechnung öffnet sich automatisch **Dienstplan** mit dem unabhängig
+geprüften Vorschlag. Die Tabelle zeigt zugeteilte Namen und offene Plätze sofort;
+Stunden, Schichtverteilung und Wünsche beziehen sich ebenfalls auf diese Vorschau.
+**VORSCHLAG – noch nicht gespeichert** kennzeichnet den Zustand.
+**Ergebnis übernehmen** speichert ihn dauerhaft. **Vorschlag verwerfen und bisherigen
+Plan anzeigen** stellt die bisherige Anzeige wieder her. Bis zur Übernahme bleibt
+der gespeicherte Plan unverändert. Ein Export enthält den gerade sichtbaren
+Vorschlag; manuelle Änderungen und Monatsbestätigung verlangen zuerst seine Übernahme. Geänderte Eingaben machen ein
 laufendes Ergebnis veraltet. Offene Plätze sind mit **OFFEN** bezeichnet;
 fehlende Randdaten gelten nicht als Freizeit. Manuelle Zuteilungen und Fixierungen
 werden mit denselben Regeln geprüft. Änderungen verwerfen bestehende

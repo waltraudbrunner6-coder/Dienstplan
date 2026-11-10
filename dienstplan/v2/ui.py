@@ -108,6 +108,9 @@ class Workbench(QDialog):
         for text,handler in (('Eintrag manuell vormerken',self.manual_entry),('Aktiven Eintrag bearbeiten',self.edit_entry),('Aktiven Eintrag löschen',self.delete_entry)):
             button=QPushButton(text);button.clicked.connect(lambda checked=False,f=handler:self.guard(f));active_bar.addWidget(button)
         plan_page=QWidget();plan_box=QVBoxLayout(plan_page)
+        self.plan_state=QLabel();self.plan_state.setWordWrap(True);plan_box.addWidget(self.plan_state)
+        self.discard_preview=QPushButton('Vorschlag verwerfen und bisherigen Plan anzeigen')
+        self.discard_preview.clicked.connect(self.discard_result);plan_box.addWidget(self.discard_preview)
         self.plan=QTableWidget();plan_box.addWidget(self.plan);self.tabs.addTab(plan_page,'Dienstplan')
         self.hours=QTableWidget();self.tabs.addTab(self.hours,'Stundenprognose')
         self.distribution=QTableWidget();self.tabs.addTab(self.distribution,'Schichtverteilung')
@@ -136,7 +139,22 @@ class Workbench(QDialog):
         except Exception as exc:QMessageBox.warning(self,'Eingabe prüfen',str(exc))
 
     def dirty(self,*_):
-        if not self.loading:self.generation+=1;self.pending=None;self.accept.setEnabled(False)
+        if not self.loading:
+            had_preview=self.pending is not None
+            self.generation+=1;self.pending=None;self.accept.setEnabled(False)
+            if had_preview:self.refresh_results()
+
+    def displayed_result(self):
+        if self.pending:
+            result,_=self.pending
+            return result.blocks,result.events,result.proofs
+        return self.blocks,self.events,self.proofs
+
+    def discard_result(self):
+        self.pending=None;self.accept.setEnabled(False);self.refresh_results()
+
+    def require_accepted_result(self):
+        if self.pending:raise ValueError('Zuerst „Ergebnis übernehmen“ wählen oder den angezeigten Vorschlag verwerfen.')
 
     @staticmethod
     def table(table,header,rows,editable=False):
@@ -233,26 +251,32 @@ class Workbench(QDialog):
                             locked=tuple(b for b in self.inputs.locked if b.id!=id),optional_ids=self.inputs.optional_ids-{id});self.fill()
 
     def refresh_results(self):
-        events=self.events or self.inputs.events
+        blocks,active_events,proofs=self.displayed_result()
+        events=self.inputs.events if active_events is None else active_events
+        preview=self.pending is not None
+        self.plan_state.setText('BERECHNETER VORSCHLAG – noch nicht gespeichert. Zum Behalten „Ergebnis übernehmen“ wählen. Der bisherige Plan bleibt bis dahin erhalten.' if preview else
+                               'Gespeicherter Plan / Entwurf.' if active_events is not None else 'Noch kein berechneter Plan. Angezeigt werden die vorgesehenen Plätze.')
+        self.discard_preview.setVisible(preview)
+        names={p.id:f'{p.name} ({p.id})' for p in self.inputs.people}
         self.plan_rows=[];rows=[]
         for e in events:
-            selected=[b for b in self.blocks if b.id==e.id]
+            selected=[b for b in blocks if b.id==e.id]
             for i in range(max(e.service.staff or 0,len(selected))):
                 b=selected[i] if i<len(selected) else None;self.plan_rows.append((e,b))
-                rows.append((e.id,e.service.code,i+1,b.person_id if b else 'OFFEN',hours_text(b.work_minutes) if b else '',
+                rows.append((e.id,e.service.code,i+1,names.get(b.person_id,b.person_id) if b else 'OFFEN',hours_text(b.work_minutes) if b else '',
                              'fixiert' if b in self.inputs.locked else '',
                              '; '.join(p.start.astimezone(vienna()).strftime('%d.%m. %H:%M')+'–'+p.end.astimezone(vienna()).strftime('%d.%m. %H:%M') for p in b.breaks) if b else ''))
         self.table(self.plan,('Termin','Dienst','Platz','Person','Arbeitsstunden (h)','Fixierung','Konkrete Pause'),rows)
-        hours=hours_rows(self.inputs.people,self.blocks+self.inputs.boundary,self.inputs.absences,self.inputs.year,self.inputs.month,accounts=self.profile.accounts,target_profile='S0',month_profile='M0')
+        hours=hours_rows(self.inputs.people,blocks+self.inputs.boundary,self.inputs.absences,self.inputs.year,self.inputs.month,accounts=self.profile.accounts,target_profile='S0',month_profile='M0')
         profile_selected=self.calculation_profile.currentIndex()==1
         self.table(self.hours,('Person','Monatssoll (h)','Anfang (h)','Wunschende (h)','Urlaub (h)','Arbeitsziel (h)','Geplant (h)','Prognose Ende (h)','Abweichung (h)'),[(r.person_id,hours_text(r.target) if profile_selected else 'Profil wählen',hours_text(r.opening),hours_text(r.desired),hours_text(r.credits) if r.credits_known and profile_selected else 'ungeklärt',hours_text(r.goal) if r.credits_known and profile_selected else 'ungeklärt',hours_text(r.work),hours_text(r.projected) if r.credits_known and profile_selected else 'ungeklärt',hours_text(r.deviation) if r.credits_known and profile_selected else 'ungeklärt') for r in hours])
-        distribution=shares(self.inputs.people,events,self.blocks,policy=self.profile.fairness_policy,absences=self.inputs.absences)
+        distribution=shares(self.inputs.people,events,blocks,policy=self.profile.fairness_policy,absences=self.inputs.absences)
         self.table(self.distribution,('Person','Dienst','Anzahl','Stunden (h)','Fairer Anteil Anzahl','Fairer Anteil (h)'),[(r.person_id,r.code,r.count,hours_text(r.work_minutes),contract_text(r.expected_count),hours_text(r.expected_minutes)) for r in distribution])
-        wishes=wish_rows(self.inputs.people,self.inputs.absences,events,self.blocks+self.inputs.boundary,policy=self.profile.wish_policy,history=self.profile.history)
+        wishes=wish_rows(self.inputs.people,self.inputs.absences,events,blocks+self.inputs.boundary,policy=self.profile.wish_policy,history=self.profile.history)
         self.table(self.wishes,('Person','Relevant','Erfüllt','Übergangen','Historisch','Kumuliert'),[(r.person_id,len(r.relevant),r.fulfilled_count,len(r.violated),len(r.historical),len(r.cumulative)) for r in wishes])
-        if self.events is not None:
-            core,calendar=verify(self.inputs,self.blocks,active_events=self.events)
-            status=f'{sum(n for _,n in core.open_slots)} offene Plätze; {sum(p.proven and not p.conditional for p in self.proofs)} unbedingt bewiesene Zielstufen. '
+        if active_events is not None:
+            core,calendar=verify(self.inputs,blocks,active_events=active_events)
+            status=('VORSCHAU – noch nicht übernommen. ' if preview else '')+f'{len(blocks)} Zuteilungen; {sum(n for _,n in core.open_slots)} offene Plätze; {sum(p.proven and not p.conditional for p in proofs)} unbedingt bewiesene Zielstufen. '
             status+=' | '.join(i.message for i in core.issues+calendar.issues)
             status+=' | '+' | '.join(dict.fromkeys(self.inputs.unchecked+calendar.unchecked+self.profile.history.missing))
         else:status='Noch kein berechneter Entwurf. Offene Planungsangaben siehe „Dienste und Planungsangaben“.'
@@ -408,6 +432,7 @@ class Workbench(QDialog):
         if not self.inputs.people:raise ValueError('Zuerst mindestens eine Person erfassen.')
         if self.calculation_profile.currentIndex()==0:raise ValueError('Unter „Dienste und Planungsangaben“ ein Rechenprofil ausdrücklich auswählen. Offene Fachprofile werden dadurch nicht freigegeben.')
         if self.save() is False:return
+        self.discard_result()
         token=(self.generation,self.store.input_revision,self.inputs.fingerprint,fingerprint(self.profile))
         events=self.events if self.events is not None else (self.inputs.events if not self.inputs.optional_ids else None)
         self.worker=Worker(self.inputs,self.profile,self.blocks,events,self.seconds.value(),token,self)
@@ -420,8 +445,13 @@ class Workbench(QDialog):
         if current!=token:self.status.setText('Eingaben geändert: Ergebnis veraltet und nicht übernommen.');return
         if result.status in {'unknown','cancelled','infeasible','invalid'}:
             self.status.setText('Noch kein gültiges Ergebnis / Vorgabenkonflikt: '+result.status+'; '+'; '.join(i.message for i in result.issues));return
+        core,calendar=verify(self.inputs,result.blocks,active_events=result.events)
+        if not core.hard_ok or not calendar.hard_ok:
+            self.status.setText('Berechneter Vorschlag verletzt verbindliche Regeln und wird nicht angezeigt.');return
         self.pending=(result,token);self.accept.setEnabled(True)
-        self.status.setText('Prüfbares Ergebnis bereit. '+('Alle gewählten Zielstufen bewiesen.' if result.global_optimal else 'Kein vollständiger Optimalitätsnachweis.')+' Bitte ausdrücklich übernehmen.')
+        self.refresh_results();self.tabs.setCurrentWidget(self.plan.parentWidget())
+        self.status.setText(self.status.text()+' '+('Alle gewählten Zielstufen bewiesen.' if result.global_optimal else 'Kein vollständiger Optimalitätsnachweis.')+
+                            (' Noch keine Person zugeteilt; Zeitlimit und Eingaben prüfen.' if not result.blocks else ''))
 
     def apply_result(self):
         if not self.pending:return
@@ -436,11 +466,13 @@ class Workbench(QDialog):
         if self.worker:self.worker.cancel.set()
 
     def selected(self):
+        self.require_accepted_result()
         row=self.plan.currentRow()
         if row<0:raise ValueError('Zuerst eine Planzeile wählen.')
         return self.plan_rows[row]
 
     def manual(self,blocks,locked=None):
+        self.require_accepted_result()
         self.ensure_team_saved()
         inputs=self.inputs if locked is None else replace(self.inputs,locked=tuple(locked))
         events=self.events or self.inputs.events
@@ -465,6 +497,7 @@ class Workbench(QDialog):
         if old:self.manual(self.blocks,tuple(b for b in self.inputs.locked if b!=old) if old in self.inputs.locked else self.inputs.locked+(old,))
 
     def unlock_all(self):
+        self.require_accepted_result()
         self.ensure_team_saved()
         inputs=replace(self.inputs,locked=())
         self.store.save_workspace(inputs,self.profile,self.blocks,self.events,expected_revision=self.store.input_revision)
@@ -544,11 +577,13 @@ class Workbench(QDialog):
 
     def export(self):
         self.ensure_team_saved()
-        if self.events is None:raise ValueError('Zuerst einen geprüften Entwurf erstellen oder manuell zuteilen.')
-        path,_=QFileDialog.getSaveFileName(self,'Neues vollständiges Exportpaket','','ZIP (*.zip)')
-        if path:export_package(path,self.inputs,self.profile,self.blocks,self.events,proofs=self.proofs)
+        blocks,events,proofs=self.displayed_result()
+        if events is None:raise ValueError('Zuerst einen geprüften Entwurf erstellen oder manuell zuteilen.')
+        path,_=QFileDialog.getSaveFileName(self,'Vorschlag als neues Exportpaket exportieren' if self.pending else 'Neues vollständiges Exportpaket','','ZIP (*.zip)')
+        if path:export_package(path,self.inputs,self.profile,blocks,events,proofs=proofs)
 
     def confirm(self):
+        self.require_accepted_result()
         self.ensure_team_saved()
         if self.events is None:raise ValueError('Zuerst einen geprüften Entwurf erstellen.')
         id='calculation-confirmation/'+fingerprint((self.inputs,self.profile,self.blocks,self.events))

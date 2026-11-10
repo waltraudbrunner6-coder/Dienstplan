@@ -1,5 +1,42 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
+## Aktueller Fehlerbericht: berechneter Dienstplan bleibt unsichtbar (0.3.1)
+
+Ursache reproduziert: `on_worker_completed()` legte das Ergebnis ausschließlich
+in `pending` ab. Weder Plantabelle noch Stunden-/Verteilungs-/Wunschtabellen
+wurden aktualisiert; erst der zusätzliche Übernahmeklick machte es sichtbar.
+Der Ablauf war in den bisherigen Tests auf explizite Übernahme geprüft, aber
+nicht auf die Sichtbarkeit vor dieser Übernahme.
+
+Korrektur: Jeder gültige aktuelle Vorschlag wird unabhängig geprüft, sofort in
+allen Ergebnistabellen angezeigt und der Dienstplan-Reiter automatisch geöffnet.
+Vorschaukennzeichnung und Zuteilungs-/Offen-Zähler unterscheiden Vorschlag,
+gespeicherten Plan und Ergebnis ohne Zuteilungen. Personen erscheinen mit Namen
+und stabiler ID. Der bisherige Plan bleibt bis zur ausdrücklichen Übernahme in
+Speicher und SQLite erhalten; Verwerfen stellt ihn sichtbar wieder her. Export
+verwendet den sichtbaren Vorschlag. Manuelle Änderungen/Bestätigungen verlangen
+zuerst Übernahme oder Verwerfen. Veraltete und ungültige Ergebnisse werden nicht
+als Vorschau dargestellt; Eingabeänderungen entfernen die veraltete Vorschau.
+
+Neue Regressionen: echter Qt-Worker mit unmittelbar sichtbaren Zuteilungen und
+Stunden vor Übernahme, Tabwechsel, unveränderter vorheriger SQLite-Stand,
+Verwerfen, Export des sichtbaren Ergebnisses, Übernahme/Neustart, Eingabeänderung,
+Teil-/Nullbesetzung und Ablehnung eines regelwidrigen Resultats. Die native
+Paketprobe verlangt jetzt zusätzlich `vorschau_anzeige=true` und prüft die echte
+Qt-Anzeige vor dem Übernahmeklick. Kein Absenken fachlicher Regeln.
+
+Prüfungen: `.venv/bin/python -m pytest tests/test_v2_ui.py -q` zunächst
+12 bestanden (vor zusätzlichem Invalid-Ergebnis-Test). Abschließend
+`.venv/bin/python scripts/run_tests.py`: **368 bestanden in 84,15 s**.
+`QT_QPA_PLATFORM=offscreen .venv/bin/python -m dienstplan --self-test
+--self-test-report /tmp/preview-smoke.json`: bestanden, einschließlich echter
+Vorschauanzeige und Übernahme in SQLite.
+
+Aktueller Schritt: geprüften Stand committen und pushen, aktualisierte native
+Pakete bauen. Keine Änderung echter Benutzerdaten.
+Die folgenden Abschnitte sind der bisherige Verlauf.
+
+
 ## Aktueller Folgeauftrag: eine Hauptoberfläche, Ausschlüsse und Stunden
 
 Der ausdrückliche Auftrag vom 10.11.2026 ersetzt die bisherige Startauswahl

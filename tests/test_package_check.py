@@ -41,7 +41,7 @@ def test_package_check_requires_exit_status_and_full_report(tmp_path, monkeypatc
             values = dict(selbsttest="bestanden", personen=12, zuteilungen=8,
                           dst=True,solver_pruefer=True,sqlite=True,exportpaket=True,qt=True,
                           hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,
-                          stundenanzeige=True,dauerhafte_datei=True,build={"commit":"a"*40})
+                          stundenanzeige=True,dauerhafte_datei=True,vorschau_anzeige=True,build={"commit":"a"*40})
             if report_kind == "failed":
                 values["selbsttest"] = "fehlgeschlagen"
             if report_kind == "incomplete":
