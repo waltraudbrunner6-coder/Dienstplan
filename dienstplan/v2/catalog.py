@@ -62,14 +62,15 @@ class Event:
     attendance: Interval
     fixed_people: tuple[str, ...] = ()
     replacement_reason: str = ""
+    rule_override: bool = False
 
     def __post_init__(self):
         object.__setattr__(self, "fixed_people", tuple(self.fixed_people))
         if not self.id or len(set(self.fixed_people)) != len(self.fixed_people):
             raise DomainError("Termin benötigt Kennung und unterschiedliche feste Personen.")
-        if self.fixed_people and len(self.fixed_people) != self.service.staff:
+        if not self.rule_override and (self.fixed_people and len(self.fixed_people) != self.service.staff):
             raise DomainError("Feste Personenzahl passt nicht zur Besetzung.")
-        if self.service.code in {"LB","VN","INT","N17","FK"} and len(self.fixed_people)!=self.service.staff:
+        if not self.rule_override and (self.service.code in {"LB","VN","INT","N17","FK"} and len(self.fixed_people)!=self.service.staff):
             raise DomainError("Dieser Sondertermin benötigt alle festen Personen.")
         if any(not p for p in self.fixed_people):
             raise DomainError("Feste Personen benötigen Kennungen.")
@@ -78,13 +79,13 @@ class Event:
         day=self.attendance.start_day
         if self.service.code!="FK" and self.attendance!=self.service.on(day):
             raise DomainError("Terminzeiten passen nicht zur Vorlage.")
-        if self.service.code in {"T","TS","KCT10","KCT","TW","LB"} and day.weekday()!=3:
+        if not self.rule_override and (self.service.code in {"T","TS","KCT10","KCT","TW","LB"} and day.weekday()!=3):
             raise DomainError("Diese Dienstvorlage gilt nur donnerstags.")
-        if self.service.code in {"KC10","KC16","W17","W16"} and day.weekday()==3:
+        if not self.rule_override and (self.service.code in {"KC10","KC16","W17","W16"} and day.weekday()==3):
             raise DomainError("Donnerstags ist die Teamvariante erforderlich.")
-        if self.service.code=="R" and not ((day.month==12 and day.day>=24) or (day.month==1 and day.day<=6)):
+        if not self.rule_override and (self.service.code=="R" and not ((day.month==12 and day.day>=24) or (day.month==1 and day.day<=6))):
             raise DomainError("Reservedienste gelten ausschließlich vom 24.12. bis 06.01.")
-        if self.service.code == "W16" and not self.replacement_reason.strip():
+        if not self.rule_override and (self.service.code == "W16" and not self.replacement_reason.strip()):
             raise DomainError("W16 benötigt eine dokumentierte Ersatzbegründung.")
 
     @property
@@ -97,15 +98,15 @@ class Event:
     def coverage_id(self) -> str:
         return (f"{self.attendance.start_day}/outside" if self.service.code in {"W17","W16"} else self.id)
 
-    def assign(self, person_id: str, breaks=(), *, reserve_profile: str | None = None) -> WorkBlock:
-        if self.fixed_people and person_id not in self.fixed_people:
+    def assign(self, person_id: str, breaks=(), *, reserve_profile: str | None = None, allow_rules=False) -> WorkBlock:
+        if not allow_rules and self.fixed_people and person_id not in self.fixed_people:
             raise DomainError("Diese Person entspricht nicht der festen Terminzuteilung.")
         if self.service.code == "R" and reserve_profile != "full_work_test":
             raise DomainError("Reservebewertung F02 fehlt; volle Arbeit nur mit ausdrücklich gewähltem Testprofil.")
-        return WorkBlock(self.id,person_id,self.service.code,self.attendance,tuple(breaks),self.protected)
+        return WorkBlock(self.id,person_id,self.service.code,self.attendance,tuple(breaks),self.protected,allow_rules)
 
 
-def event(key: str, day: date, *, people=(), reason="", attendance: Interval | None = None) -> Event:
+def event(key: str, day: date, *, people=(), reason="", attendance: Interval | None = None, allow_rules=False) -> Event:
     service = template(key)
     if key == "FK" and attendance is None:
         raise DomainError("FK benötigt konkrete Zeiten.")
@@ -113,7 +114,7 @@ def event(key: str, day: date, *, people=(), reason="", attendance: Interval | N
         raise DomainError("Abweichende Zeiten benötigen eine ausdrücklich versionierte Vorlage.")
     if attendance is not None and attendance.start_day != day:
         raise DomainError("Termindatum passt nicht zum Startdatum.")
-    return Event(f"{day.isoformat()}/{key}",service,attendance or service.on(day),tuple(people),reason)
+    return Event(f"{day.isoformat()}/{key}",service,attendance or service.on(day),tuple(people),reason,allow_rules)
 
 
 @dataclass(frozen=True, slots=True)

@@ -123,3 +123,30 @@ Eigene Blätter enthalten offene Plätze, Stunden und reimportierbare Einzelzeil
 Eine Vorschau ist noch keine Monatsbestätigung. Exportdateien werden atomar
 veröffentlicht, vorhandene Dateien nicht überschrieben. Vollständige technische
 Sicherung einschließlich Profile/Prüfmanifest weiterhin über **Exportpaket**.
+
+## Ausdrückliche Regelübersteuerung (ab 0.4.1)
+
+In der Importvorschau kann „Regeln für diesen Import übergehen“ aktiviert werden.
+Die Vorschau zeigt weiterhin die Regelmeldungen. Erst die zusätzliche Bestätigung
+„Trotz Regelverstößen übernehmen?“ aktiviert den gesamten technisch lesbaren Import.
+Ohne Bestätigung bleibt der bisherige Plan erhalten. Auch CSV-Format-2-Wünsche
+und manuell vorgemerkte Abwesenheiten können nach dieser Warnung übernommen werden.
+
+Bei manueller Zuteilung stehen alle vorhandenen Personen zur Auswahl, einschließlich
+Personen ohne passende Berechtigung oder mit Urlaub, Ruhezeitkonflikten bzw.
+abweichender Fixierung. Die Prüfung läuft unverändert weiter; „Nein“ verwirft die
+Änderung, „Ja“ speichert sie ausdrücklich als Regelübersteuerung. Das gilt auch
+für Überschneidungen, Besetzungs-, Wochen- und Kalenderregeln. Pausen werden
+weiter automatisch vorgeschlagen. Der automatische Solver erhält dadurch keine
+allgemeine Erlaubnis, verbindliche Regeln zu verletzen.
+
+Regelabweichungen und ihre bestätigten Meldungen bleiben im Monatsstand gespeichert,
+werden nach erneutem Öffnen angezeigt und im Excel-Blatt „Regelmeldungen“ bzw.
+im technischen Prüfmanifest ausgewiesen. Ein regelwidriger Plan erhält keine
+Optimierungsbewertung oder Optimalitätsaussage.
+
+Technisch unbestimmte Daten sind keine übergehbare Planungsregel: unbekannte IDs,
+unbekannte Dienstkürzel ohne Zeitdefinition, ungültige oder mehrdeutige Zeiten,
+widersprüchliche Kennungen und unvollständige Pausenintervalle müssen korrigiert
+werden. Ebenso wird eine ungeklärte Reserve-/Urlaubsgutschrift nicht erfunden.
+Beschädigte Daten und bestätigte historische Snapshots bleiben geschützt.

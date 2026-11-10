@@ -16,6 +16,7 @@ def workbench(monkeypatch,tmp_path):
     app=QApplication.instance() or QApplication([])
     monkeypatch.setattr(QMessageBox,'question',lambda *a:QMessageBox.StandardButton.Yes)
     from dienstplan.v2.demo import technical_demo
+    monkeypatch.setattr(Workbench,'confirm_override',lambda self,messages:False)
     w=Workbench(database=tmp_path/'ui.sqlite3',initial=technical_demo(),year=2026,month=11)
     yield w
     if w.worker and w.worker.isRunning():w.worker.cancel.set();w.worker.wait(5000)
@@ -60,8 +61,7 @@ def test_manual_change_and_individual_fixation_use_independent_rules(workbench):
     w=workbench;first=w.blocks[0]
     w.manual(w.blocks,locked=(first,))
     assert first in w.inputs.locked
-    with pytest.raises(ValueError,match='fixierte'):
-        w.manual(tuple(b for b in w.blocks if b!=first))
+    w.manual(tuple(b for b in w.blocks if b!=first))  # Warnung abgelehnt: unverändert
     assert first in w.blocks and first in w.store.load_workspace(2026,11)[2]
 
 
@@ -70,7 +70,7 @@ def test_thursday_csv_stays_editable_then_atomic_application_after_correction(wo
     text='format_version;person_id;entry_id;typ;von;bis;gutschrifttage;kommentar\n2;A;wish;freiwunschtag;2026-11-12T00:00;2026-11-13T00:00;;Korrigieren\n'
     w.batch=preview(text,existing=(),budgets=w.budgets(),month='2026-11')
     w.store.save_correction('ui-current',w.batch);w.fill_batch()
-    with pytest.raises(ValueError,match='Korrektur'):w.promote()
+    w.promote()  # Warnung abgelehnt: unverändert
     assert not w.store.entries() and w.batch and not w.batch.ready
     fields=w.correction_fields
     w.corrections.item(0,fields.index('von')+1).setText('2026-11-11T00:00')
@@ -236,7 +236,7 @@ def test_qt_mixed_import_preview_applies_all_or_keeps_previous_plan(workbench,mo
         check=next(b for b in dialog.findChildren(QPushButton) if b.text()=='Vorschau prüfen und vormerken');check.click()
         assert w.blocks==old and w.store.sheet_stage()
         # The same existing slot is an idempotent import.
-        next(b for b in dialog.findChildren(QPushButton) if b.text()=='Gesamten gültigen Import übernehmen').click()
+        next(b for b in dialog.findChildren(QPushButton) if b.text()=='Gesamten Import übernehmen').click()
         return QDialog.DialogCode.Accepted
     monkeypatch.setattr(QDialog,'exec',drive)
     import_dialog(w,[row(day='2026-11-02',code='WL',pid='A')],{})
@@ -278,3 +278,27 @@ def test_unplanned_weekly_view_counts_required_slots_not_all_date_options(tmp_pa
     assert 'Vorläufige automatische Termine' in w.plan_state.text()
     assert any(w.term_table.item(i,6).text()=='Datumsoption (automatisch)' for i in range(w.term_table.rowCount()))
     w.close();qt.processEvents()
+
+
+def test_manual_rule_override_requires_confirmation_and_survives_reload(workbench,monkeypatch):
+    from dataclasses import replace
+    from dienstplan.v2.pauses import automatic_pause_choices
+    from dienstplan.v2.solver import verify
+    w=workbench
+    # Synthetic person has no entitlement; remains selectable with a warning.
+    term=w.inputs.events[0]
+    person=replace(w.inputs.people[0],rights=())
+    w.inputs=replace(w.inputs,people=(person,)+w.inputs.people[1:])
+    candidate=automatic_pause_choices(term,person.id,allow_rules=True)[0]
+    monkeypatch.setattr(w,'confirm_override',lambda messages:False)
+    before=w.blocks
+    w.manual((candidate,))
+    assert w.blocks==before
+    seen=[]
+    monkeypatch.setattr(w,'confirm_override',lambda messages:seen.extend(messages) or True)
+    w.manual((candidate,))
+    assert seen and w.inputs.manual_override and w.blocks==(candidate,)
+    loaded=w.store.load_workspace(2026,11)
+    assert loaded[0].manual_override and loaded[2]==w.blocks
+    assert not verify(loaded[0],loaded[2],active_events=loaded[3])[0].hard_ok
+    assert 'REGELÜBERSTEUERUNG' in w.status.text()

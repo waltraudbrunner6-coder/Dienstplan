@@ -64,11 +64,12 @@ def export_package(target,inputs,profile,blocks,events,*,proofs=(),holidays=None
             value=field(row,key)
             return hours_text(value) if key in time_keys and value is not None else json.dumps(plain(value),ensure_ascii=False)
         files[name]=_csv(('revision_id',)+tuple(map(column,header)),[(revision,)+tuple(cell(r,key) for key in header) for r in rows])
+    invalid=not core.hard_ok or not calendar.hard_ok
     unknown_credits=any(not r.credits_known for r in report_rows['stunden.csv'])
-    manifest=dict(revision_id=revision,scope=inputs.profile_label,input_fingerprint=inputs.fingerprint,
-                  versions=saved['snapshot']['versions'],objective_profile=plain(profile),objectives=[] if unknown_credits else plain(evaluate(inputs,blocks,events,profile)),
-                  objective_status='Urlaubsgutschrifttage ungeklärt' if unknown_credits else 'bewertet',
-                  proofs=[] if unknown_credits else plain(proofs),issues=plain(core.issues+calendar.issues),open_slots=plain(core.open_slots),
+    manifest=dict(manual_override=inputs.manual_override,override_notes=list(inputs.override_notes),revision_id=revision,scope=inputs.profile_label,input_fingerprint=inputs.fingerprint,
+                  versions=saved['snapshot']['versions'],objective_profile=plain(profile),objectives=[] if unknown_credits or invalid else plain(evaluate(inputs,blocks,events,profile)),
+                  objective_status='Regelabweichung; keine Optimierungsbewertung' if invalid else 'Urlaubsgutschrifttage ungeklärt' if unknown_credits else 'bewertet',
+                  proofs=[] if unknown_credits or invalid else plain(proofs),issues=plain(core.issues+calendar.issues),open_slots=plain(core.open_slots),
                   unchecked=list(dict.fromkeys(inputs.unchecked+calendar.unchecked+profile.history.missing)),
                   euro_status='ungeklärt – kein freigegebener KV-/BV-Tarif',
                   csv_format_version=2,csv_time_unit='Stunden, Dezimalkomma, zwei Nachkommastellen; Arbeitsstand-JSON weiterhin exakte Minuten',

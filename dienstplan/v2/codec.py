@@ -22,13 +22,13 @@ from .work import WorkBlock
 def fraction(v):return Fraction(v['numerator'],v['denominator'])
 def interval(v):return Interval(datetime.fromisoformat(v['start']),datetime.fromisoformat(v['end']))
 def date_range(v):return DateRange(date.fromisoformat(v['start']),date.fromisoformat(v['end']))
-def block(v):return WorkBlock(v['id'],v['person_id'],v['code'],interval(v['attendance']),tuple(map(interval,v['breaks'])),tuple(map(interval,v['protected'])))
+def block(v):return WorkBlock(v['id'],v['person_id'],v['code'],interval(v['attendance']),tuple(map(interval,v['breaks'])),tuple(map(interval,v['protected'])),v.get('rule_override',False))
 
 
 def term(v):
     service=template(v['service']['key'])
     if plain(service)!=v['service']:raise DomainError('Gespeicherte Dienstvorlage stimmt nicht mit der Katalogversion überein.')
-    return Event(v['id'],service,interval(v['attendance']),tuple(v['fixed_people']),v['replacement_reason'])
+    return Event(v['id'],service,interval(v['attendance']),tuple(v['fixed_people']),v['replacement_reason'],v.get('rule_override',False))
 
 
 def planning_input(v):
@@ -37,12 +37,12 @@ def planning_input(v):
         people.append(Person(p['id'],p['name'],Employment(p['id'],date_range(p['employment']['dates'])),
                              Contracts(p['id'],tuple(Contract(p['id'],date_range(c['dates']),fraction(c['weekly_hours'])) for c in p['contracts']['versions'])),
                              tuple(Eligibility(date_range(e['dates']),frozenset(e['codes']),e['driving_license']) for e in p['rights'])))
-    absences=tuple(Entry(e['id'],e['person_id'],e['kind'],interval(e['span']),frozenset(date.fromisoformat(d) for d in e['credit_days']),e['comment'],e['budget_month']) for e in v['absences'])
+    absences=tuple(Entry(e['id'],e['person_id'],e['kind'],interval(e['span']),frozenset(date.fromisoformat(d) for d in e['credit_days']),e['comment'],e['budget_month'],e.get('rule_override',False)) for e in v['absences'])
     return PlanningInput(tuple(people),tuple(map(term,v['events'])),tuple(map(block,v['candidates'])),v['year'],v['month'],
             frozenset((pid,date.fromisoformat(d)) for pid,d in v['known_days']),WeekendPolicy(**v['weekend_policy']) if v['weekend_policy'] else None,
             v['profile_label'],absences,tuple(map(block,v['boundary'])),tuple(v['unchecked']),frozenset(v['optional_ids']),
             tuple(WeekQuota(q['id'],q['code'],date_range(q['dates']),q['required'],q['owner_month']) for q in v['quotas']),
-            WeekPolicy(**v['week_policy']) if v['week_policy'] else None,tuple(CoverageRule(**r) for r in v['coverage']),tuple(map(block,v.get('locked',()))))
+            WeekPolicy(**v['week_policy']) if v['week_policy'] else None,tuple(CoverageRule(**r) for r in v['coverage']),tuple(map(block,v.get('locked',()))),v.get('manual_override',False),tuple(v.get('override_notes',())))
 
 
 def objective_profile(v):
@@ -63,7 +63,7 @@ def workspace(inputs,profile,blocks=(),events=None):
                inputs.year,inputs.month,accounts=profile.accounts,target_profile=profile.target_profile,month_profile=profile.month_profile)
     if events is not None:
         core,calendar=verify(inputs,blocks,active_events=events)
-        if not core.hard_ok or not calendar.hard_ok:raise DomainError('; '.join(i.message for i in core.issues+calendar.issues))
+        if not inputs.manual_override and (not core.hard_ok or not calendar.hard_ok):raise DomainError('; '.join(i.message for i in core.issues+calendar.issues))
     snapshot=plain(dict(inputs=inputs,profile=profile,blocks=blocks,events=events,
                         versions=dict(tzdata=TZDATA_VERSION,iana=IANA_VERSION,catalog='v2-draft-1')))
     return dict(format='v2-workspace-1',revision_id=fingerprint(snapshot),snapshot=snapshot)

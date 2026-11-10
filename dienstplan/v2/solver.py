@@ -33,6 +33,8 @@ class PlanningInput:
     week_policy: object | None = None
     coverage: tuple = ()
     locked: tuple = ()
+    manual_override: bool = False
+    override_notes: tuple[str, ...] = ()
 
     def __post_init__(self):
         if not self.profile_label:raise DomainError('Das Machbarkeitsmodell benötigt eine explizite Profilbezeichnung.')

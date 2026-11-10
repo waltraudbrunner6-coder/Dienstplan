@@ -134,3 +134,7 @@ Stundenanzeige und persistentem Neustart sowie Solver, SQLite und Wiener DST.
 Sie verwendet ausschließlich temporäre synthetische Daten. Linux-Tests ersetzen
 keinen nativen Windows-/macOS-Nachweis. Aktuelle Downloadlinks sind im nativen
 Prüfbericht ausdrücklich einem Commit zugeordnet.
+
+Ab Version 0.4.1 können manuelle Änderungen und Importe nach ausdrücklicher Warnung
+auch trotz Regelverstößen übernommen werden. Der Plan und Exporte kennzeichnen
+diese Abweichungen dauerhaft. Siehe [Regelübersteuerung](docs/TABELLENIMPORT.md).

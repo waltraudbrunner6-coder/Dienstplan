@@ -41,6 +41,11 @@ def check_core(people, events, blocks, *, absences=(), boundary=(), check_fixed=
         if e.service.code in {'BK','WL'}:extra_by_day[e.attendance.start_day].add(e.service.code)
     for day,codes in extra_by_day.items():
         if codes=={'BK','WL'}:error('wl_bk_exclusion','',str(day),'BK und WL dürfen nicht am selben lokalen Startdatum stattfinden.')
+    from dataclasses import replace
+    for obj in events+blocks+tuple(absences):
+        if getattr(obj,"rule_override",False):
+            try:replace(obj,rule_override=False)
+            except DomainError as exc:error("overridden_rule",getattr(obj,"person_id",""),obj.id,str(exc))
     team_by_day=defaultdict(list)
     for e in events:
         if e.service.code in {'T','TS'}:team_by_day[e.attendance.start_day].append(e)

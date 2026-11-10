@@ -311,10 +311,10 @@ class Workbench(QDialog):
         self.table(self.wishes,('Person','Relevant','Erfüllt','Übergangen','Historisch','Kumuliert'),[(r.person_id,len(r.relevant),r.fulfilled_count,len(r.violated),len(r.historical),len(r.cumulative)) for r in wishes])
         if active_events is not None:
             core,calendar=verify(self.inputs,blocks,active_events=active_events)
-            status=('VORSCHAU – noch nicht übernommen. ' if preview else '')+f'{len(blocks)} Zuteilungen; {sum(n for _,n in core.open_slots)} offene Plätze; {sum(p.proven and not p.conditional for p in proofs)} unbedingt bewiesene Zielstufen. '
-            status+=' | '.join(i.message for i in core.issues+calendar.issues)
+            status=('REGELÜBERSTEUERUNG – kein regelkonformer Plan. ' if self.inputs.manual_override else '')+('VORSCHAU – noch nicht übernommen. ' if preview else '')+f'{len(blocks)} Zuteilungen; {sum(n for _,n in core.open_slots)} offene Plätze; {sum(p.proven and not p.conditional for p in proofs)} unbedingt bewiesene Zielstufen. '
+            status+=' | '.join(dict.fromkeys(tuple(i.message for i in core.issues+calendar.issues)+self.inputs.override_notes))
             status+=' | '+' | '.join(dict.fromkeys(self.inputs.unchecked+calendar.unchecked+self.profile.history.missing))
-        else:status='Noch kein berechneter Entwurf. Offene Planungsangaben siehe „Dienste und Planungsangaben“.'
+        else:status=('REGELÜBERSTEUERUNG – '+' | '.join(self.inputs.override_notes)+'. ' if self.inputs.manual_override else '')+'Noch kein berechneter Entwurf. Offene Planungsangaben siehe „Dienste und Planungsangaben“.'
         required=sum((e.service.staff or 0)*(e.attendance.minutes-(30 if e.attendance.minutes>360 else 0)) for e in events if e.service.code!='R')
         target=sum(max(0,r.goal) for r in hours) if all(r.credits_known for r in hours) else None
         status+=(' | Vorläufige Datumswahl; tatsächliche Dauer kann sich durch Terminwahl an Zeitumstellungstagen ändern.' if provisional_dates else '')
@@ -520,9 +520,22 @@ class Workbench(QDialog):
         if inputs.optional_ids:
             from .plan_import import selected_events
             inputs=replace(inputs,optional_ids=inputs.optional_ids-{b.id for b in blocks})
-            events=selected_events(inputs,self.events or ())
+            try:events=selected_events(inputs,self.events or ())
+            except ValueError:
+                events=tuple(e for e in inputs.events if e.id not in inputs.optional_ids or (self.events and e in self.events))
         else:events=self.events if self.events is not None else inputs.events
         return inputs,events
+
+    def confirm_override(self,messages):
+        box=QMessageBox(self)
+        box.setWindowTitle('Regeln ausdrücklich übergehen')
+        box.setIcon(QMessageBox.Icon.Warning)
+        box.setText('Trotz Regelverstößen übernehmen? Der Plan bleibt als Regelabweichung gekennzeichnet; der automatische Solver erhält dadurch keine Erlaubnis, Regeln zu verletzen.')
+        box.setInformativeText('\n'.join(messages[:5]))
+        box.setDetailedText('\n'.join(messages) or 'Ausdrücklich gewählte Regelübersteuerung.')
+        box.setStandardButtons(QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No)
+        box.setDefaultButton(QMessageBox.StandardButton.No)
+        return box.exec()==QMessageBox.StandardButton.Yes
 
     def manual(self,blocks,locked=None):
         self.require_accepted_result()
@@ -532,20 +545,25 @@ class Workbench(QDialog):
             if self.inputs.week_policy is None:return
         inputs,events=self.manual_context(blocks,locked)
         core,calendar=verify(inputs,blocks,active_events=events)
-        if not core.hard_ok or not calendar.hard_ok:raise ValueError('; '.join(i.message for i in core.issues+calendar.issues))
+        messages=tuple(i.message for i in core.issues+calendar.issues)
+        from .automatic_weekly import check_shared_weeks
+        try:check_shared_weeks(inputs,blocks,events,self.store.month_snapshots(inputs.year,inputs.month))
+        except ValueError as exc:messages+=(str(exc),)
+        if messages:
+            if not self.confirm_override(messages):return
+            inputs=replace(inputs,manual_override=True,override_notes=messages)
+        else:inputs=replace(inputs,manual_override=False,override_notes=())
         self.store.save_workspace(inputs,self.profile,blocks,events,expected_revision=self.store.input_revision)
         self.inputs,self.blocks,self.events=inputs,tuple(blocks),events;self.proofs=();self.dirty();self.refresh_results()
 
     def change_assignment(self):
         term,old=self.selected()
-        if old in self.inputs.locked:raise ValueError('Fixierung zuerst lösen, bevor diese Zuteilung geändert wird.')
+        # Auch fixierte Zuteilungen können nach ausdrücklicher Warnung geändert werden.
         if self.inputs.profile_label in (OPEN_PROFILE,SELECTED_PROFILE) and self.inputs.week_policy is None:
             self.configure_weekly()
             if self.inputs.week_policy is None:return
             old=next((b for b in self.blocks if b.id==term.id and b==old),None)
-        occupied={b.person_id for b in self.blocks if b.id==term.id and b!=old}
-        people=[p for p in self.inputs.people if p.id not in occupied and not p.eligibility_errors(term.service.code,term.attendance)
-                and (not term.fixed_people or p.id in term.fixed_people)]
+        people=list(self.inputs.people)
         labels=[p.name+' ('+p.id+')' for p in people]
         if not labels:raise ValueError('Keine berechtigte Person verfügbar.')
         label,ok=QInputDialog.getItem(self,'Zuteilung','Person wählen; Pause wird automatisch passend gesetzt:',labels,0,False)
@@ -553,13 +571,15 @@ class Workbench(QDialog):
         from .pauses import automatic_pause_choices
         pid=people[labels.index(label)].id
         base=tuple(b for b in self.blocks if b!=old)
-        for choice in automatic_pause_choices(term,pid):
+        choices=automatic_pause_choices(term,pid,allow_rules=True)
+        for choice in choices:
             inputs,events=self.manual_context(base+(choice,))
             core,calendar=verify(inputs,base+(choice,),active_events=events)
             if core.hard_ok and calendar.hard_ok:
                 self.manual(base+(choice,));return
             if calendar.issues or any(i.rule!='working_coverage' for i in core.issues):break
-        raise ValueError('Für diese Person gibt es keine mit den verbindlichen Regeln vereinbare Zuteilung und Pause.')
+        if not choices:raise ValueError('Keine technisch gültige Pause möglich.')
+        self.manual(base+(choices[0],))
 
     def remove_assignment(self):
         _,old=self.selected()
@@ -600,9 +620,14 @@ class Workbench(QDialog):
             changes={key:self.corrections.item(i,j+1).text() for j,key in enumerate(self.correction_fields)}
             self.batch=correct(self.batch,row.line,changes,existing=self.store.correction_existing('ui-current',self.inputs.absences),budgets=self.budgets(),month=f'{self.inputs.year:04d}-{self.inputs.month:02d}')
         self.store.save_correction('ui-current',self.batch);self.fill_batch()
-        if not self.batch.ready:raise ValueError('Stapel bleibt zur Korrektur vorgemerkt; Fehler bitte vollständig beheben.')
+        allow_rules=False
+        if not self.batch.ready:
+            if not self.confirm_override(self.batch.errors+tuple(e for r in self.batch.rows for e in r.errors)):return
+            allow_rules=True
+            self.batch=self.store.load_correction('ui-current',budgets=self.budgets(),month=f'{self.inputs.year:04d}-{self.inputs.month:02d}',additional_existing=self.inputs.absences,allow_rules=True)
+            if not self.batch.ready:raise ValueError('Technisch ungültige Angaben bleiben zur Korrektur vorgemerkt: '+'; '.join(self.batch.errors+tuple(e for r in self.batch.rows for e in r.errors)))
         if not self.clear_plan(confirm_only=True):return
-        self.inputs=self.store.apply_correction('ui-current',self.inputs,self.profile,budgets=self.budgets(),expected_revision=self.store.input_revision)
+        self.inputs=self.store.apply_correction('ui-current',self.inputs,self.profile,budgets=self.budgets(),expected_revision=self.store.input_revision,allow_rules=allow_rules)
         self.blocks=();self.events=None;self.proofs=();self.dirty()
         self.batch=None;self.fill_batch();self.fill()
 

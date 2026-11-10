@@ -54,7 +54,7 @@ def selected_events(inputs, preferred=()):
     return tuple(sorted(selected,key=lambda e:(e.attendance.start,e.id)))
 
 
-def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard_unfixed=False):
+def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard_unfixed=False,allow_rules=False):
     errors=[];notes=[];groups={};new_entries=[]
     people={p.id:p for p in inputs.people};terms={e.id:e for e in inputs.events}
     selected=set(e.id for e in (events or ()) if e.id in inputs.optional_ids)
@@ -78,7 +78,7 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
                 if not span.overlaps(month_span):raise DomainError('Abwesenheit liegt außerhalb des geöffneten Monats.')
                 credits=frozenset(date.fromisoformat(d) for d in row.get('gutschrifttage','').split('|') if d)
                 ident='sheet/'+sha256(str((pid,kind,span)).encode()).hexdigest()
-                entry=Entry(ident,pid,kind,span,credits,row.get('kommentar',''),(row.get('budgetmonat') or f'{inputs.year:04d}-{inputs.month:02d}') if kind=='wochenendwunsch' else None)
+                entry=Entry(ident,pid,kind,span,credits,row.get('kommentar',''),(row.get('budgetmonat') or f'{inputs.year:04d}-{inputs.month:02d}') if kind=='wochenendwunsch' else None,allow_rules)
                 if entry.identity in absences and absences[entry.identity].credit_days!=credits:raise DomainError('Identischer Zeitraum hat andere Gutschrifttage.')
                 entry=absences.get(entry.identity,entry)
                 absences[entry.identity]=entry;new_entries.append(entry)
@@ -110,13 +110,14 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
                 if code in {'TS','T'} and old.attendance.start_day==day and old.service.code=='LB':
                     removed.add(old.id);terms.pop(old.id)
                     changed=event('LB_TS' if code=='TS' else 'LB',day,people=old.fixed_people);terms[changed.id]=changed
-            term=event(code,day,people=fixed,attendance=attendance,reason='Importierter dokumentierter W16-Ersatz' if code=='W16' else '')
+            term=event(code,day,people=fixed,attendance=attendance,reason='Importierter dokumentierter W16-Ersatz' if code=='W16' else '',allow_rules=allow_rules)
             old=terms.get(term.id)
-            if old is not None and old!=term:raise DomainError('Vorhandener Termin hat abweichende feste Personen oder Zeiten.')
+            if old is not None and old!=replace(term,rule_override=old.rule_override):raise DomainError('Vorhandener Termin hat abweichende feste Personen oder Zeiten.')
+            if old is not None:term=old
             terms[term.id]=term;requested.add(term.id)
             if service.code=='R' and assigned:raise DomainError('Reserve-Arbeitsbewertung fehlt; Termin kann ohne Zuteilung importiert werden.')
         except (ValueError,KeyError,DomainError) as exc:errors.append(f'{day}/{code}: {exc}')
-    if any(b.id in removed for b in locks):errors.append('Eine importierte Alternative würde einen fixierten Dienst entfernen; Fixierung ausdrücklich lösen.')
+    if not allow_rules and any(b.id in removed for b in locks):errors.append('Eine importierte Alternative würde einen fixierten Dienst entfernen; Fixierung ausdrücklich lösen.')
     retained=tuple(b for b in retained if b.id not in removed)
     updated=replace(inputs,events=tuple(terms.values()),absences=tuple(absences.values()),optional_ids=inputs.optional_ids-removed-requested)
     for (day,code),items in groups.items():
@@ -126,7 +127,8 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
             if row['art']!='dienst':continue
             try:
                 if term.service.code=='R':continue
-                choices=(term.assign(pid,(Interval.local(row['pause_von'],row['pause_bis']),)),) if row.get('pause_von') and row.get('pause_bis') else automatic_pause_choices(term,pid)
+                if bool(row.get('pause_von')) != bool(row.get('pause_bis')):raise DomainError('Beide Pausenzeitfelder gemeinsam ausfüllen.')
+                choices=(term.assign(pid,(Interval.local(row['pause_von'],row['pause_bis']),),allow_rules=allow_rules),) if row.get('pause_von') and row.get('pause_bis') else automatic_pause_choices(term,pid,allow_rules=allow_rules)
                 if not choices:raise DomainError('Keine zulässige konkrete Pause möglich.')
                 block=choices[0]
                 prior=next((b for b in retained if b.id==block.id and b.person_id==pid),None)
@@ -141,14 +143,18 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
             budget=budgets.get((pid,owner))
             mine=[e for e in absences.values() if e.person_id==pid and e.budget_month==owner and e.kind!='urlaub']
             if budget is None or sum(e.kind=='freiwunschtag' for e in mine)>budget.single_days or sum(e.kind=='wochenendwunsch' for e in mine)>budget.weekends:
-                errors.append(f'{pid}/{owner}: Wunschbudget überschritten oder fehlt; Budget vor Übernahme ausdrücklich anpassen.')
+                (notes if allow_rules else errors).append(f'{pid}/{owner}: Wunschbudget überschritten oder fehlt; Budget vor Übernahme ausdrücklich anpassen.')
     active=()
     if not errors:
         try:
             # Konkrete importierte Pausen zusätzlich als Kandidaten erhalten.
             updated=replace(updated,candidates=service_candidates(updated.events,updated.people)+retained)
-            active=selected_events(updated,events or ())
+            try:active=selected_events(updated,events or ())
+            except DomainError as exc:
+                if not allow_rules:raise
+                notes.append(str(exc))
+                active=tuple(e for e in updated.events if e.id not in updated.optional_ids or e.id in selected)
             core,calendar=verify(updated,retained,active_events=active)
-            errors.extend(f'{i.event_id or "Kalender"} / {i.person_id}: {i.message}' for i in core.issues+calendar.issues)
+            (notes if allow_rules else errors).extend(f'{i.event_id or "Kalender"} / {i.person_id}: {i.message}' for i in core.issues+calendar.issues)
         except (DomainError,ValueError) as exc:errors.append(str(exc))
-    return PlanImport(updated,retained,active,tuple(dict.fromkeys(errors)),tuple(notes))
+    return PlanImport(replace(updated,manual_override=allow_rules,override_notes=tuple(notes) if allow_rules else ()),retained,active,tuple(dict.fromkeys(errors)),tuple(notes))

@@ -1,3 +1,7 @@
+> Folgeversion 0.4.1 ergänzt ausdrückliche Regelübersteuerung. Die folgenden
+> Downloadlinks dokumentieren noch 0.4.0; native Nachweise für 0.4.1 werden nach
+> erfolgreichem Build ergänzt.
+
 # Dienstplan 0.4.0 – Tabellenimport und Monatsübersicht
 
 Stand 10.11.2026. Aktuelle Pakete des geprüften Programm-/Testcommits **4e74b10**.

@@ -247,3 +247,14 @@ Die technische Zielskalierung wurde anhand eines reproduzierten Gegenbeispiels
 von 100 auf 1000 verfeinert. Fehlende Gutschrifttage sind keine bestätigte Null.
 Vor Produktbetrieb sind F01–F14 einschließlich Stichtag/Anwendbarkeit zu klären; eine
 konkrete Zuordnung kann nicht aus Dienstkürzeln oder einem erfolgreichen Test folgen.
+
+### Nutzerergänzung 10.11.2026 – ausdrückliche Regelübersteuerung
+
+Für manuelle Änderungen und CSV-/Excel-Importe ist die bisher zwingende Ablehnung
+fachlicher Regelverletzungen durch eine ausdrückliche, standardmäßig verneinte
+Warnbestätigung ersetzt. Unabhängige Prüfung, Status nach Neustart und Exporte
+weisen die Abweichungen weiter aus. Kein bestandener Konformitätsnachweis für
+einen solchen Entwurf. Technisch ungültige Eingaben bleiben atomar gesperrt.
+Synthetische Regressionen: `test_v2_overrides.py` und `test_v2_ui.py`.
+Dies erklärt die neue Erwartung bei den bisherigen Ablehnungsprüfungen; die
+Regeln des automatischen Solvers und unveränderliche Historie bleiben erhalten.

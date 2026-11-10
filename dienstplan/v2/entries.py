@@ -22,6 +22,7 @@ class Entry:
     credit_days: frozenset[date] = frozenset()
     comment: str = ""
     budget_month: str | None = None
+    rule_override: bool = False
 
     def __post_init__(self):
         object.__setattr__(self,"credit_days",frozenset(self.credit_days))
@@ -31,12 +32,12 @@ class Entry:
         if self.kind!="urlaub":
             if self.credit_days:
                 raise DomainError("Nur Urlaub darf Gutschrifttage enthalten.")
-            if any(d.weekday()==3 for d in days):
+            if not self.rule_override and (any(d.weekday()==3 for d in days)):
                 raise DomainError("Freiwunsch enthält einen Donnerstag; zur Korrektur vormerken.")
-            if self.kind=="freiwunschtag" and len(days)!=1:
+            if not self.rule_override and (self.kind=="freiwunschtag" and len(days)!=1):
                 raise DomainError("Ein einzelner Freiwunschtag darf nur einen Kalendertag betreffen.")
-            if self.kind=="wochenendwunsch" and (len(days)!=2 or days[0].weekday()!=5 or
-                    self.span.start!=midnight(days[0]) or self.span.end!=midnight(days[-1]+timedelta(days=1))):
+            if not self.rule_override and (self.kind=="wochenendwunsch" and (len(days)!=2 or days[0].weekday()!=5 or
+                    self.span.start!=midnight(days[0]) or self.span.end!=midnight(days[-1]+timedelta(days=1)))):
                 raise DomainError("Wochenendwunsch muss das vollständige Samstag/Sonntag-Wochenende umfassen.")
             owner=self.budget_month or (days[0].strftime('%Y-%m') if self.kind=='freiwunschtag' else None)
             if owner not in {d.strftime('%Y-%m') for d in days}:
@@ -85,7 +86,7 @@ class CorrectionBatch:
         return tuple({r.proposed.identity:r.proposed for r in self.rows}.values())
 
 
-def _check_rows(original, rows, existing, budgets, month, parse_errors=()):
+def _check_rows(original, rows, existing, budgets, month, parse_errors=(),allow_rules=False):
     result=[]
     by_identity={e.identity:e for e in existing}
     by_id={e.id:e for e in existing}
@@ -100,7 +101,7 @@ def _check_rows(original, rows, existing, budgets, month, parse_errors=()):
             credits=frozenset(date.fromisoformat(d) for d in values.get('gutschrifttage','').split('|') if d)
             key=json.dumps([person,kind,span.start.isoformat(),span.end.isoformat()],ensure_ascii=False)
             ident=values.get('entry_id') or sha256(key.encode()).hexdigest()
-            entry=Entry(ident,person,kind,span,credits,values.get('kommentar',''),month if kind=='wochenendwunsch' else None)
+            entry=Entry(ident,person,kind,span,credits,values.get('kommentar',''),month if kind=='wochenendwunsch' else None,allow_rules)
             old=by_id.get(ident)
             if old is not None and (old.identity!=entry.identity or old.credit_days!=entry.credit_days):
                 raise DomainError("Vorhandene Kennung hat anderen Inhalt; Änderung ausdrücklich prüfen.")
@@ -115,7 +116,7 @@ def _check_rows(original, rows, existing, budgets, month, parse_errors=()):
             result.append(replace(row,errors=(f"Zeile {row.line}: {exc}",),proposed=None))
     # Bestehende und neue aktive Identitäten gemeinsam; keine Teilaktivierung.
     touched={(r.proposed.person_id,r.proposed.budget_month) for r in result if r.proposed is not None and r.proposed.kind!='urlaub'}
-    for person,owner in touched:
+    for person,owner in (() if allow_rules else touched):
         relevant=[e for e in by_identity.values() if e.person_id==person and e.kind!='urlaub' and e.budget_month==owner]
         budget=budgets.get((person,owner))
         if budget is None:
@@ -126,7 +127,7 @@ def _check_rows(original, rows, existing, budgets, month, parse_errors=()):
     return CorrectionBatch(original,tuple(result),tuple(errors),tuple(parse_errors))
 
 
-def preview(text: str, *, existing: tuple[Entry, ...] = (), budgets=None, month: str) -> CorrectionBatch:
+def preview(text: str, *, existing: tuple[Entry, ...] = (), budgets=None, month: str, allow_rules=False) -> CorrectionBatch:
     original=text
     text=text.removeprefix('\ufeff')
     delimiter=';' if text.splitlines() and text.splitlines()[0].count(';')>text.splitlines()[0].count(',') else ','
@@ -144,11 +145,11 @@ def preview(text: str, *, existing: tuple[Entry, ...] = (), budgets=None, month:
     except csv.Error as exc:
         errors=(f"CSV zur Korrektur: {exc}",)
         return CorrectionBatch(original,tuple(rows),errors,errors)
-    return _check_rows(original,rows,existing,budgets or {},month)
+    return _check_rows(original,rows,existing,budgets or {},month,allow_rules=allow_rules)
 
 
-def correct(batch: CorrectionBatch, line: int, changes: dict[str,str], *, existing=(), budgets=None, month: str) -> CorrectionBatch:
+def correct(batch: CorrectionBatch, line: int, changes: dict[str,str], *, existing=(), budgets=None, month: str, allow_rules=False) -> CorrectionBatch:
     if any(k not in HEADER for k in changes) or not any(r.line==line for r in batch.rows):
         raise DomainError("Unbekannte Korrekturzeile bzw. Spalte.")
     rows=[replace(r,fields=tuple({**dict(r.fields),**changes}.items())) if r.line==line else r for r in batch.rows]
-    return _check_rows(batch.original_text,rows,existing,budgets or {},month,batch.parse_errors)
+    return _check_rows(batch.original_text,rows,existing,budgets or {},month,batch.parse_errors,allow_rules=allow_rules)

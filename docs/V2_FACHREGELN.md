@@ -392,3 +392,14 @@ Ausnahmen, Randdatenabdeckung, bestätigte Historie, Soll-/Gutschriftrechnungen,
 Zielwerte, Abbruchgrund und Nachweise zusammen mit derselben Planversion fest.
 Alle CSVs/Tabellen müssen genau zu dieser Version passen. Manuelle Fixierungen
 durchlaufen dieselbe unabhängige Ergebnisprüfung wie automatische Zuteilungen.
+
+## Ergänzung Nutzerauftrag 10.11.2026: ausdrückliche Ausnahmen
+
+Der Nutzer darf fachliche Planungsregeln bei manuellen Änderungen und Importen
+nach sichtbarer Warnung ausdrücklich übergehen (einschließlich Donnerstag,
+Berechtigung, Urlaub, Fixierungen, Ruhe, Wochenquoten und BK/WL-Ausschluss).
+Das ersetzt für diese beiden Übernahmewege die bisher zwingende Ablehnung.
+Prüfer und automatische Planung behalten ihre Regeln; Abweichungen bleiben
+Abweichungen. Keine Freigabe einer Rechts-/Tarifkonformität. Technisch undefinierte
+Daten können weiter nicht aktiv übernommen werden. Bedienung und Abgrenzung:
+`TABELLENIMPORT.md`, Abschnitt „Ausdrückliche Regelübersteuerung“.

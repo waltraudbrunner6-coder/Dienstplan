@@ -14,6 +14,7 @@ class WorkBlock:
     attendance: Interval
     breaks: tuple[Interval, ...] = ()
     protected: tuple[Interval, ...] = ()
+    rule_override: bool = False
 
     def __post_init__(self):
         if not self.id or not self.person_id or not self.code:
@@ -25,10 +26,10 @@ class WorkBlock:
             raise DomainError("Jede Pause muss vollständig innerhalb des Dienstblocks liegen.")
         if any(a.overlaps(b) for a, b in zip(pauses, pauses[1:])):
             raise DomainError("Pausen dürfen sich weder überlappen noch doppelt vorkommen.")
-        if self.attendance.minutes > 360 and (len(pauses) != 1 or pauses[0].minutes != 30):
+        if not self.rule_override and (self.attendance.minutes > 360 and (len(pauses) != 1 or pauses[0].minutes != 30)):
             raise DomainError("Ein Dienst über sechs Stunden benötigt genau eine enthaltene 30-Minuten-Pause.")
         for window in self.protected:
-            if not self.attendance.contains(window) or any(p.overlaps(window) for p in pauses):
+            if not self.rule_override and (not self.attendance.contains(window) or any(p.overlaps(window) for p in pauses)):
                 raise DomainError("Das geschützte Zeitfenster muss vollständig als Arbeitszeit erhalten bleiben.")
         if self.work_minutes + sum(p.minutes for p in pauses) != self.attendance.minutes:
             raise DomainError("Arbeits- und Pausenabschnitte zerlegen den Dienst nicht vollständig.")

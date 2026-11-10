@@ -199,6 +199,11 @@ def export_month_grid(path,inputs,profile,blocks,events):
         import_sheet.append([_safe(v) for v in (entry.id,entry.person_id,entry.person_id,entry.span.start.astimezone(vienna()).date().isoformat(),entry.kind,'','',entry.span.start.astimezone(vienna()).isoformat(),entry.span.end.astimezone(vienna()).isoformat(),'|'.join(map(str,sorted(entry.credit_days))),entry.comment,'','',entry.budget_month or '')])
     people=book.create_sheet('Personen');people.append(('person_ref','person_id'))
     for p in inputs.people:people.append((_safe(p.id),_safe(p.id)))
+    from .solver import verify
+    core,calendar_report=verify(inputs,blocks,active_events=events)
+    warnings=book.create_sheet('Regelmeldungen');warnings.append(('Status','Meldung'))
+    warnings.append(('REGELÜBERSTEUERUNG' if inputs.manual_override else 'Prüfung','Kein Regelkonformitätsnachweis' if inputs.manual_override else 'Regelprüfung'))
+    for message in dict.fromkeys(inputs.override_notes+tuple(i.message for i in core.issues+calendar_report.issues)):warnings.append(('Verstoß',_safe(message)))
     opened=book.create_sheet('Offene Plätze');opened.append(('Datum','Wochentag','Dienst','Offene Plätze'))
     for e in events:
         missing=(e.service.staff or 0)-sum(b.id==e.id for b in blocks)

@@ -733,3 +733,30 @@ SQLite-Benutzerdatenbank im Paket; echte bisherige Daten wurden nicht geöffnet,
 gelöscht oder migriert. Die bisherige App bleibt über eine ausdrückliche Wahl
 verfügbar. V2 startet getrennt mit fiktiven Testdaten. Dies ist eine Bedienkorrektur,
 keine Freigabe einer fertigen produktiven V2-Anwendung.
+
+## Folgeauftrag 10.11.2026: Regeln manuell und beim Import übergehen (0.4.1)
+
+Implementiert: ausdrückliche, standardmäßig abgelehnte Warnbestätigung; alle
+vorhandenen Personen manuell auswählbar; fachliche Objektregeln (Donnerstag,
+Diensttag/-variante, Pausenfenster) bei bestätigter Ausnahme übergehbar;
+CSV-/Excel-/manuelle Abwesenheitsübernahme einschließlich Wunschbudget.
+Speicher und Reader erhalten Ausnahme-Kennzeichnung und bestätigte Meldungen;
+Prüfer bleibt unverändert streng, Excel-/ZIP-Exporte weisen Verstöße aus.
+Keine Aufweichung automatischer Solverregeln oder Erfindung unbekannter Zeiten.
+
+Regressionen: neue synthetische Ausnahme-, Abbruch-, Speicher-/Neustart- und
+Exporttests. Zwei bisherige Qt-Test-Erwartungen von Exception auf Ablehnen der
+Warnung mit unverändertem Plan umgestellt: fachliche Grundlage ist der neue
+Nutzerauftrag; die Schutzprüfung für nicht bestätigte Änderungen bleibt erhalten.
+Gezielte Prüfung: `QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -q
+ tests/test_v2_overrides.py tests/test_v2_ui.py --maxfail=2`: 26 bestanden.
+Vollständige Prüfung und native Paketstände werden nach Abschluss ergänzt.
+
+Aktueller Gesamtlauf: `QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -q
+--disable-warnings --maxfail=1`: **411 bestanden in 146,61 s**. Abschließende
+Qt-/Ausnahmeregression mit dem Status für noch ungeplante Monate: **26 bestanden
+in 17,48 s**. Vorheriger Lauf meldete 409 bestanden/2 fehlgeschlagen (angepasster
+Buttontext und Tuple/List-Rundlauf des neuen Manifestfelds); beides korrigiert,
+keine fachlichen Erwartungen abgeschwächt. `git diff --check` fehlerfrei.
+Version 0.4.1. Native Prüfungen werden im Buildlauf nach diesem Commit ausgeführt;
+bisherige 0.4.0-Pakete enthalten die neue Ausnahmefunktion noch nicht.
