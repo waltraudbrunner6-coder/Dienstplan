@@ -113,6 +113,21 @@ Abschließender vollständiger Lauf des jetzt eingefrorenen Codes:
 geprüft (Run 42892087768); die aktuelle zusätzliche Bedarfsanzeige wird vor
 Verlinkung nochmals in den tatsächlich gebauten Paketen geprüft.
 
+Native Matrix des Programmstands 0e1735f: Windows und Apple Silicon erfolgreich.
+Intel scheiterte in zwei unveränderten Versuchen an der bisherigen Legacy-Regression
+`test_twelve_people_special_slots_distributed_without_repetition`: nach acht Sekunden
+maximal drei statt eines besonderen Einsatzes pro Person. Der Plan war gültig und
+vollbesetzt; die Fairnesssuche noch unvollständig. Derselbe Test ist kein Vertrag
+über Fairness innerhalb von acht Sekunden auf jeder Hardware. Nur sein Suchbudget
+wird auf 30 s erhöht; alle Assertions bleiben erhalten (acht Einsätze insgesamt,
+maximal einer pro Person, tägliche Typen höchstens ein Einsatz Unterschied).
+Die unmittelbar folgenden expliziten Timeout-/Startplanprüfungen bleiben unverändert.
+Kein Solver-/Produktcode wird wegen dieser CI-Kalibrierung geändert und kein
+8-Sekunden-Fairnessnachweis aus dem späteren Lauf behauptet. Beide Fehlversuche
+sind in Run 42894838022 dokumentiert. Neue native Prüfung folgt mit dieser
+präzise benannten Testkonfiguration. Lokal gezielte Fairness- und unveränderte
+Timeout-/Startplanregression: **2 bestanden in 31,62 s**.
+
 Nächster Schritt: geprüften Code pushen und endgültige Paketlinks/Messwerte sichern. Die von Fachantworten abhängigen Importzeilen
 bleiben bis zur Klärung vorgemerkt.
 

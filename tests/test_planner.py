@@ -130,7 +130,11 @@ def test_different_contract_hours_receive_proportional_types():
 
 def test_twelve_people_special_slots_distributed_without_repetition():
     data = month(12, "4")
-    result = solve(data, time_limit=8)
+    # Fachliche Fairnessregression, kein Acht-Sekunden-Hardwarebenchmark.
+    # Intel-CI erschöpfte zweimal das alte Budget mit gültigem, aber noch
+    # unbalanciertem Zwischenstand. Alle Fairnessasserts bleiben unverändert;
+    # kurze Limits/fehlende Beweise werden separat darunter geprüft.
+    result = solve(data, time_limit=30)
     special = Counter(a.employee_id for a in result.assignments if a.shift_id.endswith("/d"))
     assert not result.open_slots
     assert not validate_assignments(data, result.assignments)
