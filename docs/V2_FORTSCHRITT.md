@@ -32,8 +32,21 @@ Prüfungen: `.venv/bin/python -m pytest tests/test_v2_ui.py -q` zunächst
 --self-test-report /tmp/preview-smoke.json`: bestanden, einschließlich echter
 Vorschauanzeige und Übernahme in SQLite.
 
-Aktueller Schritt: geprüften Stand committen und pushen, aktualisierte native
-Pakete bauen. Keine Änderung echter Benutzerdaten.
+Programm-/Teststand **bbb6909** ist auf `feat/v2-implementation` gepusht.
+Eigenständig startbares Linux-Paket gebaut und mit `check_v2_package` bei leerem
+System-Zeitzonenpfad geprüft: **bestanden**, `vorschau_anzeige=true`, Version
+0.3.1, saubere Buildkennung bbb6909. Gemessen 294.033.766 Bytes / 280,41 MiB,
+Archiv 114.297.571 Bytes / 109,00 MiB. Zusätzliche visuelle Qt-Probe: acht sichtbare
+Zuteilungen vor Übernahme, null gespeicherte Zuteilungen im ursprünglichen leeren
+Entwurf; keine echte Benutzerdatenbank verwendet.
+
+Native Matrix: [Run 42870257885](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42870257885).
+Native Prüfung vollständig erfolgreich: [Run 42870257885](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42870257885).
+Windows x64 und macOS Sequoia ARM64/Intel haben Tests, Build und die verschärfte
+Paketprobe mit `vorschau_anzeige=true` bestanden. Aktuelle Paketlinks und tatsächliche
+Messwerte: [V2_NATIVE_PRUEFUNG.md](V2_NATIVE_PRUEFUNG.md).
+Der Anzeigefehler ist damit behoben und auf allen drei Zielarchitekturen automatisiert
+geprüft; keine zusätzlichen Fachprofile oder echte Datenmigration freigegeben. Keine Änderung echter Benutzerdaten.
 Die folgenden Abschnitte sind der bisherige Verlauf.
 
 

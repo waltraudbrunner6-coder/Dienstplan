@@ -1,72 +1,70 @@
-# Dienstplan 0.3.0 – native Pakete der neuen Hauptoberfläche
+# Dienstplan 0.3.1 – Pakete mit sofort sichtbarer Dienstplanvorschau
 
-Stand 10.11.2026. **Neue Downloads mit ausschließlich der V2-Hauptanwendung.**
-Der normale Start öffnet dauerhaft gespeicherte Monatsdaten, keine Startauswahl
-und keinen zusätzlichen Vier-Termine-Testbereich.
+Stand 10.11.2026. Die Anzeigekorrektur ist in den folgenden Paketen enthalten.
+Berechnete Vorschläge öffnen jetzt sofort den Reiter **Dienstplan** mit Namen,
+Zuteilungen und offenen Plätzen. Stunden, Verteilung und Wünsche zeigen denselben
+Vorschlag. **Ergebnis übernehmen** speichert ihn dauerhaft; bis dahin bleibt der
+vorherige Plan erhalten. Verwerfen stellt dessen Anzeige wieder her. Exportiert
+wird der gerade sichtbare Vorschlag.
 
 ## Aktuelle Downloads
 
-[Run 42830290050](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42830290050) des Programm-/Testcommits **4035132** ist vollständig
-**erfolgreich**. Alle drei nativen Jobs führten Testsuite, Paketbuild und die neue
-Paketprobe erfolgreich aus. Lokal sind **362 Tests bestanden**. Nachfolgende reine
+[Run 42870257885](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42870257885) des Programm-/Testcommits **bbb6909** ist vollständig
+**erfolgreich**. Alle drei nativen Jobs führten Testsuite, Paketbuild und
+Paketprobe erfolgreich aus. Lokal: **368 bestandene Tests**. Nachfolgende reine
 Dokumentationscommits ändern diesen geprüften Programm-/Teststand nicht.
 
-- [Dienstplan-macOS-Sequoia-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42830290050/artifacts/13770774528)
-- [Dienstplan-Windows-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42830290050/artifacts/13770438683)
-- [Dienstplan-macOS-Sequoia-arm64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42830290050/artifacts/13770423434)
+- [Dienstplan-macOS-Sequoia-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42870257885/artifacts/13790395890)
+- [Dienstplan-Windows-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42870257885/artifacts/13789896584)
+- [Dienstplan-macOS-Sequoia-arm64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42870257885/artifacts/13789292461)
 
-Alte App schließen, das aktuelle Archiv in einen neuen Ordner entpacken und die
-enthaltene App/EXE öffnen. Im Fenster müssen **Dienstplan V2 · Version 0.3.0** und
-**Build 4035132** stehen. Unter Windows den vollständigen Programmordner behalten;
-macOS ARM64 ist für Apple Silicon, x64 für Intel. Python und Terminal sind nicht nötig.
-Archive mit anderen Commitkennungen gehören zu früheren Programmständen.
+Alte App schließen und neues Paket in einen eigenen Ordner entpacken. Im Fenster
+müssen **Version 0.3.1 · Build bbb6909** stehen. Unter Windows den vollständigen
+Ordner behalten; Mac ARM64 ist für Apple Silicon, x64 für Intel. Python und
+Terminal sind nicht nötig. Bestehende V2-Dateien bleiben direkt ladbar, die
+bisherige Altdatei wird nicht verändert. Einen zuvor nicht übernommenen Vorschlag
+nach dem Neustart erneut berechnen und anschließend ausdrücklich übernehmen.
 
-Der vollständige Standardkatalog enthält 17 Kürzel/19 Varianten. Neue Monate
-enthalten die bestimmten Tagesmuster automatisch: November 2026 hat ohne
-Sonderdienste 94 Termine, 120 operative Plätze und 876,00 h Bedarf. Eine neue Datei
-beginnt ohne erfundene Personen. Frühere `dienstplan.sqlite3`-Benutzerdaten bleiben
-unverändert; bisherige V2-Dateien lassen sich über „Datei öffnen“ laden.
+In Version 0.3.0 war der Vorschlag erst nach **Ergebnis übernehmen** sichtbar.
+Die Korrektur ändert Anzeige und Vorschauablauf, keine fachlichen Planungsregeln.
+Standardkatalog, automatische Tagesmuster und weiterhin offene Sonderangaben
+bleiben bestehen.
 
-## Tatsächlich gemessene Größen
+## Gemessene Paketgrößen und Nachweis
 
-Rohdaten, Betriebssysteme, Commit, Paketproben und Artefaktlinks:
-[native-pruefung.json](../examples/v2/native-pruefung.json).
+Rohdaten: [native-pruefung.json](../examples/v2/native-pruefung.json).
 
-| System | Architektur | Unkomprimiert Bytes | MiB | Archiv MiB | Paketprüfung |
+| System | Architektur | Unkomprimiert Bytes | MiB | Archiv MiB | Paketprobe |
 | --- | --- | ---: | ---: | ---: | --- |
-| macOS Sequoia 15.7.9 | x86_64 | 187.223.795 | 178.55 | 67.20 | bestanden |
-| macOS Sequoia 15.8.2 | arm64 | 180.712.848 | 172.34 | 60.73 | bestanden |
-| Windows 10.0.26100 | AMD64 | 240.752.674 | 229.60 | 82.83 | bestanden |
+| macOS Sequoia 15.8.2 | arm64 | 180722575 | 172.35 | 60.74 | bestanden |
+| Windows 10.0.26100 | AMD64 | 240762514 | 229.61 | 82.84 | bestanden |
+| macOS Sequoia 15.7.9 | x86_64 | 187233522 | 178.56 | 67.21 | bestanden |
 
-Die native Paketprobe verlangt sichtbare Hauptoberfläche, Standarddienste,
-Ausschlussliste, Stundenanzeige und persistenten Neustart. Zusätzlich prüft sie
-Wiener DST, paketiertes tzdata ohne System-Zeitzonenpfad, CP-SAT/Prüfer, SQLite und
-konsistenten Export anhand einer isolierten synthetischen Zwölf-Personen-Fixture
-mit acht Zuteilungen. Das ist ausdrücklich kein Vollmonats-/Rechtsnachweis.
-Die echten Einstiegstests öffnen die Hauptoberfläche mit Qt-Ereignisloop und prüfen,
-dass eine synthetische Altdatei unverändert bleibt. Ein Legacy-Paketbericht reicht
-für den neuen Pakettest nicht mehr aus.
+Die native Paketprobe verlangt zusätzlich **vorschau_anzeige=true**: echte
+Qt-Hauptoberfläche, Tabwechsel und sichtbare zugeteilte Personen vor dem
+Übernahmeklick, danach Speichern in SQLite. Sie prüft außerdem Standarddienste,
+Ausschlüsse, Stundenanzeige, persistenten Neustart, Wiener DST mit paketiertem
+tzdata bei leerem System-Zeitzonenpfad, CP-SAT/Prüfer und Export. Rechenkette und
+Vorschau werden mit einer isolierten synthetischen Zwölf-Personen-Fixture mit
+acht Zuteilungen geprüft; dies ist kein betrieblicher Vollmonats-/Rechtsnachweis.
+Die Regressionen prüfen auch den unveränderten vorherigen Plan, verworfene,
+veraltete, ungültige, unvollständige und leere Ergebnisse und den Vorschau-Export.
 
-Linux x86_64/Python 3.12.14: zusätzlich tatsächlich gebaut und geprüft,
-**294.024.047 Bytes / 280,40 MiB**, TAR.GZ **114.309.689 Bytes / 109,01 MiB**.
-Buildkennung stimmt mit dem sauberen Commit überein; keine SQLite-Benutzerdatenbank
-im Paket gefunden. Ignorierter Ausgabeordner `dist-v2/`, keine Binärdateien im Git.
-Linux ist ein gesonderter Nachweis und ersetzt keine native Prüfung.
+Linux x86_64 zusätzlich gebaut und geprüft: **294.033.766 Bytes / 280,41 MiB**,
+Archiv **114.297.571 Bytes / 109,00 MiB**. Saubere Buildkennung bbb6909, neue
+Paketprobe vollständig bestanden. Linux ersetzt keinen nativen Nachweis.
 
-## Grenzen und frühere Pakete
+## Grenzen und frühere Belege
 
-Alle Pakete sind **unsigniert**, ohne Notarisierung. Automatisierte native
-Offscreen-Prüfungen sind keine vollständige manuelle Endgeräteabnahme; OS-weite
-Netzabschaltung wurde nicht geprüft. Der Oberflächenauftrag ersetzt keine offenen
-Fachantworten: insbesondere keine Rechts-/KV-/BV-/Tarifprofile, Reservebewertung,
-Pausenabdeckung oder WL/BK-Wochenregeln erfinden. Das technische Rechenprofil muss
-vor der Planung ausdrücklich gewählt werden. Feste Sondertermine brauchen
-weiterhin tatsächliche Datums-/Personenangaben.
+Pakete sind unsigniert und nicht notarisiert. Native automatisierte
+Offscreen-Prüfungen sind keine vollständige manuelle Endgeräteabnahme. OS-weite
+Netzabschaltung wurde nicht geprüft. Offene KV-/BV-/Rechts-, Reserve-, Pausen- und
+Abrechnungsprofile werden durch die Anzeigekorrektur nicht entschieden.
 
-Frühere Downloads mit Startauswahl sind als historische Belege unter
-[historischer Paketstand 32e3732](V2_NATIVE_STARTAUSWAHL_HISTORISCH.md) und
-[native-startauswahl.json](../examples/v2/native-startauswahl.json) erhalten.
-Sie sind nicht die aktuellen Downloads.
+Die früheren erfolgreichen Pakete 0.3.0 sind als historischer Nachweis in
+[native-0-3-0.json](../examples/v2/native-0-3-0.json) erhalten; Pakete mit alter
+Startauswahl in [native-startauswahl.json](../examples/v2/native-startauswahl.json).
+Aktuelle Downloads stehen ausschließlich oben.
 
 [Bedienungsanleitung](V2_BEDIENUNG.md), [Fortschritt](V2_FORTSCHRITT.md),
-[offene Fachentscheidungen](V2_OFFENE_FRAGEN.md), [Abnahmestatus](V2_ABNAHMESTATUS.md).
+[offene Entscheidungen](V2_OFFENE_FRAGEN.md), [Abnahmestatus](V2_ABNAHMESTATUS.md).
