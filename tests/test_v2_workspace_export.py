@@ -136,3 +136,17 @@ def test_legacy_app_rejects_v2_before_changing_journal_or_file_bytes(tmp_path):
     before=path.read_bytes()
     with pytest.raises(ValueError,match='neueren Programmversion'):Store(path)
     assert path.read_bytes()==before and not Path(str(path)+'-wal').exists()
+
+
+def test_export_distinguishes_missing_holiday_calendar_from_explicit_empty_set(tmp_path):
+    import csv,io
+    data,p,old=technical_demo()
+    revisions=[]
+    for name,days,expected in (('unknown',None,'null'),('empty',frozenset(),'0')):
+        path=tmp_path/(name+'.zip');report=export_package(path,data,p,old,data.events,holidays=days)
+        assert report['holiday_calendar']==('ungeklärt' if days is None else [])
+        revisions.append(report['revision_id'])
+        with zipfile.ZipFile(path) as archive:
+            rows=list(csv.DictReader(io.StringIO(archive.read('zeitmengen.csv').decode('utf-8-sig')),delimiter=';'))
+            assert rows and all(row['holiday_minutes']==expected for row in rows)
+    assert revisions[0]!=revisions[1]

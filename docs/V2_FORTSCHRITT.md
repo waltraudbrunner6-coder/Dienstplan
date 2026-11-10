@@ -322,6 +322,16 @@ führt auch diesen erweiterten Teststand aus und wird im nativen Bericht belegt.
 
 ## Offene Fachentscheidungen und Grenzen
 
+Nachtrag zur Exportgrundlage: Nicht übergebene Feiertagsdaten sind im CSV `null`
+und im Manifest ungeklärt; eine ausdrücklich leere Datumsmenge ist separat
+erkennbar und verändert die Export-Revisions-ID. Keine behauptete Nullmenge aus
+fehlenden Eingaben. Letzter lokaler Gesamtlauf hierzu: **330 bestanden in 79,56 s**.
+Run `42725140124` hat den vorherigen erweiterten 329-Test-Stand auf allen drei
+Zielarchitekturen bestanden. Das neue read-only Berichtsskript
+`scripts/v2_native_report.py` wurde gegen einen abgeschlossenen echten Run geprüft;
+es sammelt Messwerte, OS-/Architekturstände, Paketprüfungen und Artefaktlinks über
+die erlaubte GitHub-API, ohne den gesperrten Blob-Logzugriff zu umgehen.
+
 F01–F14 aus `V2_OFFENE_FRAGEN.md` bleiben offen, außer den dort ausdrücklich bereits
 erledigten Klärungen. Donnerstagswünsche bleiben zur Korrektur vorgemerkt, ohne
 aktive/teilweise Importübernahme. Testprofile sind ausdrücklich keine betrieblichen

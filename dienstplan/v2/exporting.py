@@ -12,7 +12,7 @@ import zipfile
 from .codec import workspace
 from .objectives import evaluate
 from .reporting import hours_rows,quantity_rows,shares
-from .serialization import plain
+from .serialization import fingerprint,plain
 from .solver import verify
 from .time import vienna
 from .wishes import wish_rows
@@ -23,9 +23,14 @@ def _csv(header,rows):
     return ('\ufeff'+stream.getvalue()).encode('utf-8')
 
 
-def export_package(target,inputs,profile,blocks,events,*,proofs=(),fault=None):
+def export_package(target,inputs,profile,blocks,events,*,proofs=(),holidays=None,fault=None):
     target=Path(target);blocks=tuple(blocks);events=tuple(events)
-    saved=workspace(inputs,profile,blocks,events);revision=saved['revision_id']
+    holidays=None if holidays is None else frozenset(holidays)
+    saved=workspace(inputs,profile,blocks,events)
+    if holidays is not None:
+        saved['snapshot']['holiday_calendar']=sorted(d.isoformat() for d in holidays)
+        saved['revision_id']=fingerprint(saved['snapshot'])
+    revision=saved['revision_id']
     core,calendar=verify(inputs,blocks,active_events=events)
     terms={e.id:e for e in events};plan=[]
     for e in events:
@@ -40,12 +45,16 @@ def export_package(target,inputs,profile,blocks,events,*,proofs=(),fault=None):
         'stunden.csv':hours_rows(inputs.people,tuple({(b.id,b.person_id):b for b in inputs.boundary+blocks}.values()),inputs.absences,inputs.year,inputs.month,accounts=profile.accounts,target_profile=profile.target_profile,month_profile=profile.month_profile),
         'verteilung.csv':shares(inputs.people,events,blocks,policy=profile.fairness_policy,absences=inputs.absences),
         'wuensche.csv':wish_rows(inputs.people,inputs.absences,events,blocks+inputs.boundary,policy=profile.wish_policy,history=profile.history),
-        'zeitmengen.csv':quantity_rows(blocks),
+        'zeitmengen.csv':quantity_rows(blocks,frozenset() if holidays is None else frozenset(holidays)),
     }
     for name,rows in report_rows.items():
         rows=tuple(rows)
         header=tuple(asdict(rows[0])) if rows else ('person_id',)
-        files[name]=_csv(('revision_id',)+header,[(revision,)+tuple(json.dumps(plain(None if name=='stunden.csv' and not r.credits_known and key in {'credits','goal','projected','deviation','raw_credits'} else getattr(r,key)),ensure_ascii=False) for key in header) for r in rows])
+        def field(row,key):
+            if name=='stunden.csv' and not row.credits_known and key in {'credits','goal','projected','deviation','raw_credits'}:return None
+            if name=='zeitmengen.csv' and holidays is None and key=='holiday_minutes':return None
+            return getattr(row,key)
+        files[name]=_csv(('revision_id',)+header,[(revision,)+tuple(json.dumps(plain(field(r,key)),ensure_ascii=False) for key in header) for r in rows])
     unknown_credits=any(not r.credits_known for r in report_rows['stunden.csv'])
     manifest=dict(revision_id=revision,scope=inputs.profile_label,input_fingerprint=inputs.fingerprint,
                   versions=saved['snapshot']['versions'],objective_profile=plain(profile),objectives=[] if unknown_credits else plain(evaluate(inputs,blocks,events,profile)),
@@ -53,8 +62,10 @@ def export_package(target,inputs,profile,blocks,events,*,proofs=(),fault=None):
                   proofs=[] if unknown_credits else plain(proofs),issues=plain(core.issues+calendar.issues),open_slots=plain(core.open_slots),
                   unchecked=list(dict.fromkeys(inputs.unchecked+calendar.unchecked+profile.history.missing)),
                   euro_status='ungeklärt – kein freigegebener KV-/BV-Tarif',
+                  holiday_calendar='ungeklärt' if holidays is None else sorted(d.isoformat() for d in holidays),
                   files={name:sha256(content).hexdigest() for name,content in files.items()})
     if unknown_credits:manifest['unchecked'].append('Urlaubsgutschrifttage ungeklärt; keine angenommene Nullgutschrift.')
+    if holidays is None:manifest['unchecked'].append('Feiertagsmenge nicht übergeben; keine angenommene Nullmenge.')
     files['arbeitsstand.json']=(json.dumps(saved,ensure_ascii=False,indent=2)+'\n').encode('utf-8')
     manifest['files']['arbeitsstand.json']=sha256(files['arbeitsstand.json']).hexdigest()
     files['pruefmanifest.json']=(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n').encode('utf-8')

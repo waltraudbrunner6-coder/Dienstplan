@@ -61,6 +61,9 @@ Gutschrift/Ziel/Endsaldo sind ungeklärt. Eine solche Eingabe wird nicht als
 bestätigte Nullgutschrift optimiert oder bestätigt. Der Export führt dafür
 `null` und `credits_known=false`; Pläne und bekannte physische Mengen bleiben
 exportierbar. Die Bedienperson muss die anrechenbaren Tage ausdrücklich ergänzen.
+Ohne übergebene Feiertagsmenge enthält der Zeitmengenexport ebenfalls `null`
+statt einer vermeintlich berechneten Null. Eine ausdrücklich leere Datumsmenge
+ist davon unterscheidbar; beides bedeutet keine Freigabe eines KV-/Tarifprofils.
 
 E0 ist eine ausgewählte Testhierarchie; Formeln und genaue Prüfstände stehen in
 [V2_FORTSCHRITT.md](V2_FORTSCHRITT.md). Höhere beste Ziele bleiben fest. Ein späteres
