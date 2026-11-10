@@ -74,8 +74,26 @@ Tatsächliche Prüfungen dieses Folgeauftrags:
   einem Lauf 2 Plätze offen (gültiger unvollständiger Entwurf). Standardzeit der
   Hauptoberfläche daher 60 s, weiterhin änderbar/abbrechbar.
 
-Nächster konkreter Schritt: geprüften Stand committen/pushen, native Windows-/
-macOS-Pakete bauen und tatsächliche Ergebnisse verlinken.
+Programm-/Teststand **4035132** ist auf `feat/v2-implementation` gepusht.
+Linux-Paket tatsächlich gebaut und mit deaktiviertem System-Zeitzonenpfad geprüft:
+294.024.047 Bytes / 280,40 MiB, Archiv 114.309.689 Bytes / 109,01 MiB.
+Paketprobe vollständig bestanden; Buildkennung stimmt mit dem sauberen Commit
+überein. Im Paket keine SQLite-Benutzerdatenbanken gefunden. Die native Matrix
+läuft unter [Run 42830290050](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42830290050).
+
+Native Prüfung abgeschlossen: [Run 42830290050](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42830290050)
+ist vollständig erfolgreich. Windows x64 sowie macOS Sequoia ARM64/Intel haben
+Tests, Build und die neue Paketprobe bestanden. Aktuelle Downloads/Messwerte:
+[V2_NATIVE_PRUEFUNG.md](V2_NATIVE_PRUEFUNG.md). Der neue Pakettest bestätigt die
+Hauptoberfläche mit Standarddiensten, Ausschlüssen, Stunden und Neustart sowie
+die zusätzliche synthetische Rechenkette. Kein bloßer Legacy-Selbsttest.
+
+Der begrenzte Oberflächenfolgeauftrag ist umgesetzt und geprüft. Das Gesamtprojekt
+bleibt bei den dokumentierten offenen Fachprofilen, vollständiger Monatskonfiguration,
+bestätigter Übernahme/Abrechnung und manueller Endgeräte-/Signierprüfung offen.
+Nächster fachlicher Schritt: nur die von F01–F14 abhängigen Funktionen nach den
+jeweiligen tatsächlichen Entscheidungen freigeben; keine neuen Betriebsprofile
+oder Datenübernahmen aus dem UI-Wechsel ableiten.
 
 ## Folgeauftrag: Artefakte wirken wie die alte Version
 
