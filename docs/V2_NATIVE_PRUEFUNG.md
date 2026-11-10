@@ -1,77 +1,70 @@
-# V2 – tatsächliche Paketprüfungen
+# V2 – tatsächliche native Paketprüfung
 
-Stand 10.11.2026. Technischer Prüfbereich, **keine produktive V2-Freigabe**.
-Alle Angaben nennen den tatsächlich geprüften Commit. Keine Linux-Prüfung wird
-als nativer Windows-/Mac-Nachweis ausgegeben.
+Stand 10.11.2026. **Technischer Prüfbereich, keine produktive V2-Freigabe.**
 
-## Aktueller Code und Zugangssperre
+## Geprüfter Stand und Pakete
 
-Code/Testkorrektur bis `fa61c12` ist auf `feat/v2-implementation` gepusht.
-Der letzte lokale Gesamtlauf bestand mit **330 Tests in 94,71 s**.
-Ein weiterer nativer Lauf dieses Commits wurde erfolgreich angestoßen. Sein
-Ergebnis konnte anschließend nicht mehr abgefragt werden: GitHub-API meldet
-`401 Bad credentials`, `gh auth status` kennzeichnet `GH_TOKEN` als ungültig,
-Git kann keine Anmeldung abrufen. Eine frische Status-/Verbindungsprüfung hat
-dies bestätigt. Keine Zugangsdaten wurden umgangen oder im Chat angefordert.
+[Run 42727609885](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42727609885) des Commits `fa61c12` ist vollständig
+**erfolgreich**. Alle drei nativen Jobs führten die vollständige damalige
+330-Test-Suite, den Paketbuild sowie den Legacy- und V2-Paketselbsttest erfolgreich
+aus. Nachfolgende Dokumentationscommits ändern diesen Programm-/Testcode nicht.
 
-Deshalb bleibt der letzte native Intel-Nachweis nach der Testkorrektur ausdrücklich
-**unbestätigt**. Nach erneuerter GitHub-Verbindung zuerst den letzten Lauf für
-`fa61c12` lesen, nicht nochmals ungeprüft neu implementieren oder Tests lockern.
-Bei Fehlern konkrete Annotationen prüfen und korrigieren; erst danach den
-Abschlussbericht pushen. Der externe Blob-Logspeicher ist zusätzlich mit HTTP 403
-gesperrt; die reguläre GitHub-API konnte zuvor Mess- und Fehlerannotationen liefern.
+Download der tatsächlich erzeugten Prüfartefakte:
 
-## Bereits vollständig beobachtete native Läufe
+- [Dienstplan-macOS-Sequoia-arm64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42727609885/artifacts/13723920072)
+- [Dienstplan-macOS-Sequoia-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42727609885/artifacts/13723796238)
+- [Dienstplan-Windows-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42727609885/artifacts/13722788520)
 
-- [42724231255](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42724231255),
-  Commit `b358351`: alle drei Zielarchitekturen grün, damaliger 325-Test-Stand,
-  gebaute Programme mit Legacy- und V2-Selbsttest.
-- [42725140124](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42725140124),
-  Commit `6527faf`: alle drei Zielarchitekturen grün, erweiterter 329-Test-Stand
-  einschließlich gemeinsamer Zwölfer-Teaminstanzen.
-- [42726096163](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42726096163),
-  Commit `527d639`: Windows und ARM64 grün; Intel scheiterte im Zwei-Sekunden-
-  Wunschzähltest an einem leeren Ergebnisbericht. Die Korrektur `fa61c12` verwendet
-  einen gültigen Startplan und 10 s und fordert zusätzlich einen bewiesenen
-  CP-Zielwert. Die fachliche Zählerwartung wurde nicht abgeschwächt. Separat
-  geprüfte Zeitlimit-/Abbruchregeln bleiben erhalten.
+Die Archive enthalten eigenständig startbare Programme; Python/Terminal werden
+für die Nutzung nicht benötigt. Vollständigen Paketordner beziehungsweise das
+macOS-App-Bundle behalten. Native Rohdaten einschließlich OS/Architektur,
+Bytegrößen und Selbsttestergebnissen: [native-pruefung.json](../examples/v2/native-pruefung.json).
 
-## Gemessene native Größen des belegten Stands b358351
+| Tatsächliches System | Architektur | Unkomprimiert Bytes | MiB | Archiv MiB | Paketprüfung |
+| --- | --- | ---: | ---: | ---: | --- |
+| macOS Sequoia 15.8.2 | arm64 | 180.680.151 | 172,31 | 60,72 | bestanden |
+| macOS Sequoia 15.7.9 | x86_64 | 187.191.097 | 178,52 | 67,18 | bestanden |
+| Windows-Runner 10.0.26100 | AMD64 | 240.720.802 | 229,57 | 82,81 | bestanden |
 
-Diese Werte gehören ausschließlich zu Run `42724231255`, nicht zum noch nicht
-abschließend kontrollierten Nachfolgelauf. Rohdaten samt Artefaktlinks:
-[native-gepruefter-zwischenstand.json](../examples/v2/native-gepruefter-zwischenstand.json).
+Python der nativen Läufe: 3.12.10. Die Paketprüfung belegt Wien-DST, gebündeltes
+tzdata 2026.6 / IANA 2026f, CP-SAT/Prüfer, SQLite-Workspace, konsistentes ZIP und
+sichtbare Qt-Widgets. Legacy-Selbsttest: zwölf Personen/186 Zuteilungen; V2-Test:
+zwölf Personen/acht Zuteilungen im ausdrücklich synthetischen Vier-Termine-
+Datensatz. Acht Zuteilungen bedeuten keinen vollständig besetzten Betriebsmonat.
 
-| Plattform / tatsächliches System | Architektur | Unkomprimiert Bytes | MiB | Archiv MiB |
-| --- | --- | ---: | ---: | ---: |
-| Windows-Runner 10.0.26100 | AMD64 / x64 | 240.715.491 | 229,56 | 82,80 |
-| macOS Sequoia 15.8.2 | ARM64 | 180.674.901 | 172,31 | 60,72 |
-| macOS Sequoia 15.7.9 | Intel x86_64 | 187.185.847 | 178,51 | 67,18 |
-
-Python der nativen Läufe: 3.12.10. Paketprüfung belegt Wien-DST, tzdata 2026.6 /
-IANA 2026f, CP-SAT/Prüfer, SQLite-Workspace, konsistentes ZIP und sichtbare Qt-Widgets.
-Legacy-Selbsttest: 12 Personen/186 Zuteilungen; V2-Test: 12 Personen/8 Zuteilungen
-im ausdrücklich synthetischen Vier-Termine-Datensatz. Die Zahl acht bedeutet
-keinen vollständig besetzten betrieblichen Monatskalender.
-
-## Aktuelles Linux-Paket
+## Zusätzlich gebautes Linux-Paket
 
 Programmstand `527d639`, Linux x86_64/Python 3.12.14: tatsächlich **293.991.514 Bytes
 / 280,37 MiB**, TAR.GZ **114.285.491 Bytes / 108,99 MiB**. Beide Paketselbsttests
-bestanden. V2 lief mit `PYTHONTZPATH=""`; gebündelte Datei Europe/Vienna und
-deutsche Qt-Basistranslation sind im Paket vorhanden. Ausgabe im lokalen
-ignorierten Verzeichnis `dist-v2/`; keine Binärdateien im Git.
+bestanden. V2 lief mit `PYTHONTZPATH=""`; gebündelte Datei Europe/Vienna und deutsche
+Qt-Basistranslation sind vorhanden. Lokale Ausgabe: ignoriertes `dist-v2/`, keine
+Binärdateien im Git. Linux ersetzt keinen der oben tatsächlich ausgeführten nativen
+Windows-/Mac-Nachweise.
 
-## Bewusst offene Nachweise
+## Reparaturen und Grenzen
 
-Die nativen Builds sind unsigniert; keine Notarisierung behauptet. Qt wurde auf
-den jeweiligen nativen Runnern automatisiert/offscreen gestartet. Eine vollständige
-manuelle Bedienabnahme auf Endgeräten und eine OS-weite Netzabschaltung wurden
-nicht durchgeführt. S0/M0/E0/Q0 und synthetische Bestätigungen sind keine KV-/BV-,
-Abrechnungs- oder Produktfreigabe. Weitere Grenzen: [Abnahmestatus](V2_ABNAHMESTATUS.md).
+Der erste Windows-Lauf scheiterte am Exportflush: der Handle wird jetzt schreibbar
+geöffnet, wie Windows fsync/_commit es benötigt. Eine plattformübergreifende
+Regression erzwingt das. Der später einmal auf Intel gescheiterte Wunschzähltest
+unterstellte einen Fund innerhalb von zwei Sekunden. Er verwendet nun einen gültigen
+Startplan/10 s und verlangt zusätzlich einen bewiesenen CP-Zielwert. Die fachliche
+Zählerwartung und kontrollierte Abbruch-/Zeitlimittests wurden nicht abgeschwächt.
+Der oben verlinkte letzte Lauf prüft beide Korrekturen auf allen drei Architekturen.
+Frühere Messdaten bleiben separat in
+[native-gepruefter-zwischenstand.json](../examples/v2/native-gepruefter-zwischenstand.json) erhalten.
 
-Nach wiederhergestelltem Zugang lässt sich ein abgeschlossener Lauf reproduzierbar
-auslesen, ohne den externen Logspeicher zu benötigen:
+Die Builds sind **unsigniert**, keine Notarisierung behauptet. Qt wurde auf den
+jeweiligen nativen Runnern automatisiert/offscreen gestartet. Vollständige manuelle
+Bedienabnahme auf Endgeräten und OS-weite Netzabschaltung wurden nicht durchgeführt.
+S0/M0/E0/Q0 und synthetische Bestätigungen sind keine KV-/BV-, Abrechnungs- oder
+Produktfreigabe. Weitere Grenzen: [Abnahmestatus](V2_ABNAHMESTATUS.md).
+
+Der zwischenzeitliche GitHub-Anmeldeausfall (`401 Bad credentials`) war vorübergehend;
+frische Verbindungen erlaubten danach wieder Push und Prüfung. Der externe Blob-
+Logspeicher blieb mit HTTP 403 gesperrt. Mess- und Fehlerannotationen wurden regulär
+über die erlaubte GitHub-API gelesen, ohne die Netzbeschränkung zu umgehen.
+
+Ein abgeschlossener Lauf lässt sich ohne externen Logdownload reproduzierbar erfassen:
 
 ```sh
 python scripts/v2_native_report.py --run RUN_ID --output NEUER_BERICHT.json

@@ -1,11 +1,10 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
 Basis: Etappe A `0a0bc48`, Arbeitsbranch `feat/v2-implementation`.
-Aktueller Sicherungsstand: Code/Testkorrektur bis `fa61c12` gepusht, **330 lokale
-Tests grün**. Letzter nativer Korrekturlauf gestartet, anschließend GitHub-Anmeldung
-abgelaufen (`401 Bad credentials`, ungültiger GH_TOKEN, Git-Anmeldung ebenfalls
-nicht abrufbar). Abschlussstatus/letzter Berichtspush deshalb technisch blockiert.
-Belegte native Zwischenstände und Größen: [V2_NATIVE_PRUEFUNG.md](V2_NATIVE_PRUEFUNG.md).
+Aktueller geprüfter Programm-/Teststand: `fa61c12`, **330 lokale Tests grün**,
+alle drei nativen Zielarchitekturen einschließlich Paket-/V2-Selbsttests grün in
+Run `42727609885`. Zwischenzeitlicher Anmeldeausfall ist behoben; Push/API wieder
+funktionsfähig. Größen/Artefaktlinks: [V2_NATIVE_PRUEFUNG.md](V2_NATIVE_PRUEFUNG.md).
 Die produktive Altanwendung bleibt unverändert; keine V2-Umschaltung, kein Merge
 nach main und keine Migration einer echten Benutzerdatenbank.
 
@@ -344,7 +343,7 @@ Freigaben. Produktive Wunschhistorie und vollständige produktive Oberfläche si
 noch nicht freigegeben. Testprofiloptimierung ersetzt keine betriebliche Rechts-/Tarifprüfung.
 Monatsskalierung des Kalenders mit Ausschlussschnitten ist weiterhin begrenzt.
 
-## Nächster zusammenhängender Schritt
+## Verlauf der letzten nativen Nachprüfung (abgeschlossen)
 
 Nativer Lauf `42726096163` von `527d639`: Windows und ARM64 bestanden, Intel
 meldete im Wunschzähltest einen leeren Ergebnisbericht (`KeyError: wishes`).
@@ -360,9 +359,31 @@ Abbruch-/Zeitlimitfälle bleiben unverändert. Gezielte Ziel-/Teamprüfung hierz
 Gesamtlauf nach dieser Präzisierung: **330 bestanden in 94,71 s**.
 
 Nutzer hat am 10.11.2026 selbstständige Fortsetzung bestätigt.
-Nächster Schritt: native Prüfungen ausführen und konkrete Fehler korrigieren;
-dafür zuerst die GitHub-Verbindung der Cloud-Umgebung erneuern, dann den letzten
-Lauf für `fa61c12` abfragen und den lokal gesicherten Abschlussbericht pushen.
-Nicht ungeprüft Erfolg des Intel-Korrekturlaufs behaupten. Der Programmcode ist
-bereits gepusht; nur der nach Zugangsausfall ergänzte Bericht ist noch lokal.
-keine produktive Umschaltung oder echte Datenmigration ohne gesonderten Auftrag.
+Zwischenzeitlich war die GitHub-Anmeldung ungültig. Der Bericht wurde lokal
+gesichert und nach Wiederherstellung erfolgreich gepusht; der letzte Lauf wurde
+anschließend vollständig kontrolliert. Keine produktive Umschaltung oder echte
+Datenmigration ohne gesonderten Auftrag.
+
+## Abschluss dieses technischen Änderungssatzes und Wiederaufnahme
+
+Run `42727609885`, Commit `fa61c12`: Windows x64, macOS Sequoia ARM64 und Intel
+vollständig erfolgreich einschließlich der 330-Test-Suite, Builds und beider
+Paketselbsttests. Tatsächliche Paketgrößen und Downloadlinks sind in
+`V2_NATIVE_PRUEFUNG.md` und `examples/v2/native-pruefung.json` belegt. Die zuvor
+ungültige GitHub-Anmeldung war vorübergehend und blockiert nicht mehr.
+Alle Programmänderungen sind auf `feat/v2-implementation` committed/gepusht;
+kein Merge nach main, keine produktive Umschaltung, keine echte Datenbankmigration.
+
+Der technische Zwischenstand ist keine vollständige Produktabnahme der 125 Fälle.
+Offene F01–F14 begrenzen weiterhin die produktive Profilführung, R-/Tarif-/
+Sollbewertung, Wochen-/Teilmonatszuordnung und vollständige betriebliche
+Mehrmonatsabnahme. Insbesondere werden gesetzliche Werte nicht aus Testprofilen
+übernommen. Die Frage nach F02/R-Bewertung wurde gezielt gestellt; ohne Antwort
+keine volle Arbeit oder Freizeit unterstellen. Normale monatliche Eingaben sind
+von diesen Fachentscheidungen getrennt zu erfassen.
+
+Bei Fortsetzung zuerst Git-Stand, diese Datei, native Prüfnachweise und
+`V2_ABNAHMESTATUS.md` lesen. Erledigte Etappen nicht neu beginnen. Nach geklärten
+Profilen die jeweils abhängige produktive Integration und vollständige X04-/
+Endgeräteabnahme ergänzen. Produktive Umschaltung benötigt weiterhin gesonderten
+Auftrag. Dies ist ausdrücklich noch kein fertiges Gesamtprojekt.

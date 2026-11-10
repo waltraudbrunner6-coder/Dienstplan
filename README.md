@@ -32,6 +32,9 @@ Korrekturstapel, getrennte Speicherung und konsistente Exportpakete. Anleitung:
 Lokal sind inzwischen **330 Tests** geprüft. Tatsächlich gebaute native Pakete,
 gemessene Größen und der getrennte Nachweisstatus stehen unter
 [Native V2-Prüfungen](docs/V2_NATIVE_PRUEFUNG.md); dies ist keine produktive V2-Umschaltung.
+Windows x64 und macOS Sequoia ARM64/Intel wurden inzwischen tatsächlich gebaut
+und mit beiden Paketselbsttests geprüft. Die dort verlinkten Artefakte gehören
+zum jeweils ausdrücklich genannten geprüften Commit; alle Pakete sind unsigniert.
 
 Python 3.12 verwenden. Die folgenden Befehle sind für Entwickler*innen; Nutzer*innen erhalten ein fertiges Paket. `requirements-lock.txt` hält die in Linux geprüften direkten und transitiven Versionen fest; die nativen Builds installieren die direkt festgelegten Versionen aus `requirements-dev.txt` mit passenden Plattformabhängigkeiten.
 
