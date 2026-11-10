@@ -760,3 +760,11 @@ Buttontext und Tuple/List-Rundlauf des neuen Manifestfelds); beides korrigiert,
 keine fachlichen Erwartungen abgeschwächt. `git diff --check` fehlerfrei.
 Version 0.4.1. Native Prüfungen werden im Buildlauf nach diesem Commit ausgeführt;
 bisherige 0.4.0-Pakete enthalten die neue Ausnahmefunktion noch nicht.
+
+Native Lieferung 0.4.1: Run **42912433306**, Programm-/Testcommit **72b168a**:
+Windows x64, macOS Sequoia ARM64 und Intel vollständig erfolgreich. Testsuite,
+Build und beide gebauten Programmproben je Ziel grün. Rohdaten unter
+`examples/v2/native-pruefung.json`; 0.4.0 unter `native-0-4-0.json` archiviert.
+Aktuelle Downloads und gemessene Größen: `V2_NATIVE_PRUEFUNG.md`. Nachfolgende
+reine Nachweis-/Dokumentationscommits ändern diesen Programm-/Testcode nicht.
+Keine Datenbankmigration; keine Zusammenführung nach main.
