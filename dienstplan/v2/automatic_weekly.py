@@ -45,12 +45,23 @@ def automatic_weekly(inputs,*,snapshots=(),full_weeks_only=False):
                     prior=locks.get((b.id,b.person_id))
                     if prior is not None and prior!=b:raise DomainError('Widersprüchliche konkrete Randwochenpause.')
                     locks[b.id,b.person_id]=b
+        # Auch Nachbarpläne ohne neues Wochenprofil enthalten verbindliche
+        # beobachtete Dienste/Ruhezeiten. Nicht als unbekannte Freizeit behandeln.
+        for term in active:
+            relevant=any(q.code==term.service.code and q.dates.includes(term.attendance.start_day) for q in quotas)
+            relevant=relevant or ((term.attendance.start_day.year,term.attendance.start_day.month)==(inputs.year,inputs.month) and term.service.code in {'BK','WL'})
+            if relevant and term.service.code in {'BK','WL'}:
+                terms[term.id]=term;optional.discard(term.id)
+                for b in blocks:
+                    if b.id==term.id:
+                        if b.person_id not in people:raise DomainError('Person aus einem bekannten Randwochentermin fehlt im Team.')
+                        locks[b.id,b.person_id]=b
         if shared:
             notes.append(f'Gemeinsame Randwoche aus {previous.year}-{previous.month:02d} übernommen; bestehende Termine und Zuteilungen bleiben fixiert.')
-            for b in blocks:
-                if b.person_id in people and any(horizon(inputs.year,inputs.month).includes(d) for d in b.occupied_days):
-                    boundary[b.id,b.person_id]=b
-            known.update((p,d) for p,d in previous.known_days if p in people)
+        for b in blocks:
+            if b.person_id in people and any(horizon(inputs.year,inputs.month).includes(d) for d in b.occupied_days):
+                boundary[b.id,b.person_id]=b
+        known.update((p,d) for p,d in previous.known_days if p in people)
     errors=tuple(i.message for i in options.rejected)
     unchecked=tuple(n for n in inputs.unchecked if not n.startswith(('F06/F07:','F06:')))+tuple(notes)+errors
     if full_weeks_only:unchecked+=('Randwochen sind ausdrücklich aus der automatischen Quote ausgeschlossen.',)
@@ -60,9 +71,15 @@ def automatic_weekly(inputs,*,snapshots=(),full_weeks_only=False):
 
 
 def check_shared_weeks(inputs,blocks,events,snapshots):
-    if events is None or inputs.week_policy is None:return
+    if events is None:return
     for previous,_,old_blocks,active in snapshots:
         if active is None or (previous.year,previous.month)==(inputs.year,inputs.month):continue
+        relevant={e.id for e in active if e.service.code in {'BK','WL'} and (
+            (e.attendance.start_day.year,e.attendance.start_day.month)==(inputs.year,inputs.month)
+            or any(q.code==e.service.code and q.dates.includes(e.attendance.start_day) for q in inputs.quotas))}
+        current={e.id for e in events}
+        if not relevant<=current or not {b for b in old_blocks if b.id in relevant}<=set(blocks):
+            raise DomainError('Bekannte BK/WL-Dienste einer Randwoche des Nachbarmonats fehlen oder wurden verändert.')
         common={q.id for q in inputs.quotas}&{q.id for q in previous.quotas}
         for q in (q for q in inputs.quotas if q.id in common):
             old={e.id for e in active if e.service.code==q.code and q.dates.includes(e.attendance.start_day)}

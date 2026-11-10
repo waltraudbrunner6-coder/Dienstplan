@@ -73,7 +73,25 @@ bestehende harte Schutzregel wurde für einen grünen Test abgeschwächt.
 Neue native Paketprobe mit Excel-Roundtrip und echter Speicherübernahme im
 Quellcode bestanden; die native Matrix prüft zusätzlich den gesamten aktuellen Stand.
 
-Nächster Schritt: geprüften Stand committen und pushen, native Pakete bauen. Die von Fachantworten abhängigen Importzeilen
+Stand 974cc90 wurde gepusht und auf Windows x64/macOS Sequoia ARM64/Intel mit
+Tests, Build und verschärfter Paketprobe erfolgreich geprüft (Run 42890069478).
+Anschließend Randdatenabsicherung ergänzt: auch Nachbarpläne ohne neues
+Wochenprofil liefern vorhandene Nacht-/BK-/WL-Dienste und bekannte Tage; alte
+BK-/WL-Zuteilungen werden nicht durch eine neue unabhängige Randquote verdrängt.
+Regression mit W17 am 30.11. bis 01.12. 01:00: KC10 am 01.12. um 10:15 wird
+wegen tatsächlicher Ruhe von nur 9:15 abgelehnt. Früherer Nachbar benötigt dafür
+kein bereits freigegebenes neues Wochenprofil. Finale Pakete müssen diesen
+nachfolgenden geprüften Code ebenfalls enthalten.
+
+Randdaten-Gesamtlauf: **398 bestanden in 109,18 s**. Danach zusätzlich den
+normalen Erstfall einer manuellen Zuteilung geprüft: Wochenprofil wählen,
+konkrete statt aller optionalen Datumsalternativen prüfen und speichern.
+Relevante komplette Tabellen-/Qt-Regressionen: **41 bestanden in 24,54 s**.
+Das schließt die neue normale Erstzuteilung ein; kein technischer Vier-Termine-
+Datensatz als Ersatz dieses Ablaufs. Neue finale Pakete werden aus dem gesamten
+nachfolgenden Code gebaut. Keine privaten Tabellen ins Repository aufgenommen.
+
+Nächster Schritt: finalen geprüften Stand pushen und native Pakete verlinken. Die von Fachantworten abhängigen Importzeilen
 bleiben bis zur Klärung vorgemerkt.
 
 

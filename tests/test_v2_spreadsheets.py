@@ -280,3 +280,18 @@ def test_empty_and_structurally_invalid_csv_have_readable_errors(tmp_path):
     with pytest.raises(DomainError,match='leer'):read_import(p)
     p.write_text(';'.join(COLUMNS)+'\nx;y\n')
     with pytest.raises(DomainError,match='Spaltenzahl'):read_import(p)
+
+
+def test_existing_neighbour_without_week_profile_supplies_real_rest_boundaries():
+    nov,p,_=demonstration_month(2026,11)
+    night=automatic_pause_choices(event('W17',date(2026,11,30)),'P01')[0]
+    bk=event('BK',date(2026,11,30));fixed=tuple(automatic_pause_choices(bk,pid)[0] for pid in ('P02','P03'))
+    nov=replace(nov,events=nov.events+(bk,),candidates=nov.candidates+fixed)
+    dec,_,_=demonstration_month(2026,12)
+    dec=automatic_weekly(dec,snapshots=((nov,p,(night,)+fixed,nov.events),))
+    assert night in dec.boundary and set(fixed)<=set(dec.locked)
+    assert bk.id not in dec.optional_ids
+    # KC10 at 10:15 after W17 until 01:00 has only 9:15 actual rest.
+    early=event('KC10',date(2026,12,1)).assign('P01')
+    chosen=selected_events(dec)
+    assert any(i.rule=='rest' for i in verify(dec,fixed+(early,),active_events=chosen)[0].issues)

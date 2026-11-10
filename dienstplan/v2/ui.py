@@ -508,11 +508,22 @@ class Workbench(QDialog):
         if row<0:raise ValueError('Zuerst eine Planzeile wählen.')
         return self.plan_rows[row]
 
+    def manual_context(self,blocks,locked=None):
+        inputs=self.inputs if locked is None else replace(self.inputs,locked=tuple(locked))
+        if inputs.optional_ids:
+            from .plan_import import selected_events
+            inputs=replace(inputs,optional_ids=inputs.optional_ids-{b.id for b in blocks})
+            events=selected_events(inputs,self.events or ())
+        else:events=self.events if self.events is not None else inputs.events
+        return inputs,events
+
     def manual(self,blocks,locked=None):
         self.require_accepted_result()
         self.ensure_team_saved()
-        inputs=self.inputs if locked is None else replace(self.inputs,locked=tuple(locked))
-        events=self.events or self.inputs.events
+        if self.inputs.profile_label in (OPEN_PROFILE,SELECTED_PROFILE) and self.inputs.week_policy is None:
+            self.configure_weekly()
+            if self.inputs.week_policy is None:return
+        inputs,events=self.manual_context(blocks,locked)
         core,calendar=verify(inputs,blocks,active_events=events)
         if not core.hard_ok or not calendar.hard_ok:raise ValueError('; '.join(i.message for i in core.issues+calendar.issues))
         self.store.save_workspace(inputs,self.profile,blocks,events,expected_revision=self.store.input_revision)
@@ -521,6 +532,10 @@ class Workbench(QDialog):
     def change_assignment(self):
         term,old=self.selected()
         if old in self.inputs.locked:raise ValueError('Fixierung zuerst lösen, bevor diese Zuteilung geändert wird.')
+        if self.inputs.profile_label in (OPEN_PROFILE,SELECTED_PROFILE) and self.inputs.week_policy is None:
+            self.configure_weekly()
+            if self.inputs.week_policy is None:return
+            old=next((b for b in self.blocks if b.id==term.id and b==old),None)
         occupied={b.person_id for b in self.blocks if b.id==term.id and b!=old}
         people=[p for p in self.inputs.people if p.id not in occupied and not p.eligibility_errors(term.service.code,term.attendance)
                 and (not term.fixed_people or p.id in term.fixed_people)]
@@ -532,7 +547,8 @@ class Workbench(QDialog):
         pid=people[labels.index(label)].id
         base=tuple(b for b in self.blocks if b!=old)
         for choice in automatic_pause_choices(term,pid):
-            core,calendar=verify(self.inputs,base+(choice,),active_events=self.events or self.inputs.events)
+            inputs,events=self.manual_context(base+(choice,))
+            core,calendar=verify(inputs,base+(choice,),active_events=events)
             if core.hard_ok and calendar.hard_ok:
                 self.manual(base+(choice,));return
             if calendar.issues or any(i.rule!='working_coverage' for i in core.issues):break

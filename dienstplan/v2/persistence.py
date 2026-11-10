@@ -228,7 +228,7 @@ class V2Store:
         keys=[r[0].removeprefix('workspace:') for r in self.connection.execute("SELECT key FROM v2_meta WHERE key LIKE 'workspace:%' ORDER BY key")]
         if year is not None:
             serial=year*12+month
-            keys=[k for k in keys if abs(int(k[:4])*12+int(k[5:])-serial)<=1]
+            keys=[k for k in keys if 0<abs(int(k[:4])*12+int(k[5:])-serial)<=1]
         return tuple(self.load_workspace(*map(int,key.split('-'))) for key in keys)
 
     def _save_workspace(self,inputs,profile,blocks=(),events=None,*,expected_revision):
@@ -238,7 +238,7 @@ class V2Store:
         if self.connection.execute('SELECT 1 FROM v2_meta WHERE key=?',('confirmation:'+month,)).fetchone():
             raise DomainError('Bestätigter Testmonat bleibt geschützt; keine stille Bearbeitung.')
         from .automatic_weekly import check_shared_weeks
-        if events is not None and inputs.week_policy is not None:
+        if events is not None:
             check_shared_weeks(inputs,blocks,events,self.month_snapshots(inputs.year,inputs.month))
         value=workspace(inputs,profile,blocks,events);id='workspace/'+value['revision_id']
         previous=self.connection.execute('SELECT value FROM v2_meta WHERE key=?',('workspace:'+month,)).fetchone()
