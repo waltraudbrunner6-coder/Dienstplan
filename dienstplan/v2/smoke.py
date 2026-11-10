@@ -5,6 +5,35 @@ import tempfile
 import traceback
 
 
+def check_manual_controls(window):
+    """Echte Qt-Bedienwege ohne Wochenprofil; Dialoge mit Testentscheidungen bedienen."""
+    from PySide6.QtWidgets import QInputDialog,QMessageBox
+    picker,question=QInputDialog.getItem,QMessageBox.question
+    desired=['P01']
+    def choose(parent,title,label,items,*args):
+        assert title=='Zuteilung', 'Manuelle Zuordnung öffnet einen fremden Dialog: '+title
+        return next(value for value in items if '('+desired[0]+')' in value),True
+    try:
+        QInputDialog.getItem=staticmethod(choose)
+        QMessageBox.question=staticmethod(lambda *a,**kw:QMessageBox.StandardButton.Yes)
+        events=window.events
+        assert window.inputs.week_policy is None
+        window.plan.setCurrentCell(0,0);window.change_assignment()
+        assert len(window.blocks)==1 and window.blocks[0].person_id=='P01'
+        window.plan.setCurrentCell(0,0);window.lock_assignment()
+        old=window.blocks[0];assert old in window.inputs.locked
+        desired[0]='P02';window.plan.setCurrentCell(0,0);window.change_assignment()
+        assert window.blocks[0].person_id=='P02' and old not in window.inputs.locked
+        assert window.blocks[0] in window.inputs.locked
+        window.plan.setCurrentCell(0,0);window.remove_assignment()
+        assert not window.blocks and not window.inputs.locked
+        assert window.events==events and window.inputs.week_policy is None
+        assert window.store.load_workspace(2026,11)[2]==window.blocks
+    finally:
+        QInputDialog.getItem=staticmethod(picker)
+        QMessageBox.question=staticmethod(question)
+
+
 def run(report_path=None):
     values={}
     try:
@@ -54,6 +83,7 @@ def run(report_path=None):
             assert window.team.horizontalHeaderItem(6).text()=='Ausgeschlossene Dienste'
             assert window.team.horizontalHeaderItem(3).text()=='Anfang (h)'
             assert window.inputs.people[0].rights[0].excluded_codes==frozenset()
+            check_manual_controls(window)
             window.team.item(0,1).setText('Dauerhaft gespeicherte Beispielperson')
             window.save();window.close();app.processEvents()
             reopened=Workbench(database=Path(directory)/'hauptoberflaeche.sqlite3')
@@ -94,7 +124,7 @@ def run(report_path=None):
         values=dict(selbsttest='bestanden',scope='Hauptoberfläche mit Standardmonat; Rechenkette separat mit synthetischer Fixture',
                     personen=12,zuteilungen=8,tzdata=TZDATA_VERSION,iana=IANA_VERSION,
                     dst=True,solver_pruefer=True,sqlite=True,exportpaket=True,qt=True,
-                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,vorschau_anzeige=True,excel_import_export=True,automatic_pause=True,weekly_configuration=True,build=identity)
+                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,vorschau_anzeige=True,excel_import_export=True,automatic_pause=True,weekly_configuration=True,manual_assignment=True,build=identity)
         code=0
     except Exception as exc:
         values=dict(selbsttest='fehlgeschlagen',fehler=str(exc),details=traceback.format_exc());code=1

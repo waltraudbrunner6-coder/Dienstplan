@@ -157,3 +157,17 @@ Wiederherstellung hin. Falls der ursprüngliche Plan Regelverletzungen enthält,
 den aktuellen Arbeitsstand einschließlich bestehender Fixierungen in eine
 separate Datei. Sie setzt den Monat nicht zurück. Zur Fehlerbehebung ist keine
 neue Datenbank erforderlich; die Originaldatei kann erhalten bleiben.
+
+### Manuell zuordnen ohne BK/WL-Einstellungsfenster (ab 0.4.3)
+
+„Zuteilung ändern“ öffnet direkt die Personenauswahl. Auch „Zuteilung entfernen“
+und „Fixierung umschalten“ funktionieren bei importierten Monaten ohne gewähltes
+Wochenprofil. Vorhandene BK/WL-Daten und alle anderen Dienste bleiben erhalten.
+Bei einer fixierten Zuteilung wird die Änderung zusätzlich bestätigt; die neue
+Person bleibt anschließend fixiert. Wird derselbe Name ausgewählt oder der
+Dialog abgebrochen, bleibt der Dienst einschließlich seiner Pause unverändert.
+
+Die Wochenregel wird über „BK/WL automatisch: 2 WL + 1 BK“ oder vor einer
+entsprechenden automatischen Planung eingerichtet. Auch das ausdrückliche
+Einrichten erhält die bereits zugeteilten Dienste; zusätzliche benötigte Termine
+erscheinen mit offenen Plätzen. Manuelle Regelübersteuerungen bleiben möglich.

@@ -1,3 +1,7 @@
+> Folgeversion 0.4.3 korrigiert die manuelle Zuordnung und erhält Zuteilungen
+> beim Einrichten der Wochenregel. Die folgenden Downloads gehören noch zu
+> 0.4.2; neue native Nachweise werden nach erfolgreichem Build ergänzt.
+
 # Dienstplan 0.4.2 – Terminänderungen ohne Planverlust
 
 Stand 10.11.2026. Programm-/Testcommit **304f3e1**. Alle drei nativen Ziele haben Testsuite, Paketbuild und die Prüfung des gebauten Programms erfolgreich abgeschlossen.

@@ -1,7 +1,7 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
-Aktueller Folgeauftrag: **0.4.2 – Terminänderungen ohne Planverlust und Reimport
-ohne doppelte Fixierung**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
+Aktueller Folgeauftrag: **0.4.3 – direkte manuelle Zuordnung und erneute
+Funktionsprüfung der Bedienwege**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
 die folgenden älteren Etappenberichte bleiben als Verlauf erhalten.
 
 ## Aktueller Folgeauftrag: Excel-Import, Monatsansicht, Pausen und BK/WL (0.4.0)
@@ -814,3 +814,50 @@ Größen: `V2_NATIVE_PRUEFUNG.md`; Rohdaten `examples/v2/native-pruefung.json`.
 0.4.1-Nachweis unter `native-0-4-1.json` archiviert. Keine Benutzerdatenbank
 verändert, keine Migration, kein Merge nach main. Reine nachfolgende Nachweis-
 commits ändern den geprüften Programm-/Testcode nicht.
+
+## Bedienkorrektur 0.4.3: manuelle Zuordnung und erneute Funktionsprüfung
+
+Ursache reproduziert: manuelle Handler riefen bei normalem importierten Monat
+ohne Wochenprofil das BK/WL-Fenster auf. Zwei neue Regressionen scheiterten vor
+der Korrektur. Implizite Konfiguration aus manuellen Änderungen entfernt;
+vorhandene konkrete Termine bleiben bei manueller Bearbeitung unverändert.
+Fixierte Zuteilungen übertragen nach Bestätigung ihre Fixierung auf die neue
+Person; Entfernen beseitigt auch die zugehörige Fixierung. Keine doppelte Belegung
+einer Person innerhalb desselben Termins. Unpassende Berechtigungen und andere
+fachliche Regeln bleiben nach ausdrücklicher Warnung übersteuerbar.
+
+Zusätzliche Befunde: Wochenkonfiguration verwarf den Plan; sie erhält jetzt die
+Zuteilungen und lässt bereits optionale Daten für spätere Optimierung frei.
+Dateikopie schützt vor Kopieren des falschen Standes hinter einer Vorschau und
+zeigt keine Korrekturvormerkung aus der alten Datei weiter an. Ursprünglicher
+Korrekturstapel bleibt gespeichert. Keine Änderung bestätigter Historie.
+
+Prüfumfang: `V2_BEDIENPRUEFUNG_0_4_3.md`. Neue durchgehende Qt-Prüfungen mit
+normalem Monat, synthetischem Import, manueller Änderung, Speicherung, Exporten,
+Dateikopie/Öffnen und Monatsnavigation. Bestehende 418 Tests als Ausgangskontrolle
+in 146,86 s bestanden. Gezielte neue/Qt-/Paketprüfungen: 52 bestanden in 62,80 s;
+zusätzliche Regression für erneute Wochenkonfiguration: bestanden in 11,28 s.
+Quell-Selbsttest `QT_QPA_PLATFORM=offscreen .venv/bin/python -m dienstplan
+--self-test-v2 --self-test-report /tmp/dienstplan-0.4.3-smoke.json` erfolgreich,
+einschließlich tatsächlicher manueller Qt-Bedienung ohne Wochenprofil. Dieser
+Nachweis `manual_assignment` ist jetzt für native Pakete verpflichtend.
+
+Der bisherige Test erwartete bei der ersten manuellen Zuordnung das automatische
+Öffnen der Wochenkonfiguration. Gemäß aktuellem Nutzerauftrag korrigiert:
+Personenauswahl ohne Nebenfenster, sowohl ohne als auch mit explizitem Profil;
+Termine, Optionen und strenge Ergebnisprüfung weiterhin geprüft. Kein Abschwächen
+von Solverregeln. Alle Datenbanken ausschließlich synthetisch.
+
+Zusätzlich wird die Fixierungsidentität in der Oberfläche nach Termin-/Personen-ID
+ermittelt: ein abweichendes Override-Metadatum erzeugt beim Ändern/Entfernen oder
+Umschalten keine zweite Fixierung. Drei weitere Regressionen dafür bestanden.
+Zwischenlauf: 433 bestanden, 1 fehlgeschlagen in 217,69 s; die alte positive
+Paketbericht-Testvorlage enthielt den neu verpflichtenden `manual_assignment`-
+Nachweis noch nicht. Vorlage ergänzt, strenge Prüfung unverändert. Gezielter
+Nachlauf Paketbericht/Metadaten: 9 bestanden in 12,72 s. Abschließender Gesamtlauf
+mit allen Ergänzungen läuft anschließend; Ergebnisse werden ergänzt.
+
+Abschließende Gesamtprüfung: `QT_QPA_PLATFORM=offscreen .venv/bin/python -m
+pytest -q --disable-warnings --maxfail=1`: **437 bestanden in 257,35 s**.
+`git diff --check` fehlerfrei. Version 0.4.3. Native Windows-/macOS-Builds werden
+mit diesem geprüften Programm-/Teststand und verschärfter Paketprobe erzeugt.

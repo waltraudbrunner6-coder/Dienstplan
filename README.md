@@ -138,3 +138,8 @@ Prüfbericht ausdrücklich einem Commit zugeordnet.
 Ab Version 0.4.1 können manuelle Änderungen und Importe nach ausdrücklicher Warnung
 auch trotz Regelverstößen übernommen werden. Der Plan und Exporte kennzeichnen
 diese Abweichungen dauerhaft. Siehe [Regelübersteuerung](docs/TABELLENIMPORT.md).
+
+Ab 0.4.3 öffnet die manuelle Zuordnung direkt die Personenauswahl, auch nach einem
+Import ohne BK/WL-Wochenprofil. Fixierungen werden bei einem bestätigten Wechsel
+korrekt auf die neue Person übertragen. Umfang der erneuten Funktionsprüfung:
+[Bedienprüfung 0.4.3](docs/V2_BEDIENPRUEFUNG_0_4_3.md).

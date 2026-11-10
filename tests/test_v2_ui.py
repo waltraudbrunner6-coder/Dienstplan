@@ -247,7 +247,8 @@ def test_qt_mixed_import_preview_applies_all_or_keeps_previous_plan(workbench,mo
     assert w.month_grid.rowCount()==12 and 'So' in w.month_grid.horizontalHeaderItem(1).text()
 
 
-def test_first_manual_assignment_uses_real_selected_week_dates(app=None):
+@pytest.mark.parametrize("weekly_profile",[False,True])
+def test_first_manual_assignment_respects_explicit_week_profile(weekly_profile):
     # Isolated normal application, not the four-term technical fixture.
     from tempfile import TemporaryDirectory
     from pathlib import Path
@@ -257,10 +258,16 @@ def test_first_manual_assignment_uses_real_selected_week_dates(app=None):
     qt=QApplication.instance() or QApplication([])
     with TemporaryDirectory() as directory:
         w=Workbench(database=Path(directory)/'normal.sqlite3',initial=demonstration_month(),year=2026,month=11)
+        if weekly_profile:
+            with patch.object(QInputDialog,'getItem',lambda parent,title,label,items,*_:(items[0],True)):w.configure_weekly()
+        events=w.events;options=w.inputs.optional_ids
         w.plan.setCurrentCell(0,0)
-        def select(parent,title,label,items,*_):return (items[0] if title=='Automatische BK/WL-Termine' else next(v for v in items if '(P01)' in v)),True
+        def select(parent,title,label,items,*_):
+            assert title=='Zuteilung'
+            return next(v for v in items if '(P01)' in v),True
         with patch.object(QInputDialog,'getItem',select):w.change_assignment()
-        assert len(w.blocks)==1 and w.inputs.week_policy is not None
+        assert len(w.blocks)==1 and (w.inputs.week_policy is not None)==weekly_profile
+        assert w.events==events and w.inputs.optional_ids==options
         assert verify(w.inputs,w.blocks,active_events=w.events)[0].hard_ok
         assert not any(a.service.code=='BK' and b.service.code=='WL' and a.attendance.start_day==b.attendance.start_day for a in w.events for b in w.events)
         w.close();qt.processEvents()

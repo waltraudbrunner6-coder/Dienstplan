@@ -295,7 +295,7 @@ class Workbench(QDialog):
             for i in range(max(e.service.staff or 0,len(selected))):
                 b=selected[i] if i<len(selected) else None;self.plan_rows.append((e,b))
                 rows.append((e.attendance.start_day.strftime('%d.%m.%Y'),e.service.code,i+1,names.get(b.person_id,b.person_id) if b else 'OFFEN',hours_text(b.work_minutes) if b else '',
-                             'fixiert' if b in self.inputs.locked else '',
+                             'fixiert' if self.is_locked(b) else '',
                              '; '.join(p.start.astimezone(vienna()).strftime('%d.%m. %H:%M')+'–'+p.end.astimezone(vienna()).strftime('%d.%m. %H:%M') for p in b.breaks) if b else '',
                              ('Mo','Di','Mi','Do','Fr','Sa','So')[e.attendance.start_day.weekday()],
                              e.attendance.start.astimezone(vienna()).strftime('%H:%M'),e.attendance.end.astimezone(vienna()).strftime('%d.%m. %H:%M')))
@@ -353,6 +353,7 @@ class Workbench(QDialog):
         self.fill();return True
 
     def new_file(self):
+        self.require_accepted_result()
         if self.worker and self.worker.isRunning():raise ValueError('Berechnung zuerst abbrechen.')
         path,_=QFileDialog.getSaveFileName(self,'Arbeitsstand in neue Dienstplandatei kopieren','','SQLite (*.sqlite3)')
         if not path:return
@@ -360,6 +361,7 @@ class Workbench(QDialog):
         try:new.save_workspace(inputs,profile,self.blocks,self.events,expected_revision=0)
         except Exception:new.close();raise
         self.store.close();self.store=new;self.inputs,self.profile=inputs,profile;self.proofs=();self.location.setText(path);self.dirty();self.fill()
+        self.batch=None;self.fill_batch()
 
     def open_file(self):
         if self.worker and self.worker.isRunning():raise ValueError('Berechnung zuerst abbrechen.')
@@ -534,15 +536,20 @@ class Workbench(QDialog):
         if row<0:raise ValueError('Zuerst eine Planzeile wählen.')
         return self.plan_rows[row]
 
+    def is_locked(self,block):
+        return block is not None and any((b.id,b.person_id)==(block.id,block.person_id) for b in self.inputs.locked)
+
     def manual_context(self,blocks,locked=None):
         inputs=self.inputs if locked is None else replace(self.inputs,locked=tuple(locked))
+        # Manuelle Bearbeitung verändert die gewählten Termine niemals nebenbei.
+        if self.events is not None:return inputs,self.events
         if inputs.optional_ids:
             from .plan_import import selected_events
-            inputs=replace(inputs,optional_ids=inputs.optional_ids-{b.id for b in blocks})
-            try:events=selected_events(inputs,self.events or ())
+            selection=replace(inputs,optional_ids=inputs.optional_ids-{b.id for b in blocks})
+            try:events=selected_events(selection)
             except ValueError:
-                events=tuple(e for e in inputs.events if e.id not in inputs.optional_ids or (self.events and e in self.events))
-        else:events=self.events if self.events is not None else inputs.events
+                events=tuple(e for e in inputs.events if e.id not in selection.optional_ids)
+        else:events=inputs.events
         return inputs,events
 
     def confirm_override(self,messages):
@@ -559,9 +566,6 @@ class Workbench(QDialog):
     def manual(self,blocks,locked=None):
         self.require_accepted_result()
         self.ensure_team_saved()
-        if self.inputs.profile_label in (OPEN_PROFILE,SELECTED_PROFILE) and self.inputs.week_policy is None:
-            self.configure_weekly()
-            if self.inputs.week_policy is None:return
         inputs,events=self.manual_context(blocks,locked)
         core,calendar=verify(inputs,blocks,active_events=events)
         messages=tuple(i.message for i in core.issues+calendar.issues)
@@ -577,36 +581,40 @@ class Workbench(QDialog):
 
     def change_assignment(self):
         term,old=self.selected()
-        # Auch fixierte Zuteilungen können nach ausdrücklicher Warnung geändert werden.
-        if self.inputs.profile_label in (OPEN_PROFILE,SELECTED_PROFILE) and self.inputs.week_policy is None:
-            self.configure_weekly()
-            if self.inputs.week_policy is None:return
-            old=next((b for b in self.blocks if b.id==term.id and b==old),None)
-        people=list(self.inputs.people)
+        occupied={b.person_id for b in self.blocks if b.id==term.id and b!=old}
+        people=[p for p in self.inputs.people if p.id not in occupied]
         labels=[p.name+' ('+p.id+')' for p in people]
-        if not labels:raise ValueError('Keine berechtigte Person verfügbar.')
+        if not labels:raise ValueError('Alle Personen sind diesem Termin bereits zugeteilt.')
         label,ok=QInputDialog.getItem(self,'Zuteilung','Person wählen; Pause wird automatisch passend gesetzt:',labels,0,False)
         if not ok:return
         from .pauses import automatic_pause_choices
         pid=people[labels.index(label)].id
+        if old is not None and pid==old.person_id:return
+        fixed=self.is_locked(old)
+        if fixed and QMessageBox.question(self,'Fixierte Zuteilung ändern','Die bisherige Fixierung aufheben und die neue Person fixieren?',QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No,QMessageBox.StandardButton.No)!=QMessageBox.StandardButton.Yes:return
         base=tuple(b for b in self.blocks if b!=old)
+        remaining_locks=tuple(b for b in self.inputs.locked if (b.id,b.person_id)!=(old.id,old.person_id)) if old is not None else self.inputs.locked
         choices=automatic_pause_choices(term,pid,allow_rules=True)
         for choice in choices:
-            inputs,events=self.manual_context(base+(choice,))
+            locks=remaining_locks+(choice,) if fixed else self.inputs.locked
+            inputs,events=self.manual_context(base+(choice,),locks)
             core,calendar=verify(inputs,base+(choice,),active_events=events)
             if core.hard_ok and calendar.hard_ok:
-                self.manual(base+(choice,));return
+                self.manual(base+(choice,),locks);return
             if calendar.issues or any(i.rule!='working_coverage' for i in core.issues):break
         if not choices:raise ValueError('Keine technisch gültige Pause möglich.')
-        self.manual(base+(choices[0],))
+        locks=remaining_locks+(choices[0],) if fixed else self.inputs.locked
+        self.manual(base+(choices[0],),locks)
 
     def remove_assignment(self):
         _,old=self.selected()
-        if old:self.manual(tuple(b for b in self.blocks if b!=old))
+        if old:
+            if self.is_locked(old) and QMessageBox.question(self,'Fixierte Zuteilung entfernen','Diese Zuteilung einschließlich ihrer Fixierung entfernen? Alle anderen Dienste bleiben erhalten.',QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No,QMessageBox.StandardButton.No)!=QMessageBox.StandardButton.Yes:return
+            self.manual(tuple(b for b in self.blocks if b!=old),tuple(b for b in self.inputs.locked if (b.id,b.person_id)!=(old.id,old.person_id)))
 
     def lock_assignment(self):
         _,old=self.selected()
-        if old:self.manual(self.blocks,tuple(b for b in self.inputs.locked if b!=old) if old in self.inputs.locked else self.inputs.locked+(old,))
+        if old:self.manual(self.blocks,tuple(b for b in self.inputs.locked if (b.id,b.person_id)!=(old.id,old.person_id)) if self.is_locked(old) else self.inputs.locked+(old,))
 
     def unlock_all(self):
         self.require_accepted_result()
@@ -618,7 +626,8 @@ class Workbench(QDialog):
     def budgets(self):return {(p.id,f'{self.inputs.year:04d}-{self.inputs.month:02d}'):WishBudget(self.day_budget.value(),self.weekend_budget.value()) for p in self.inputs.people}
 
     def fill_batch(self):
-        if not self.batch:self.corrections.setRowCount(0);return
+        if not self.batch:
+            self.corrections.setRowCount(0);self.import_status.setText('Keine CSV-Korrektur vorgemerkt.');return
         self.batch_headers=tuple(dict(r.fields) for r in self.batch.rows)
         fields=tuple(dict(self.batch.rows[0].fields)) if self.batch.rows else ()
         self.correction_fields=fields
@@ -693,14 +702,31 @@ class Workbench(QDialog):
         self.inputs=updated;self.blocks=();self.events=None;self.proofs=();self.dirty();self.fill()
 
     def configure_weekly(self):
+        self.require_accepted_result()
         self.ensure_team_saved()
         label,ok=QInputDialog.getItem(self,'Automatische BK/WL-Termine','Wochenprofil ausdrücklich wählen:',('Montag–Sonntag mit gemeinsamen Randwochen','Nur volle Montag–Sonntag-Wochen im Monat'),0,False)
         if not ok:return
         from .automatic_weekly import automatic_weekly
-        updated=automatic_weekly(self.inputs,snapshots=self.store.month_snapshots(self.inputs.year,self.inputs.month),full_weeks_only=label.startswith('Nur'))
-        if not self.clear_plan(confirm_only=True):return
-        self.store.save_workspace(updated,self.profile,expected_revision=self.store.input_revision)
-        self.inputs=updated;self.blocks=();self.events=None;self.proofs=();self.dirty();self.fill()
+        from .plan_import import selected_events
+        # Bereits zugeteilte Tage beim Einrichten eines Wochenprofils erhalten.
+        source=replace(self.inputs,optional_ids=self.inputs.optional_ids-{b.id for b in self.blocks})
+        updated=automatic_weekly(source,snapshots=self.store.month_snapshots(self.inputs.year,self.inputs.month),full_weeks_only=label.startswith('Nur'))
+        assigned={b.id for b in self.blocks}
+        # Innerhalb weiter geprüfter Quoten bleiben frühere Datumsoptionen auch
+        # für eine spätere automatische Berechnung frei; nur diese Anzeige fixieren.
+        restored={e.id for e in updated.events if e.id in assigned & self.inputs.optional_ids
+                  and sum(q.code==e.service.code and q.dates.includes(e.attendance.start_day) for q in updated.quotas)==1}
+        updated=replace(updated,optional_ids=updated.optional_ids|restored)
+        selection=replace(updated,optional_ids=updated.optional_ids-assigned)
+        events=selected_events(selection,self.events or ()) if self.events is not None else None
+        if events is not None:
+            core,calendar=verify(updated,self.blocks,active_events=events)
+            messages=tuple(i.message for i in core.issues+calendar.issues)
+            if messages:
+                if not self.confirm_override(messages):return
+                updated=replace(updated,manual_override=True,override_notes=messages)
+        self.store.save_workspace(updated,self.profile,self.blocks,events,expected_revision=self.store.input_revision)
+        self.inputs,self.events=updated,events;self.proofs=();self.dirty();self.fill()
 
     def import_sheet(self):
         self.ensure_team_saved()
