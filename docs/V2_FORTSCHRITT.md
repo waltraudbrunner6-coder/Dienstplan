@@ -28,9 +28,9 @@ geprüft. Neue native Pakete werden vor Verlinkung tatsächlich gebaut/geprüft;
 vorherige native Belege bleiben getrennt in `native-vor-startauswahl.json` erhalten.
 
 Basis: Etappe A `0a0bc48`, Arbeitsbranch `feat/v2-implementation`.
-Aktueller geprüfter Programm-/Teststand: `fa61c12`, **330 lokale Tests grün**,
+Aktueller geprüfter Programm-/Teststand: `32e3732`, **339 lokale Tests grün**,
 alle drei nativen Zielarchitekturen einschließlich Paket-/V2-Selbsttests grün in
-Run `42727609885`. Zwischenzeitlicher Anmeldeausfall ist behoben; Push/API wieder
+Run `42821811250`. Zwischenzeitlicher Anmeldeausfall ist behoben; Push/API wieder
 funktionsfähig. Größen/Artefaktlinks: [V2_NATIVE_PRUEFUNG.md](V2_NATIVE_PRUEFUNG.md).
 Die produktive Altanwendung bleibt unverändert; keine V2-Umschaltung, kein Merge
 nach main und keine Migration einer echten Benutzerdatenbank.
@@ -414,3 +414,19 @@ Bei Fortsetzung zuerst Git-Stand, diese Datei, native Prüfnachweise und
 Profilen die jeweils abhängige produktive Integration und vollständige X04-/
 Endgeräteabnahme ergänzen. Produktive Umschaltung benötigt weiterhin gesonderten
 Auftrag. Dies ist ausdrücklich noch kein fertiges Gesamtprojekt.
+
+## Folgeauftrag abgeschlossen: sichtbarer Einstieg und eindeutige Artefakte
+
+Geprüfter Programm-/Testcommit `32e3732`, nativer Run `42821811250`: **Windows x64,
+macOS Sequoia Intel und ARM64 vollständig grün**, jeweils 339 Tests, Paketbuild
+und beide Paketselbsttests. Im Paket werden Startauswahl und eingebetteter Commit
+zusätzlich geprüft und mit dem Buildbericht verglichen. Archive haben den Commit
+im Namen; die alte 0.2.0-Basisnummer allein wird nicht mehr als Paketkennung benutzt.
+Aktuelle Downloadlinks/Größen stehen in `V2_NATIVE_PRUEFUNG.md`, Rohdaten in
+`examples/v2/native-pruefung.json`. Vorheriger Stand separat erhalten.
+
+Lokaler Linux-Neubau und beide Selbsttests ebenfalls erfolgreich. Keine
+SQLite-Benutzerdatenbank im Paket; echte bisherige Daten wurden nicht geöffnet,
+gelöscht oder migriert. Die bisherige App bleibt über eine ausdrückliche Wahl
+verfügbar. V2 startet getrennt mit fiktiven Testdaten. Dies ist eine Bedienkorrektur,
+keine Freigabe einer fertigen produktiven V2-Anwendung.
