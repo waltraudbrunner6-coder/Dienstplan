@@ -20,4 +20,4 @@ def build_info():
 def build_label():
     info=build_info()
     stand=('Build '+info['commit'][:7]+(' mit lokalen Änderungen' if info['dirty'] else '')) if info['commit'] else 'Quellcode – kein Paketbuild'
-    return f'Dienstplan – Entwicklung mit V2-Prüfbereich · Basis {info["version"]} · {stand}'
+    return f'Dienstplan V2 · Version {info["version"]} · {stand}'

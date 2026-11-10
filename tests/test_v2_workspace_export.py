@@ -119,7 +119,7 @@ def test_unspecified_leave_credit_is_unknown_not_confirmed_zero(tmp_path):
     with zipfile.ZipFile(tmp_path/'unknown.zip') as archive:
         import csv,io
         rows=list(csv.DictReader(io.StringIO(archive.read('stunden.csv').decode('utf-8-sig')),delimiter=';'))
-        assert rows[0]['credits']=='null' and rows[0]['projected']=='null' and rows[0]['credits_known']=='false'
+        assert rows[0]['credits_hours']=='null' and rows[0]['projected_hours']=='null' and rows[0]['credits_known']=='false'
     with V2Store(tmp_path/'unknown.sqlite3',create=True) as store:
         store.save_workspace(data,p,old,data.events,expected_revision=0)
         with pytest.raises(DomainError,match='ungeklärt'):
@@ -142,11 +142,11 @@ def test_export_distinguishes_missing_holiday_calendar_from_explicit_empty_set(t
     import csv,io
     data,p,old=technical_demo()
     revisions=[]
-    for name,days,expected in (('unknown',None,'null'),('empty',frozenset(),'0')):
+    for name,days,expected in (('unknown',None,'null'),('empty',frozenset(),'0,00')):
         path=tmp_path/(name+'.zip');report=export_package(path,data,p,old,data.events,holidays=days)
         assert report['holiday_calendar']==('ungeklärt' if days is None else [])
         revisions.append(report['revision_id'])
         with zipfile.ZipFile(path) as archive:
             rows=list(csv.DictReader(io.StringIO(archive.read('zeitmengen.csv').decode('utf-8-sig')),delimiter=';'))
-            assert rows and all(row['holiday_minutes']==expected for row in rows)
+            assert rows and all(row['holiday_hours']==expected for row in rows)
     assert revisions[0]!=revisions[1]

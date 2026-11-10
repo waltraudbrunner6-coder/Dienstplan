@@ -1,5 +1,82 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
+## Aktueller Folgeauftrag: eine Hauptoberfläche, Ausschlüsse und Stunden
+
+Der ausdrückliche Auftrag vom 10.11.2026 ersetzt die bisherige Startauswahl
+und parallele Testoberfläche. Version **0.3.0** startet ausschließlich die
+V2-Monatsanwendung mit dauerhafter `dienstplan-v2.sqlite3`.
+Die vorherige `dienstplan.sqlite3` bleibt bytegleich unberührt; alte V2-Dateien
+mit Schema 3 bleiben ladbar. Kein Merge nach main und keine echte Datenmigration.
+Die nachfolgenden älteren Verlaufsabschnitte bleiben historische Belege.
+
+Implementiert:
+
+- Einziger Startweg, sichtbar benannte Version/Buildkennung, echter Neustart mit
+  gespeicherten Monatsdaten. Kein temporärer Vier-Termine-Stand beim normalen Start.
+- Vollständiger Standardkatalog mit 17 Kürzeln/19 Varianten. Neue Monate erzeugen
+  die bestimmten Tagesmuster und saisonalen R-Fenster automatisch. November 2026:
+  94 Termine, 120 operative Plätze, 876,00 Stunden ohne Sonderdienste/Reserve.
+  Keine erfundenen WL/BK-Quoten, LB-Anker, festen Personen oder Sonderdaten.
+- Personenmaske mit zeitgültigen ausgeschlossenen Diensten und anklickbarer
+  Ausschlussliste. Leer heißt keine Ausschlüsse; Führerscheinprüfung bleibt extra.
+  Bestehende gespeicherte Rechte werden über das Komplement verlustfrei abgebildet.
+- Alle Dauern/Konten/Verteilungsmengen in Oberfläche und CSV in Stunden;
+  Uhrzeiten bleiben Uhrzeiten. CSV-Formatversion 2 benennt Stundenfelder,
+  Arbeitsstand-JSON bleibt exakt in Minuten. Unverändertes Speichern erhält auch
+  einzelne Minuten und exakte Vertragswerte. Neue Konten behalten E=0.
+- Monatswechsel übernimmt Personen, Verträge und Ausschlüsse, erhält Anfangssalden
+  beziehungsweise verwendet bestätigte Vormonatsprognosen; E wird für neue Monate null.
+- TS/T und W16/W17 ersetzen beim Ergänzen das vorhandene Standardgegenstück;
+  TS verlängert vorhandenes LB. Keine doppelten Veranstaltungen/operativen Bedarfe.
+- Modellaufbau für vollständige Monate: Zuordnungsvariablen teilen Anwesenheits-
+  und Ruhekonflikte über Pausenvarianten. Die bestätigte Vorwochen-Freipaarregel
+  wird mit derselben Randdaten-Unbekanntbehandlung wie im unabhängigen Prüfer
+  kompiliert. Rein dominante Pausenlagen mit identischen Monats-/Gesamtarbeitsmengen
+  werden nur im Suchmodell reduziert; vorhandene/fixierte Pausen und sämtliche
+  Arbeitsabdeckungs-/Vertretungsrollen bleiben erhalten. Eingabekandidaten bleiben
+  vollständig für manuelle Änderungen verfügbar. Keine Schutzregel entfernt.
+
+Offene F01–F14 werden nicht durch den UI-Wechsel beantwortet. S0/M0/E0 wird vor
+neuer Berechnung ausdrücklich ausgewählt; ein bestätigter Rechenstand ist keine
+KV-/BV-/Rechtsfreigabe. F06/F07 blockieren weiter verbindliche WL/BK-Wochenquoten,
+F08 LB ohne Referenzdatum, F02 Reserve-Arbeitsbewertung. Alle 125 Abnahmefälle
+behalten ihren tatsächlichen Status; der Oberflächenwechsel besteht sie nicht
+pauschal. F1 ist verbessert, bleibt bei vollständiger Profilkonfiguration und
+Aufhebung bestätigter Stände teilweise offen. Der produktive Abrechnungsstichtag
+F14 wird aus dem Download nicht abgeleitet.
+
+Tatsächliche Prüfungen dieses Folgeauftrags:
+
+- Ausgangskontrolle `.venv/bin/python scripts/run_tests.py`: **339 bestanden,
+  76,51 s**.
+- Zwischenstand nach UI-/Stunden-/Ausschlussänderung: **360 bestanden, 84,85 s**.
+- Erforderliche Anpassungen alter Tests: Startauswahl-/Legacy-Start-Erwartungen
+  sind durch den ausdrücklichen Auftrag überholt; sie prüfen jetzt den einzigen
+  V2-Einstieg und den unveränderten Altdatei-Hash. Zeitspalten ändern ausschließlich
+  ihre Einheit/Namen; insbesondere unbekannte Gutschriften/Feiertage bleiben `null`.
+  Der alte Paketbericht mit 186 Vier-Schichten-Zuteilungen gilt nicht mehr als
+  Nachweis der neuen App. Die Paketprobe verlangt jetzt sichtbare Hauptoberfläche,
+  Standarddienste, Ausschlussliste, Stundenanzeige und persistenten Neustart;
+  Solver/DST/SQLite/Export werden zusätzlich mit isolierter synthetischer Fixture geprüft.
+- Visuelle Qt-Offscreen-Probe der tatsächlichen Hauptoberfläche; kleine Mindestgröße
+  800 × 458, normale Fenstergröße 1360 × 900. Kein nativer Nachweis daraus abgeleitet.
+
+- Abschließender Gesamtlauf `.venv/bin/python scripts/run_tests.py`: **362 bestanden,
+  110,81 s**, keine Fehler/Skips. Paketquellprobe `QT_QPA_PLATFORM=offscreen
+  .venv/bin/python -m dienstplan --self-test --self-test-report /tmp/dienstplan-ui-smoke.json`:
+  bestanden, einschließlich echter Hauptoberfläche, 19 Varianten/94 Novemberterminen,
+  Ausschlüssen/Stunden und persistentem Neustart.
+- Vollständiger synthetischer November mit zwölf Personen à 25 h und allen bestimmten
+  Tagesmustern: bei 45 s Suchlimit **0 offene operative Plätze**, 146 Dienstblöcke
+  einschließlich freiwilliger T-Teilnahmen; Gesamtdauer einschließlich Nachprüfung
+  46,05 s. Bedingt gültig wegen ausdrücklich offener Profile/Randdaten; kein
+  vollständiger Optimalitäts- oder Rechtsnachweis behauptet. Bei 20 s blieben in
+  einem Lauf 2 Plätze offen (gültiger unvollständiger Entwurf). Standardzeit der
+  Hauptoberfläche daher 60 s, weiterhin änderbar/abbrechbar.
+
+Nächster konkreter Schritt: geprüften Stand committen/pushen, native Windows-/
+macOS-Pakete bauen und tatsächliche Ergebnisse verlinken.
+
 ## Folgeauftrag: Artefakte wirken wie die alte Version
 
 Die Rückmeldung wurde am 10.11.2026 nachvollzogen: Auch das neue Paket startete

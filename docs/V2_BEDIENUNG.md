@@ -1,108 +1,132 @@
-# V2-Prüfbereich – technischer Stand
+# Dienstplan – die neue Hauptoberfläche
 
-Die normale Anwendung arbeitet weiter mit ihren bisherigen Daten und Regeln.
-In der neuen **Startauswahl** „V2-Prüfbereich öffnen“ wählen. Aus der bisherigen
-Oberfläche führen auch die sichtbare Schaltfläche und das Menü **Bereiche →
-V2-Prüfbereich (Testprofile)** dorthin. Dieser Bereich dient der fachlichen Prüfung. Er schaltet
-keine produktive V2-Planung frei und öffnet die normale Benutzerdatenbank nicht.
+Ab Version 0.3.0 ersetzt V2 die frühere Oberfläche vollständig. Der vorherige
+Testbereich und die Startauswahl entfallen. Die Anwendung verwendet eine
+dauerhafte lokale V2-Datei; es wird kein flüchtiger Vier-Termine-Teststand mehr
+beim normalen Start erzeugt. Der ausdrückliche Nutzerauftrag vom 10.11.2026
+autorisiert diesen Oberflächenwechsel. Offene fachliche Profile werden dadurch
+nicht entschieden.
 
-Die bisherigen Artefakte öffneten direkt die bisherige Oberfläche. Deshalb waren
-zunächst dieselben vier Schichten und die bereits gespeicherten Daten zu sehen,
-obwohl der V2-Code enthalten war. Die Daten liegen im Benutzerkonto außerhalb des
-Programmpakets; der erneute Download löscht sie nicht. Das war keine automatische
-Übernahme alter Daten in V2. Der Zugriff war insbesondere über ein verstecktes
-Menü zu wenig erkennbar und ist mit der Startauswahl korrigiert.
+## Monat und Standarddienste
 
-Bei den neuen Paketen wird die Buildkennung in beiden Bereichen angezeigt und
-steht im Archivnamen. Damit lässt sich ein neuer Download von einem früheren
-Paket unterscheiden. Der anfängliche V2-Datensatz ist weiterhin ein fiktiver
-Vier-Termine-Test mit zwölf Personen, kein fertiger betrieblicher Monatsplan.
-Für den direkten Entwicklerstart gibt es `python -m dienstplan --v2` und
-`python -m dienstplan --legacy`; explizite bisherige `--database`-/`--demo`-Aufrufe
-öffnen weiterhin die bisherige Anwendung. Kein Terminal ist für die Pakete nötig.
+**Monat wählen** lädt einen vorhandenen Monat oder legt einen neuen an.
+Personen samt Vertragsversionen und Ausschlüssen werden im Folgemonat übernommen;
+Anfangssalden kommen aus dem letzten bestätigten Vormonat, sonst bleiben die
+bisherigen Anfangssalden erhalten. Das neue Wunschende ist null.
+Gespeicherte andere Monate werden dabei nicht verändert.
 
-1. Der Startdatensatz enthält zwölf fiktive Personen und vier WL-Testtermine.
-   Das ist ausdrücklich kein vollständiger Betriebsmonat. „Neue Testdatei“ legt
-   eine getrennte SQLite-Datei an; der anfängliche temporäre Stand ist flüchtig.
-2. Namen, Wochenstunden und Minutenkonten bearbeiten und speichern. Für neue
-   Konten gilt Wunschende 0. **Beschäftigung, Verträge und Rechte bearbeiten**
-   ermöglicht mehrere datierte Fassungen. Alle Enddaten sind ausgeschlossen:
-   Beschäftigung einschließlich 31.12. bedeutet Ende 01.01. Die Personen-ID bleibt
-   stabil. Wochenstunden erteilen keine Berechtigungen oder Führerscheine.
-3. Termine mit echten Katalogkürzeln ergänzen; VN/INT/N17/LB/FK brauchen feste IDs.
-   FK braucht konkrete ISO-Zeitpunkte; mehrdeutige Herbstzeiten mit richtigem
-   Offset angeben. W16 braucht einen Ersatzgrund. R erhält ohne geklärtes Profil
-   keine Arbeitskandidaten. Die gesamten Kataloghäufigkeiten sind in diesem
-   kleinen Prüfdatensatz nicht als Betriebsmonat freigegeben.
-4. Urlaub/Wünsche manuell vormerken oder CSV-Format 2 aus den Fachregeln importieren. Ein fehlerhafter Stapel bleibt
-   vollständig sichtbar/bearbeitbar. Änderungen in den Spalten vornehmen und
-   den gesamten Stapel erneut prüfen. Erst die vollständige erfolgreiche Übernahme
-   aktiviert Einträge. Die daneben angezeigten Wunschbudgets sind ausdrückliche
-   Testeingaben. Bestehende bestätigte Vergangenheit bleibt unverändert.
-   Aktive Einträge lassen sich über die eigene Schaltfläche bearbeiten oder
-   löschen. Eine Bearbeitung erhält den bisherigen aktiven Eintrag, bis die
-   vollständige korrigierte Ersetzung atomar gelingt. Der alte Eintrag verbraucht
-   während dieser Prüfung nicht zusätzlich das Wunschbudget. Ungültige
-   Donnerstagsänderungen bleiben zur Korrektur vorgemerkt, der alte Stand aktiv.
-5. **Testplan berechnen** startet die Optimierung im Hintergrund. **Abbrechen**
-   erhält den besten gültigen Zwischenstand. Änderungen während des Laufs machen
-   dessen Ergebnis veraltet. **Ergebnis übernehmen** übernimmt ausdrücklich den
-   nachgeprüften Vorschlag. Offene Plätze und fehlende Grundlagen bleiben sichtbar.
-6. In der Plantabelle eine Zeile wählen und Zuteilung/Pause ändern, entfernen
-   oder einzeln fixieren. Jede Änderung wird unabhängig geprüft. Fixierungen gelten
-   bei erneuter Suche weiter; „Alle manuellen Fixierungen lösen“ ist ausdrücklich.
-   Eingabeänderungen können einen neuen Entwurf verlangen; gespeicherte Revisionen
-   werden nicht überschrieben.
-7. **Exportpaket** erstellt ein neues ZIP mit Dienstplan, Stunden, Verteilung,
-   Wünschen, Zeitmengen, vollständigem Arbeitsstand und Prüfmanifest. Alle Tabellen
-   tragen dieselbe Revisions-ID; Hashes belegen die zusammengehörigen Dateien.
-   Bei Schreibfehlern wird kein halbes Paket veröffentlicht. Bestehende Ziele
-   werden nicht überschrieben. Eurobeträge bleiben ohne Tarif ungeklärt.
-8. **Testmonat bestätigen** friert nur synthetische Testfakten ein, nur bei gültiger
-   Vollbesetzung. Wiederholen zählt nicht doppelt. Ein bestätigter Testmonat ist
-   geschützt. Aufhebung/Ablösung ist noch nicht bedienbar. **Testmonat wählen**
-   lädt einen vorhandenen Arbeitsstand oder erzeugt einen weiteren gekennzeichneten
-   Testdatensatz mit bestätigter Historie und übernommenen Prognosesalden.
+Der Katalog unter **Dienste und Planungsangaben** ist sofort vorhanden:
+T, KC10, KCT10, KC16, KCT, TS, W17, TW, W16, WL, BK, VN, LB, INT, N17, R, FK.
+LB mit TS und die beiden R-Zeitfenster sind getrennte Varianten, insgesamt 19.
+Dort stehen Uhrzeiten, Folgetag, Besetzung und Auftreten.
 
-## Rechen- und Nachweisgrenzen
+Im Monat sind die normalen Tagesmuster bereits eingetragen: außer Donnerstag
+KC10 10:15–16:15 (1 Person), KC16 16:00–00:00 (1) und W17 17:00–01:00 (2).
+Donnerstags KCT10 10:15–17:30 (1), KCT 14:30–00:00 (1), TW 14:30–00:00 (2)
+und die Teamveranstaltung T 14:30–17:30. Für November 2026 sind dies
+94 Termine, 120 operative Plätze und 876,00 Stunden Bedarf vor Sonderdiensten.
+Reservefenster kommen täglich 24.12.–06.01. hinzu; ohne bestätigte Bewertung
+werden sie nicht als volle Arbeitszeit angenommen oder automatisch besetzt.
 
-S0 und M0 sind explizite technische Profile. S0 summiert zeitgültige W/7-Anteile
-über Beschäftigungstage und rundet einmal monatlich auf Minuten. M0 ordnet reale
-Arbeitssegmente ihrem lokalen Kalendermonat zu. Urlaub verwendet ausschließlich
-ausdrücklich anrechenbare Tage mit gültigem W/5. Ziel: `S+E−B−G`, Prognoseende:
-`B+P+G−S`. Ein negatives Ziel erzeugt keine negative Arbeit. Es wird als Überdeckung
-ausgewiesen. Arbeitszeit bleibt Planprognose, keine Ist-Zeiterfassung.
-Fehlen anrechenbare Urlaubstage, bleibt die Abwesenheit verbindlich, aber
-Gutschrift/Ziel/Endsaldo sind ungeklärt. Eine solche Eingabe wird nicht als
-bestätigte Nullgutschrift optimiert oder bestätigt. Der Export führt dafür
-`null` und `credits_known=false`; Pläne und bekannte physische Mengen bleiben
-exportierbar. Die Bedienperson muss die anrechenbaren Tage ausdrücklich ergänzen.
-Ohne übergebene Feiertagsmenge enthält der Zeitmengenexport ebenfalls `null`
-statt einer vermeintlich berechneten Null. Eine ausdrücklich leere Datumsmenge
-ist davon unterscheidbar; beides bedeutet keine Freigabe eines KV-/Tarifprofils.
+Feste Sondertermine werden unter **Monatstermine** ergänzt. VN/INT/N17/LB/FK
+brauchen feste Personenkennungen; FK zusätzlich konkrete ISO-Zeitpunkte.
+W16 braucht einen dokumentierten Ersatzgrund. WL/BK sind im Katalog als
+automatisch vorgesehen, erhalten aber vor Klärung von F06/F07 keine erfundene
+Wochenquote oder still gewählte Wochentage. LB benötigt den gültigen
+Donnerstagsanker und seine beiden Personen. Fehlende Angaben bleiben sichtbar.
+Der Katalog allein bestätigt deshalb keine Monatsvollständigkeit.
 
-E0 ist eine ausgewählte Testhierarchie; Formeln und genaue Prüfstände stehen in
-[V2_FORTSCHRITT.md](V2_FORTSCHRITT.md). Höhere beste Ziele bleiben fest. Ein späteres
-Optimum unter unbewiesenem Präfix ist bedingt, kein Gesamtoptimum. Bei manuellen
-Änderungen werden Solverbeweise verworfen. Zielrundung erfolgt mit Skala 1000;
-die zuerst untersuchte Skala 100 war zu grob und wurde vor Auslieferung korrigiert.
+## Personen und ausgeschlossene Dienste
 
-Das Fenster bietet noch keine vollständige produktive Monatskonfiguration aller
-Wochen-/Reserve-/Tarifprofile und keine Aufhebung bestätigter Teststände.
-Manuelle Einträge und CSV verwenden denselben vollständigen Korrekturstapel.
-Bekannte Randtage sind Teil des
-gespeicherten Testprofils; fehlende Randdaten werden nicht als Freizeit angenommen.
-Die offenen F01–F14 bleiben verbindlich sichtbar. Linux-Qt-Tests sind kein nativer
-Windows-/macOS-Sequoia-Nachweis.
+Unter **Personen** Namen, Wochenstunden, Anfangs- und Wunschendsaldo bearbeiten.
+**Arbeitsstand speichern** übernimmt Tabelleneingaben. Neue Dateien beginnen
+mit einem leeren Team; fiktive Personen gibt es nur beim ausdrücklichen Demostart.
 
-## Reproduzieren
+**Person ergänzen** fragt eine dauerhafte eindeutige Kennung ab.
+**Person bearbeiten / Dienste ausschließen** enthält Beschäftigung,
+zeitgültige Vertragsversionen und zeitgültige Dienstausschlüsse. Enddaten
+sind derzeit als **ausgeschlossen** bezeichnet: Beschäftigung einschließlich
+31.12. bedeutet Ende 01.01. Für Vertrags- und Ausschlussversionen ihre
+Gültigkeitszeiträume vollständig erfassen.
 
-```sh
-python scripts/v2_benchmark.py --seconds 5 20 60 --output NEUER_BERICHT.json
-python scripts/v2_multimonth_demo.py --output NEUER_DEMOORDNER --seconds 5
+**Ausgeschlossene Dienste auswählen** öffnet eine Liste mit Häkchen:
+angehakt bedeutet ausgeschlossen; keine Häkchen bedeutet keine Ausschlüsse.
+Die Liste lässt sich auch mit durch Leerzeichen getrennten Kürzeln bearbeiten.
+Die bisherigen intern gespeicherten Berechtigungen werden durch das Komplement
+verlustfrei dargestellt; bestehende Rechte werden beim Laden nicht erweitert.
+N17 benötigt zusätzlich bestätigten Führerschein, unabhängig von Wochenstunden.
+Die feste Personenbindung eines Sondertermins wird durch Ausschlüsse nicht
+aufgehoben und kann bei Widersprüchen einen Eingabekonflikt erzeugen.
+
+## Stunden
+
+Konten und alle Arbeitszeitmengen erscheinen in Stunden mit zwei Dezimalstellen,
+z. B. **7,50 h**, **-2,25 h**. Eingaben akzeptieren Dezimalkomma oder Punkt.
+Wochenstunden bleiben exakt, auch mit mehr als zwei Nachkommastellen.
+Intern wird weiterhin mit ganzen Minuten und exakten Bruchwerten gerechnet.
+Geänderte Stundenwerte werden einmal kaufmännisch auf Minuten gerundet;
+unverändert gespeicherte gerundete Anzeigen behalten die ursprünglichen Minuten.
+Uhrzeiten bleiben Uhrzeiten, beispielsweise 10:15–16:15.
+
+Die **Stundenprognose** enthält Soll, Anfangssaldo, Wunschende, Urlaubsgutschrift,
+Arbeitsziel, geplante Arbeit, Prognose-Endsaldo und Abweichung. Die
+**Schichtverteilung** zeigt Anzahl, Stunden und faire Anteile. **Freiwünsche**
+zeigt relevante, erfüllte, übergangene, historische und kumulierte Wünsche.
+
+## Urlaub, Wünsche und Planung
+
+Manuelle Einträge und CSV-Format 2 verwenden denselben Korrekturstapel:
+
+```csv
+format_version;person_id;entry_id;typ;von;bis;gutschrifttage;kommentar
+2;P01;urlaub-1;urlaub;2026-11-09T00:00;2026-11-11T00:00;2026-11-09|2026-11-10;Zwei ausdrücklich anrechenbare Tage
+2;P01;wunsch-1;freiwunschtag;2026-11-11T00:00;2026-11-12T00:00;;Freiwunsch
 ```
 
-Die Mehrmonatsdemo umfasst November/Dezember 2026 und Jänner 2027. Sie prüft
-Testbestätigung, Salden und eingefrorene Verteilung. Vollständige R-/Randwochen- und
-Urlaubs-/Tarifintegration von X04 bleibt gesondert offen; vier Termine beweisen
-keine betriebliche Monatsmachbarkeit. Die SQLite-Datei und ZIPs bleiben lokal.
+Ende ist ausgeschlossen; Nachtintervalle benötigen das tatsächliche Enddatum.
+Donnerstagsanteile sind bei Wünschen unzulässig. Fehlerhafte Stapel bleiben
+vollständig bearbeitbar vorgemerkt; keine teilweise aktive Übernahme.
+Beim Bearbeiten eines aktiven Eintrags bleibt sein alter Stand bis zur
+vollständig geprüften atomaren Ersetzung aktiv. Wunschbudgets ausdrücklich
+prüfen; vorhandene Anzeigewerte sind keine betriebliche Profilbestätigung.
+
+Vor **Dienstplan erstellen** unter **Dienste und Planungsangaben** das technische
+Rechenprofil S0/M0/E0 ausdrücklich wählen. Dies entscheidet keine offenen
+Rechts-/Abrechnungsfragen. S0 summiert gültige Wochenstunden / 7 je
+Beschäftigungstag und rundet einmal monatlich; M0 ordnet physische Arbeit dem
+Kalendermonat zu. Urlaub berücksichtigt nur ausdrücklich anrechenbare Tage
+mit gültigem W/5. Ziel `S+E−B−G`, Prognoseende `B+P+G−S`.
+Fehlende Urlaubsgutschrifttage bleiben ungeklärt, keine angenommene Nullgutschrift.
+
+Die Berechnung läuft im Hintergrund und ist abbrechbar. **Ergebnis übernehmen**
+übernimmt einen unabhängig geprüften Vorschlag. Geänderte Eingaben machen ein
+laufendes Ergebnis veraltet. Offene Plätze sind mit **OFFEN** bezeichnet;
+fehlende Randdaten gelten nicht als Freizeit. Manuelle Zuteilungen und Fixierungen
+werden mit denselben Regeln geprüft. Änderungen verwerfen bestehende
+Optimalitätsnachweise; ein Zeitlimit ist kein Beweis der Unlösbarkeit.
+
+**Monat bestätigen** friert ausschließlich einen gültigen vollbesetzten
+Rechenstand mit seinen ausgewählten Annahmen ein, keine KV-/BV- oder
+Tariffreigabe. Bestätigte Stände sind geschützt; Aufhebung/Ablösung ist noch
+nicht bedienbar. Wiederholen erzeugt keine doppelte Historie.
+
+## Datei und Export
+
+Die Standarddatei heißt **dienstplan-v2.sqlite3** im lokalen Anwendungsdatenordner.
+Beim nächsten Start wird der zuletzt vorhandene Monatsarbeitsstand geladen.
+**Datei öffnen** unterstützt bisherige V2-Dateien mit Schema 3.
+**Neue Datei** speichert eine separate Kopie des Arbeitsstands.
+Die frühere `dienstplan.sqlite3` wird nicht automatisch geöffnet oder verändert.
+Sie wird nicht ungeprüft als Urlaub/BK/WL umgedeutet.
+
+**Exportpaket** erzeugt ein neues ZIP mit Dienstplan, Stunden, Verteilung,
+Wünschen, Zeitmengen, exaktem Arbeitsstand und Prüfmanifest. CSV-Zeitspalten sind
+in Stunden mit Dezimalkomma und benannter Einheit; das Arbeitsstand-JSON behält
+exakte Minuten für verlustfreies Laden. Alle Dateien tragen dieselbe
+Revisions-ID und sind per Hash zusammengehörig. Feiertagsmengen ohne übergebenen
+Kalender und unbekannte Urlaubsgutschriften sind `null`, nicht fälschlich null
+Stunden. Bestehende Exportdateien werden nicht überschrieben.
+
+Offene Produktprofile und tatsächliche Prüfstände:
+[offene Fragen](V2_OFFENE_FRAGEN.md), [Fortschritt](V2_FORTSCHRITT.md),
+[native Downloads](V2_NATIVE_PRUEFUNG.md), [Abnahmestatus](V2_ABNAHMESTATUS.md).

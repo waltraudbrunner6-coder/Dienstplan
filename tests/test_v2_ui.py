@@ -12,10 +12,11 @@ from dienstplan.v2.ui import Workbench
 
 
 @pytest.fixture
-def workbench(monkeypatch):
+def workbench(monkeypatch,tmp_path):
     app=QApplication.instance() or QApplication([])
     monkeypatch.setattr(QMessageBox,'question',lambda *a:QMessageBox.StandardButton.Yes)
-    w=Workbench()
+    from dienstplan.v2.demo import technical_demo
+    w=Workbench(database=tmp_path/'ui.sqlite3',initial=technical_demo(),year=2026,month=11)
     yield w
     if w.worker and w.worker.isRunning():w.worker.cancel.set();w.worker.wait(5000)
     w.close();app.processEvents()
@@ -30,7 +31,7 @@ def wait_worker(w):
 def test_real_qt_input_solver_explicit_acceptance_storage_and_export(workbench,tmp_path,monkeypatch):
     w=workbench
     assert w.team.rowCount()==12 and w.plan.rowCount()==8
-    w.team.item(0,2).setText('25,04');w.team.item(0,3).setText('600');w.team.item(0,4).setText('0')
+    w.team.item(0,2).setText('25,04');w.team.item(0,3).setText('10,00');w.team.item(0,4).setText('0')
     w.save()
     assert w.inputs.people[0].contracts.versions[0].weekly_hours==Fraction(626,25)
     w.seconds.setValue(1);w.start();wait_worker(w)

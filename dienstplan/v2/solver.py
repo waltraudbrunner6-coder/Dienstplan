@@ -7,7 +7,7 @@ from time import monotonic
 
 from ortools.sat.python import cp_model
 
-from .calendar_rules import check_calendar,check_quotas,extra_events_conflict
+from .calendar_rules import check_calendar,check_quotas,extra_events_conflict,dates,horizon
 from .errors import DomainError
 from .serialization import fingerprint
 from .pauses import check_coverage,coverage_segments
@@ -97,6 +97,29 @@ class StageProof:
     conditional: bool
 
 
+def _reduce_pause_choices(inputs,candidates,profile,protected=()):
+    """Dominanz nur ohne Arbeitsabdeckungsrolle; Eingabekandidaten bleiben erhalten.
+
+    Gleiche Anwesenheit/Person hat dieselben Kern-, Wunsch- und Kalenderregeln.
+    Bei gleichen Monats-/Gesamtarbeitsmengen unterscheiden die vorhandenen
+    Zielklassen nur die letzte Pausenpräferenz. Vertretungsrollen und vorhandene
+    beziehungsweise fixierte konkrete Pausen sind von der Reduktion ausgenommen.
+    """
+    from .objectives import _night_pause
+    from .work import quantities
+    coverage={id for r in inputs.coverage for id in (r.event_id,)+r.relief_event_ids}
+    protected=set(protected);selected={};untouched=[]
+    for block in candidates:
+        if block.id in coverage or block in protected:
+            untouched.append(block);continue
+        monthly=sum(q.work_minutes for q in quantities(block) if (q.day.year,q.day.month)==(inputs.year,inputs.month))
+        key=block.id,block.person_id,block.work_minutes,monthly
+        cost=_night_pause(block) if profile is not None and 'late_break' in profile.order else 0
+        rank=(cost,tuple(p.start for p in block.breaks))
+        if key not in selected or rank<selected[key][0]:selected[key]=(rank,block)
+    return tuple(dict.fromkeys(untouched+[block for _,block in selected.values()]))
+
+
 def verify(inputs,blocks,*,check_fixed=True,active_events=None):
     blocks=tuple(blocks)
     if active_events is None:
@@ -176,6 +199,7 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
         local=check_core((persons[b.person_id],),(terms[b.id],),(b,),absences=inputs.absences,
                          boundary=tuple(p for p in inputs.boundary if p.person_id==b.person_id),check_fixed=False)
         if local.hard_ok:candidates.append(b)
+    candidates=_reduce_pause_choices(inputs,candidates,objective_profile,existing+inputs.locked)
     model=cp_model.CpModel();x=[model.new_bool_var(f'candidate_{i}') for i in range(len(candidates))]
     for fixed in inputs.locked:
         if fixed not in candidates:
@@ -191,13 +215,17 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
         for i,a in enumerate(inputs.events):
             for b in inputs.events[i+1:]:
                 if extra_events_conflict(a,b,inputs.week_policy):model.add(y[a.id]+y[b.id]<=1)
+    assignments={}
     for term in inputs.events:
         indices=[i for i,b in enumerate(candidates) if b.id==term.id]
         for i in indices:model.add(x[i]<=y[term.id])
         if term.service.staff is not None:model.add(sum(x[i] for i in indices)<=term.service.staff*y[term.id])
         for person in inputs.people:
             mine=[i for i in indices if candidates[i].person_id==person.id]
-            model.add(sum(x[i] for i in mine)<=1)
+            if mine:
+                chosen=model.new_bool_var(f'assignment_{term.id}_{person.id}')
+                model.add(sum(x[i] for i in mine)==chosen)
+                assignments[term.id,person.id]=(chosen,candidates[mine[0]])
         for person in term.fixed_people:
             fixed=[i for i in indices if candidates[i].person_id==person]
             if not fixed and term.id not in inputs.optional_ids:
@@ -206,14 +234,17 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
                 last_issues=detail.issues or (Issue('fixed_candidate',person,term.id,'Für die feste Person liegt keine gültige konkrete Zuteilung einschließlich Pause vor.'),)
                 return finish('infeasible')
             model.add(sum(x[i] for i in fixed)==y[term.id])
-    for i,a in enumerate(candidates):
-        if monotonic()>=deadline or (cancel is not None and cancel.is_set()):return finish('cancelled' if cancel is not None and cancel.is_set() else 'unknown')
-        for j in range(i+1,len(candidates)):
-            b=candidates[j]
-            if a.person_id!=b.person_id:continue
-            left,right=sorted((a.attendance,b.attendance),key=lambda span:span.start)
-            if (left.start_day==right.start_day or left.overlaps(right) or rest_minutes(left,right)<660):
-                model.add(x[i]+x[j]<=1)
+    # Anwesenheit/Starttag/Ruhe hängen nicht von der konkreten Pausenlage ab.
+    # Eine gemeinsame Zuordnungsvariable ersetzt das quadratische Kreuzprodukt
+    # sämtlicher Pausenvarianten, ohne eine davon zu entfernen.
+    for person in inputs.people:
+        mine=[value for (_,pid),value in assignments.items() if pid==person.id]
+        for i,(chosen,a) in enumerate(mine):
+            if monotonic()>=deadline or (cancel is not None and cancel.is_set()):return finish('cancelled' if cancel is not None and cancel.is_set() else 'unknown')
+            for other,b in mine[i+1:]:
+                left,right=sorted((a.attendance,b.attendance),key=lambda span:span.start)
+                if (left.start_day==right.start_day or left.overlaps(right) or rest_minutes(left,right)<660):
+                    model.add(chosen+other<=1)
     for person in inputs.people:
         indices=[i for i,b in enumerate(candidates) if b.person_id==person.id]
         past=set().union(*(b.occupied_days for b in inputs.boundary if b.person_id==person.id))
@@ -228,6 +259,29 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
             old=len(window&past)
             if old>5:model.add(sum(x[i] for i in indices if candidates[i].occupied_days&window)==0)
             else:model.add(sum(flags[d] for d in flags if d in window)<=5-old)
+        def occupied(day):
+            return 1 if day in past else flags.get(day,0)
+        # Dieselbe Vorwochenregel wie im unabhängigen Prüfer, einschließlich
+        # seiner ausdrücklichen Unbekannt-Behandlung für fehlende Randdaten.
+        for saturday in (d for d in dates(horizon(inputs.year,inputs.month)) if d.weekday()==5):
+            weekend=[saturday,saturday+timedelta(days=1)]
+            previous=[saturday-timedelta(days=5-i) for i in range(5)]
+            touched=model.new_bool_var(f'weekend_work_{person.id}_{saturday}')
+            model.add_max_equality(touched,[occupied(d) for d in weekend])
+            current=[chosen for (eid,pid),(chosen,b) in assignments.items() if pid==person.id
+                     and (b.attendance.start_day.year,b.attendance.start_day.month)==(inputs.year,inputs.month)
+                     and b.occupied_days&set(previous+weekend)]
+            if not current:continue
+            scope=model.new_bool_var(f'weekend_scope_{person.id}_{saturday}')
+            model.add_max_equality(scope,current)
+            free=[1-occupied(d) if (person.id,d) in inputs.known_days or not person.employment.dates.includes(d) else 0 for d in previous]
+            pairs=[]
+            for i in range(4):
+                pair=model.new_bool_var(f'free_pair_{person.id}_{saturday}_{i}')
+                model.add(pair<=free[i]);model.add(pair<=free[i+1]);model.add(pair>=free[i]+free[i+1]-1)
+                pairs.append(pair)
+            unknown=[1-occupied(d) for d in previous if (person.id,d) not in inputs.known_days and person.employment.dates.includes(d)]
+            model.add(sum(pairs)+sum(unknown)>=touched+scope-1)
     for rule in inputs.coverage:
         term=terms[rule.event_id]
         roles={rule.event_id,*rule.relief_event_ids}
@@ -258,7 +312,7 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
         model.minimize(expression)
         if best is not None:model.add(expression<=best_values[stage][1])
         # Späte Fairness erhält eigenes Budget; lokale Prüfung 15 Prozent.
-        weights=[3 if n in {'hours_max','hours_spread','shifts'} else 1 for n,_ in goals[stage:]]
+        weights=[6 if n=='coverage' else 3 if n in {'hours_max','hours_spread','shifts'} else 1 for n,_ in goals[stage:]]
         local_reserve=.15*time_limit if objective_profile is not None else 0
         stage_deadline=min(deadline-local_reserve,monotonic()+max(0,deadline-local_reserve-monotonic())*weights[0]/sum(weights))
         stage_proved=False

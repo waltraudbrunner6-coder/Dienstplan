@@ -1,5 +1,7 @@
 # V2 – Bestandsaufnahme, Etappe A
 
+**Aktualisierung 10.11.2026:** Der ausdrückliche Folgeauftrag ersetzt ab Version 0.3.0 die alte Oberfläche durch die V2-Hauptanwendung. Es gibt keinen zusätzlichen Testbereich mehr. Dienstrechte werden als zeitgültige **Ausschlüsse** bedient; gespeicherte Rechte bleiben durch verlustfreie Komplementdarstellung erhalten. Zeitmengen erscheinen in Stunden, intern bleiben Minuten/Brüche. Neue Monate erhalten den Standardkatalog und die bestimmten Tagesmuster automatisch. Dieser Oberflächenauftrag entscheidet keine offenen Fach-/Tarifprofile und autorisiert keine Migration echter Altdateien. Historische Aussagen zum parallelen Altbetrieb weiter unten beschreiben den vorherigen Stand. Details: [Bedienung](V2_BEDIENUNG.md), [Fortschritt](V2_FORTSCHRITT.md).
+
 Aktueller Implementierungs- und Prüfstand: [Fortschritt](V2_FORTSCHRITT.md),
 [Zuordnung aller 125 Abnahmefälle](V2_ABNAHMESTATUS.md) und
 [Bedienung des technischen Prüfbereichs](V2_BEDIENUNG.md). Die nachfolgende

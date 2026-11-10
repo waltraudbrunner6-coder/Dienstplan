@@ -1,4 +1,4 @@
-"""Selbsttest des paketierten V2-Prüfbereichs, nur temporäre Testdaten."""
+"""Paketprobe der Hauptoberfläche und der Rechenkette mit isolierten Testdaten."""
 import json
 from pathlib import Path
 import tempfile
@@ -26,7 +26,6 @@ def run(report_path=None):
         from PySide6.QtWidgets import QApplication
         from .ui import Workbench
         from ..build_info import build_info
-        from ..startup import check_start_dialog
         import sys
         identity=build_info()
         if getattr(sys,'frozen',False):assert identity['commit'], 'Paketkennung fehlt im gebauten Programm.'
@@ -44,14 +43,25 @@ def run(report_path=None):
             assert manifest['revision_id']==workspace(inputs,profile,result.blocks,result.events)['revision_id']
             assert restore_workspace(workspace(inputs,profile,result.blocks,result.events))[0]==inputs
             app=QApplication.instance() or QApplication([])
-            startup=check_start_dialog(app)
-            window=Workbench();window.show();app.processEvents()
+            from .application import demonstration_month
+            window=Workbench(database=Path(directory)/'hauptoberflaeche.sqlite3',initial=demonstration_month(),year=2026,month=11)
+            window.show();app.processEvents()
             assert window.isVisible() and window.team.rowCount()==12
-            window.close();app.processEvents()
-        values=dict(selbsttest='bestanden',scope='Synthetischer V2-Prüfbereich – keine Produktfreigabe',
+            assert 'Prüfbereich' not in window.windowTitle()
+            assert window.catalog_table.rowCount()==19 and len(window.inputs.events)==94
+            assert window.team.horizontalHeaderItem(6).text()=='Ausgeschlossene Dienste'
+            assert window.team.horizontalHeaderItem(3).text()=='Anfang (h)'
+            assert window.inputs.people[0].rights[0].excluded_codes==frozenset()
+            window.team.item(0,1).setText('Dauerhaft gespeicherte Beispielperson')
+            window.save();window.close();app.processEvents()
+            reopened=Workbench(database=Path(directory)/'hauptoberflaeche.sqlite3')
+            assert reopened.inputs.people[0].name=='Dauerhaft gespeicherte Beispielperson'
+            assert len(reopened.inputs.events)==94
+            reopened.close()
+        values=dict(selbsttest='bestanden',scope='Hauptoberfläche mit Standardmonat; Rechenkette separat mit synthetischer Fixture',
                     personen=12,zuteilungen=8,tzdata=TZDATA_VERSION,iana=IANA_VERSION,
                     dst=True,solver_pruefer=True,sqlite=True,exportpaket=True,qt=True,
-                    startauswahl=startup,build=identity)
+                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,build=identity)
         code=0
     except Exception as exc:
         values=dict(selbsttest='fehlgeschlagen',fehler=str(exc),details=traceback.format_exc());code=1

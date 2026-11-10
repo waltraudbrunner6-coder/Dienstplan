@@ -17,6 +17,20 @@ class Eligibility:
     def __post_init__(self):
         object.__setattr__(self,"codes",frozenset(self.codes))
 
+    @property
+    def excluded_codes(self) -> frozenset[str]:
+        from .catalog import CATALOG
+        return frozenset(t.code for t in CATALOG) - self.codes
+
+    @classmethod
+    def from_exclusions(cls, dates, excluded_codes=(), driving_license=None):
+        from .catalog import CATALOG
+        codes = frozenset(t.code for t in CATALOG)
+        excluded = frozenset(excluded_codes)
+        if not excluded <= codes:
+            raise DomainError('Unbekannte ausgeschlossene Dienste: ' + ', '.join(sorted(excluded - codes)))
+        return cls(dates, codes - excluded, driving_license)
+
 
 @dataclass(frozen=True, slots=True)
 class Person:

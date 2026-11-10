@@ -16,7 +16,7 @@ def collect(repository,run_id):
     report=dict(run_id=run_id,commit=run['head_sha'],url=run['html_url'],conclusion=run['conclusion'],jobs=[],
                 limits=['Automatisierte native Qt-Prüfung; keine vollständige manuelle Bedienabnahme.',
                         'Keine OS-weite Netzabschaltung, Signierung oder Notarisierung nachgewiesen.',
-                        'Synthetischer Prüfbereich, keine betriebliche V2-Freigabe.'])
+                        'Hauptoberfläche geprüft; Rechenkette mit synthetischer Fixture, keine Rechts-/Tariffreigabe.'])
     for job in api(repository,f'actions/runs/{run_id}/jobs?per_page=100')['jobs']:
         row=dict(name=job['name'],job_id=job['id'],conclusion=job['conclusion'])
         for annotation in api(repository,f'check-runs/{job["id"]}/annotations?per_page=100'):
