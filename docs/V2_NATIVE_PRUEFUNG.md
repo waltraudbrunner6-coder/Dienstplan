@@ -1,70 +1,78 @@
-# Dienstplan 0.3.1 – Pakete mit sofort sichtbarer Dienstplanvorschau
+# Dienstplan 0.4.0 – Tabellenimport und Monatsübersicht
 
-Stand 10.11.2026. Die Anzeigekorrektur ist in den folgenden Paketen enthalten.
-Berechnete Vorschläge öffnen jetzt sofort den Reiter **Dienstplan** mit Namen,
-Zuteilungen und offenen Plätzen. Stunden, Verteilung und Wünsche zeigen denselben
-Vorschlag. **Ergebnis übernehmen** speichert ihn dauerhaft; bis dahin bleibt der
-vorherige Plan erhalten. Verwerfen stellt dessen Anzeige wieder her. Exportiert
-wird der gerade sichtbare Vorschlag.
+Stand 10.11.2026. Aktuelle Pakete des geprüften Programm-/Testcommits **4e74b10**.
+Der komplette lokale Gesamtlauf bestand **402 Tests in 136,65 s**. Alle drei
+nativen Ziele führten Testsuite, Build und verschärfte Paketprobe erfolgreich aus:
+[Run 42899281763](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42899281763). Nachfolgende reine Dokumentationscommits ändern
+diesen geprüften Programm-/Testcode nicht.
 
 ## Aktuelle Downloads
 
-[Run 42870257885](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42870257885) des Programm-/Testcommits **bbb6909** ist vollständig
-**erfolgreich**. Alle drei nativen Jobs führten Testsuite, Paketbuild und
-Paketprobe erfolgreich aus. Lokal: **368 bestandene Tests**. Nachfolgende reine
-Dokumentationscommits ändern diesen geprüften Programm-/Teststand nicht.
+- [Dienstplan-macOS-Sequoia-arm64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42899281763/artifacts/13802381766)
+- [Dienstplan-Windows-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42899281763/artifacts/13801848228)
+- [Dienstplan-macOS-Sequoia-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42899281763/artifacts/13801478552)
 
-- [Dienstplan-macOS-Sequoia-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42870257885/artifacts/13790395890)
-- [Dienstplan-Windows-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42870257885/artifacts/13789896584)
-- [Dienstplan-macOS-Sequoia-arm64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42870257885/artifacts/13789292461)
+Alte App schließen, GitHub-Download und darin enthaltenes ZIP/TAR.GZ vollständig
+entpacken. Windows: den vollständigen Dienstplan-Ordner behalten und darin die EXE
+öffnen. Mac ARM64 ist für Apple Silicon, x64 für Intel; das gesamte App-Bundle
+behalten. Im Fenster müssen **Version 0.4.0 · Build 4e74b10** stehen. Python und
+Terminal werden nicht benötigt. Bestehende V2-Dateien sind weiterhin lesbar;
+Originale und frühere Altdatenbanken werden nicht automatisch verändert.
 
-Alte App schließen und neues Paket in einen eigenen Ordner entpacken. Im Fenster
-müssen **Version 0.3.1 · Build bbb6909** stehen. Unter Windows den vollständigen
-Ordner behalten; Mac ARM64 ist für Apple Silicon, x64 für Intel. Python und
-Terminal sind nicht nötig. Bestehende V2-Dateien bleiben direkt ladbar, die
-bisherige Altdatei wird nicht verändert. Einen zuvor nicht übernommenen Vorschlag
-nach dem Neustart erneut berechnen und anschließend ausdrücklich übernehmen.
+## Neue Funktionen und Auswahlgrenzen
 
-In Version 0.3.0 war der Vorschlag erst nach **Ergebnis übernehmen** sichtbar.
-Die Korrektur ändert Anzeige und Vorschauablauf, keine fachlichen Planungsregeln.
-Standardkatalog, automatische Tagesmuster und weiterhin offene Sonderangaben
-bleiben bestehen.
+- XLSX-/CSV-Import von Terminen, einzelnen/vollständigen Zuteilungen und gemischten
+  Wünschen/Urlaub mit zentraler ID-Zuordnung und bearbeitbarer Gesamtvorschau.
+- Atomare Übernahme, Duplikaterkennung, Rollback bei Fehlern, keine fehlerhafte
+  Teilaktivierung. Formeln werden nicht ausgeführt; alte Datumsköpfe nur aus
+  gespeicherten Cachewerten gelesen, ohne externe Verknüpfungen zu öffnen.
+- Datum/Wochentag/Beginn/Ende sowie Monatsmatrix mit festen Personenlabels;
+  XLSX-Tabellenexport mit Stunden, offenen Plätzen und reimportierbaren Zeilen.
+- Manuell nur Person wählen: Pause möglichst vor 22 Uhr, sonst mittig unter
+  allen harten Regeln. Konkrete Pausen/Fixierungen bleiben im Reimport erhalten.
+- Zwei WL und ein BK je Woche, nie am selben lokalen Startdatum. Das Wochenprofil
+  wird vor der ersten normalen Berechnung/manuellen Zuteilung ausdrücklich
+  gewählt, Folgemonate übernehmen es. Termine und Personen optimiert der Solver
+  gemeinsam. Die globale Randwochenentscheidung wird nicht still geraten.
+- Bekannte Nachbarpläne liefern Dienste/Ruhezeiten auch ohne neues Wochenprofil.
+  Keine zweite unabhängige gemeinsame Randquote, keine Doppelzählung von Stunden.
+- Vorläufige Datumswahl zeigt echte benötigte Plätze statt aller Kandidatentage;
+  Horizont- und Kalendermonatsbedarf werden getrennt ausgewiesen. Noch freie
+  Pausen an Monatsgrenzen ergeben eine Bandbreite statt falscher Genauigkeit.
 
-## Gemessene Paketgrößen und Nachweis
+Die privaten Originaltabellen und vorbereiteten persönlichen Importdateien sind
+**nicht im Repository oder in diesen Programmpaketen enthalten**. Sie werden im
+Chat separat bereitgestellt. Ungeklärte KC15-/R-/U-Angaben, Donnerstagswünsche und
+KC10 am Donnerstag bleiben bis zur ausdrücklichen Klärung Korrekturfälle.
+Einlesen ist kein Nachweis, dass ein alter Plan den aktuellen Regeln entspricht.
+Der Import prüft auch Rechte, Besetzung, Ruhe, Urlaub und vorhandene Fixierungen.
 
-Rohdaten: [native-pruefung.json](../examples/v2/native-pruefung.json).
+## Tatsächlich gemessene Paketgrößen
+
+Rohdaten, Betriebssysteme und Paketnachweise:
+[native-pruefung.json](../examples/v2/native-pruefung.json).
 
 | System | Architektur | Unkomprimiert Bytes | MiB | Archiv MiB | Paketprobe |
 | --- | --- | ---: | ---: | ---: | --- |
-| macOS Sequoia 15.8.2 | arm64 | 180722575 | 172.35 | 60.74 | bestanden |
-| Windows 10.0.26100 | AMD64 | 240762514 | 229.61 | 82.84 | bestanden |
-| macOS Sequoia 15.7.9 | x86_64 | 187233522 | 178.56 | 67.21 | bestanden |
+| Windows 10.0.26100 | AMD64 | 241317035 | 230.14 | 83.35 | bestanden |
+| macOS Sequoia 15.8.2 | arm64 | 181281151 | 172.88 | 61.26 | bestanden |
+| macOS Sequoia 15.7.9 | x86_64 | 187792098 | 179.09 | 67.73 | bestanden |
 
-Die native Paketprobe verlangt zusätzlich **vorschau_anzeige=true**: echte
-Qt-Hauptoberfläche, Tabwechsel und sichtbare zugeteilte Personen vor dem
-Übernahmeklick, danach Speichern in SQLite. Sie prüft außerdem Standarddienste,
-Ausschlüsse, Stundenanzeige, persistenten Neustart, Wiener DST mit paketiertem
-tzdata bei leerem System-Zeitzonenpfad, CP-SAT/Prüfer und Export. Rechenkette und
-Vorschau werden mit einer isolierten synthetischen Zwölf-Personen-Fixture mit
-acht Zuteilungen geprüft; dies ist kein betrieblicher Vollmonats-/Rechtsnachweis.
-Die Regressionen prüfen auch den unveränderten vorherigen Plan, verworfene,
-veraltete, ungültige, unvollständige und leere Ergebnisse und den Vorschau-Export.
+Linux x86_64 zusätzlich gebaut und geprüft: **294587932 Bytes / 280.94 MiB**,
+Archiv **114839087 Bytes / 109.52 MiB**.
+Die Paketprobe bei leerem System-Zeitzonenpfad ist erfolgreich; Buildkennung
+stimmt mit dem sauberen Programmstand überein. Dies ersetzt keinen nativen Nachweis.
 
-Linux x86_64 zusätzlich gebaut und geprüft: **294.033.766 Bytes / 280,41 MiB**,
-Archiv **114.297.571 Bytes / 109,00 MiB**. Saubere Buildkennung bbb6909, neue
-Paketprobe vollständig bestanden. Linux ersetzt keinen nativen Nachweis.
+Die neue Paketprobe verlangt zusätzlich Excel-Export→Import→SQLite-Roundtrip,
+automatische Pausen und Wochenkonfiguration, außerdem weiterhin sichtbare
+Vorschau, Standardkatalog, Stunden, Neustart, Wiener DST und CP-SAT/Prüfer.
+Sie verwendet ausschließlich synthetische Daten, keine hochgeladenen Dienstpläne.
+Der unveränderte Legacy-Fairnessfall läuft nun ausdrücklich mit 30 s statt 8 s Suchbudget, nachdem Intel zweimal noch unbalancierte gültige Zwischenstände lieferte; alle Assertions und separate Kurzzeit-/Timeoutprüfungen bleiben erhalten. Dies ist kein Nachweis derselben Fairness innerhalb von acht Sekunden. Details im Fortschritt. Native Tests sind automatisierte Offscreen-Prüfungen. Vollständige manuelle
+Endgeräteabnahme, Signierung und Notarisierung bleiben offen; Pakete unsigniert.
+Keine KV-/BV-, Reserve-, Gehalts- oder Abrechnungsfreigabe aus diesen Tests ableiten.
 
-## Grenzen und frühere Belege
-
-Pakete sind unsigniert und nicht notarisiert. Native automatisierte
-Offscreen-Prüfungen sind keine vollständige manuelle Endgeräteabnahme. OS-weite
-Netzabschaltung wurde nicht geprüft. Offene KV-/BV-/Rechts-, Reserve-, Pausen- und
-Abrechnungsprofile werden durch die Anzeigekorrektur nicht entschieden.
-
-Die früheren erfolgreichen Pakete 0.3.0 sind als historischer Nachweis in
-[native-0-3-0.json](../examples/v2/native-0-3-0.json) erhalten; Pakete mit alter
-Startauswahl in [native-startauswahl.json](../examples/v2/native-startauswahl.json).
-Aktuelle Downloads stehen ausschließlich oben.
-
-[Bedienungsanleitung](V2_BEDIENUNG.md), [Fortschritt](V2_FORTSCHRITT.md),
-[offene Entscheidungen](V2_OFFENE_FRAGEN.md), [Abnahmestatus](V2_ABNAHMESTATUS.md).
+Frühere Belege: [0.3.1](../examples/v2/native-0-3-1.json),
+[0.3.0](../examples/v2/native-0-3-0.json),
+[Startauswahl](../examples/v2/native-startauswahl.json).
+[Tabellenimport](TABELLENIMPORT.md), [Fortschritt](V2_FORTSCHRITT.md),
+[offene Entscheidungen](V2_OFFENE_FRAGEN.md).

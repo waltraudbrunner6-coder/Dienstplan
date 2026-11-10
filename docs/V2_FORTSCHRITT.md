@@ -143,7 +143,18 @@ die Tests; Windows und Apple Silicon dort bereits vollständig erfolgreich.
 Die abschließenden Programmdateien werden einschließlich Uhrzeit-Erhalt aus
 echten Excel-Zellen erneut gebaut; danach folgen nur noch Prüfbericht/Links.
 
-Nächster Schritt: geprüften Code pushen und endgültige Paketlinks/Messwerte sichern. Die von Fachantworten abhängigen Importzeilen
+Programm-/Teststand **4e74b10** ist auf `feat/v2-implementation` gepusht.
+Endgültige native Matrix [Run 42899281763](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42899281763) vollständig erfolgreich:
+Windows x64 und macOS Sequoia ARM64/Intel einschließlich Tests, Build und neuer
+Paketprobe. Aktuelle Paketlinks/Messwerte: [V2_NATIVE_PRUEFUNG.md](V2_NATIVE_PRUEFUNG.md).
+Linux-Paket des identischen sauberen Standes ebenfalls gebaut/geprüft.
+
+Unabhängige Implementierung und private Formatvorlagen sind geliefert. Die
+vollständige aktive Übernahme aller privaten Excel-Zeilen bleibt von den oben
+genannten konkreten Fachantworten und der Korrektur echter Regelkonflikte abhängig.
+Keine unbestätigte Ausnahme erfunden. Nächster abhängiger Schritt: Antworten zu
+Donnerstag-X, KC15, R/U und KC10 am 31.12. übernehmen, die betroffenen Vorlagen
+anpassen und die konkrete Gesamtübernahme erneut prüfen. Die von Fachantworten abhängigen Importzeilen
 bleiben bis zur Klärung vorgemerkt.
 
 
