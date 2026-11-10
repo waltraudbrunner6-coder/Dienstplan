@@ -805,3 +805,12 @@ gestarteter Qt-Lauf erreichte im bestehenden 1-Sekunden-Solvertest keine volle
 Besetzung; unveränderte Erwartung im seriellen Gesamtlauf erfolgreich. Keine
 Testanforderung oder Solverregel abgeschwächt. `git diff --check` fehlerfrei.
 Native Pakete werden nach diesem geprüften Programm-/Testcommit erzeugt.
+
+Native Lieferung 0.4.2: **Run 42917710392**, Programm-/Testcommit **304f3e1**.
+Windows x64, macOS Sequoia ARM64 und Intel: alle Tests, Paketbuilds und
+Programm-Selbsttests erfolgreich. Der langsamere Intel-Testlauf endete ebenfalls
+erfolgreich, ohne geänderte Anforderungen oder Wiederholung. Aktuelle Links und
+Größen: `V2_NATIVE_PRUEFUNG.md`; Rohdaten `examples/v2/native-pruefung.json`.
+0.4.1-Nachweis unter `native-0-4-1.json` archiviert. Keine Benutzerdatenbank
+verändert, keine Migration, kein Merge nach main. Reine nachfolgende Nachweis-
+commits ändern den geprüften Programm-/Testcode nicht.
