@@ -14,7 +14,12 @@ def main(argv=None):
     parser.add_argument("--self-test-report", type=Path, help="JSON-Bericht des Selbsttests speichern")
     parser.add_argument("--year", type=int, default=None, help="Jahr des Startmonats")
     parser.add_argument("--month", type=int, default=None, help="Startmonat (1–12)")
+    mode=parser.add_mutually_exclusive_group()
+    mode.add_argument('--v2',action='store_true',help='Getrennten V2-Prüfbereich direkt öffnen')
+    mode.add_argument('--legacy',action='store_true',help='Bisherige Anwendung direkt öffnen')
     args = parser.parse_args(argv)
+    if args.v2 and (args.database or args.demo or args.year is not None or args.month is not None):
+        parser.error('--v2 verwendet getrennte Testdateien; Datei und Monat im V2-Prüfbereich wählen.')
     if args.self_test_v2:
         from .v2.smoke import run
         return run(args.self_test_report)
@@ -23,8 +28,6 @@ def main(argv=None):
         return run_smoke_test(args.self_test_report)
     from PySide6.QtCore import QLibraryInfo, QLocale, QStandardPaths, QTranslator
     from PySide6.QtWidgets import QApplication, QMessageBox
-    from .storage import Store
-    from .ui import MainWindow
     app = QApplication.instance() or QApplication(sys.argv[:1])
     QLocale.setDefault(QLocale("de_DE"))
     translator = QTranslator(app)
@@ -32,6 +35,24 @@ def main(argv=None):
     if translator.load("qtbase_de", translations): app.installTranslator(translator)
     app._dienstplan_translator = translator
     app.setApplicationName("Dienstplan"); app.setOrganizationName("Dienstplan")
+    # Zuerst wählen; insbesondere vor dem Öffnen/Anlegen einer Legacy-Datei.
+    legacy_options=args.legacy or args.database or args.demo or args.year is not None or args.month is not None
+    if args.v2:selection='v2'
+    elif legacy_options:selection='legacy'
+    else:
+        from .startup import choose_start_mode
+        selection=choose_start_mode()
+    if selection is None:return 0
+    if selection=='v2':
+        try:
+            from .v2.ui import Workbench
+            window=Workbench();window.show()
+            return app.exec()
+        except Exception as exc:
+            QMessageBox.critical(None,'V2-Prüfbereich konnte nicht gestartet werden',f'Bitte Installation und temporären Speicherort prüfen.\n{exc}')
+            return 1
+    from .storage import Store
+    from .ui import MainWindow
     if args.database:
         database = args.database
     else:

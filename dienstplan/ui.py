@@ -149,8 +149,8 @@ class MainWindow(QMainWindow):
         self._last_status = "Gespeicherter Plan" if self.data.assignments else "Noch kein Dienstplan"
         self._exception_notice = ""
         self._proof_text = ""
-        self.setWindowTitle("Dienstplan – lokale Monatsplanung")
-        v2_action=self.menuBar().addAction("V2-Prüfbereich (Testprofile)")
+        self.setWindowTitle("Dienstplan – bisherige Anwendung (4 Schichten)")
+        v2_action=self.menuBar().addMenu('Bereiche').addAction("V2-Prüfbereich (Testprofile)")
         v2_action.triggered.connect(self.open_v2_workbench)
         self.resize(1320, 850)
         central = QWidget(); layout = QVBoxLayout(central); self.setCentralWidget(central)
@@ -162,8 +162,12 @@ class MainWindow(QMainWindow):
         self.save_button = QPushButton("Monat speichern")
         self.confirm_button = QPushButton("Plan bestätigen")
         self.help_button = QPushButton("Anleitung")
-        top.addStretch(); top.addWidget(self.save_button); top.addWidget(self.confirm_button); top.addWidget(self.help_button)
+        self.v2_button=QPushButton('V2-Prüfbereich öffnen')
+        self.v2_button.clicked.connect(self.open_v2_workbench)
+        top.addStretch(); top.addWidget(self.save_button); top.addWidget(self.confirm_button); top.addWidget(self.help_button);top.addWidget(self.v2_button)
         layout.addLayout(top)
+        from .build_info import build_label
+        self.build_identity=QLabel(build_label());self.build_identity.setWordWrap(True);layout.addWidget(self.build_identity)
         self.banner = QLabel(); self.banner.setWordWrap(True); layout.addWidget(self.banner)
         self.tabs = QTabWidget(); layout.addWidget(self.tabs, 1)
         self._build_team(); self._build_shifts(); self._build_exceptions(); self._build_blockers(); self._build_result()

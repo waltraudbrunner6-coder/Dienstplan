@@ -2,6 +2,11 @@
 
 Stand 10.11.2026. **Technischer Prüfbereich, keine produktive V2-Freigabe.**
 
+Hinweis zum Folgeauftrag: Die unten belegten bisherigen Pakete enthielten V2,
+öffneten beim Start jedoch die bisherige Vier-Schichten-Oberfläche. Die neue
+Startauswahl und Buildkennung werden gerade separat gebaut und geprüft. Die
+folgenden bisherigen Downloads enthalten diese Bedienkorrektur noch nicht.
+
 ## Geprüfter Stand und Pakete
 
 [Run 42727609885](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42727609885) des Commits `fa61c12` ist vollständig

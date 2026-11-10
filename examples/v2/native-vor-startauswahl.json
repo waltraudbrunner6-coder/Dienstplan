@@ -1,0 +1,135 @@
+{
+  "run_id": 42727609885,
+  "commit": "fa61c12126ce608bedc2a6e3d9992d625529b2aa",
+  "url": "https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42727609885",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "native (macos-15, macOS-Sequoia-arm64)",
+      "job_id": 129537170235,
+      "conclusion": "success",
+      "v2_self_test": {
+        "selbsttest": "bestanden",
+        "scope": "Synthetischer V2-Prüfbereich – keine Produktfreigabe",
+        "personen": 12,
+        "zuteilungen": 8,
+        "tzdata": "2026.6",
+        "iana": "2026f",
+        "dst": true,
+        "solver_pruefer": true,
+        "sqlite": true,
+        "exportpaket": true,
+        "qt": true
+      },
+      "build": {
+        "version": "0.2.0",
+        "platform": "Darwin",
+        "architecture": "arm64",
+        "os_version": "15.8.2",
+        "python": "3.12.10",
+        "artifact": "/Users/runner/work/Dienstplan/Dienstplan/dist/Dienstplan.app",
+        "bytes": 180680151,
+        "mib": 172.31,
+        "archive": "/Users/runner/work/Dienstplan/Dienstplan/dist/Dienstplan-Darwin-arm64.tar.gz",
+        "archive_bytes": 63669632,
+        "archive_mib": 60.72,
+        "signed": false,
+        "stripped": false
+      }
+    },
+    {
+      "name": "native (macos-15-intel, macOS-Sequoia-x64)",
+      "job_id": 129537170353,
+      "conclusion": "success",
+      "v2_self_test": {
+        "selbsttest": "bestanden",
+        "scope": "Synthetischer V2-Prüfbereich – keine Produktfreigabe",
+        "personen": 12,
+        "zuteilungen": 8,
+        "tzdata": "2026.6",
+        "iana": "2026f",
+        "dst": true,
+        "solver_pruefer": true,
+        "sqlite": true,
+        "exportpaket": true,
+        "qt": true
+      },
+      "build": {
+        "version": "0.2.0",
+        "platform": "Darwin",
+        "architecture": "x86_64",
+        "os_version": "15.7.9",
+        "python": "3.12.10",
+        "artifact": "/Users/runner/work/Dienstplan/Dienstplan/dist/Dienstplan.app",
+        "bytes": 187191097,
+        "mib": 178.52,
+        "archive": "/Users/runner/work/Dienstplan/Dienstplan/dist/Dienstplan-Darwin-x86_64.tar.gz",
+        "archive_bytes": 70443350,
+        "archive_mib": 67.18,
+        "signed": false,
+        "stripped": false
+      }
+    },
+    {
+      "name": "native (windows-latest, Windows-x64)",
+      "job_id": 129537170461,
+      "conclusion": "success",
+      "v2_self_test": {
+        "selbsttest": "bestanden",
+        "scope": "Synthetischer V2-Pr�fbereich � keine Produktfreigabe",
+        "personen": 12,
+        "zuteilungen": 8,
+        "tzdata": "2026.6",
+        "iana": "2026f",
+        "dst": true,
+        "solver_pruefer": true,
+        "sqlite": true,
+        "exportpaket": true,
+        "qt": true
+      },
+      "build": {
+        "version": "0.2.0",
+        "platform": "Windows",
+        "architecture": "AMD64",
+        "os_version": "10.0.26100",
+        "python": "3.12.10",
+        "artifact": "D:\\a\\Dienstplan\\Dienstplan\\dist\\Dienstplan",
+        "bytes": 240720802,
+        "mib": 229.57,
+        "archive": "D:\\a\\Dienstplan\\Dienstplan\\dist\\Dienstplan-Windows-AMD64.zip",
+        "archive_bytes": 86828051,
+        "archive_mib": 82.81,
+        "signed": false,
+        "stripped": false
+      }
+    }
+  ],
+  "limits": [
+    "Automatisierte native Qt-Prüfung; keine vollständige manuelle Bedienabnahme.",
+    "Keine OS-weite Netzabschaltung, Signierung oder Notarisierung nachgewiesen.",
+    "Synthetischer Prüfbereich, keine betriebliche V2-Freigabe."
+  ],
+  "artifacts": [
+    {
+      "id": 13723920072,
+      "name": "Dienstplan-macOS-Sequoia-arm64",
+      "bytes": 63397985,
+      "expired": false,
+      "url": "https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42727609885/artifacts/13723920072"
+    },
+    {
+      "id": 13723796238,
+      "name": "Dienstplan-macOS-Sequoia-x64",
+      "bytes": 70221963,
+      "expired": false,
+      "url": "https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42727609885/artifacts/13723796238"
+    },
+    {
+      "id": 13722788520,
+      "name": "Dienstplan-Windows-x64",
+      "bytes": 86395892,
+      "expired": false,
+      "url": "https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42727609885/artifacts/13722788520"
+    }
+  ]
+}

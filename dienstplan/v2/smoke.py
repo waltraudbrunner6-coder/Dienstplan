@@ -25,6 +25,11 @@ def run(report_path=None):
         from .codec import workspace,restore_workspace
         from PySide6.QtWidgets import QApplication
         from .ui import Workbench
+        from ..build_info import build_info
+        from ..startup import check_start_dialog
+        import sys
+        identity=build_info()
+        if getattr(sys,'frozen',False):assert identity['commit'], 'Paketkennung fehlt im gebauten Programm.'
         with tempfile.TemporaryDirectory(prefix='dienstplan-v2-paket-') as directory:
             inputs,profile,old=technical_demo()
             result=solve_feasibility(inputs,time_limit=3,existing=old,objective_profile=profile)
@@ -39,12 +44,14 @@ def run(report_path=None):
             assert manifest['revision_id']==workspace(inputs,profile,result.blocks,result.events)['revision_id']
             assert restore_workspace(workspace(inputs,profile,result.blocks,result.events))[0]==inputs
             app=QApplication.instance() or QApplication([])
+            startup=check_start_dialog(app)
             window=Workbench();window.show();app.processEvents()
             assert window.isVisible() and window.team.rowCount()==12
             window.close();app.processEvents()
         values=dict(selbsttest='bestanden',scope='Synthetischer V2-Prüfbereich – keine Produktfreigabe',
                     personen=12,zuteilungen=8,tzdata=TZDATA_VERSION,iana=IANA_VERSION,
-                    dst=True,solver_pruefer=True,sqlite=True,exportpaket=True,qt=True)
+                    dst=True,solver_pruefer=True,sqlite=True,exportpaket=True,qt=True,
+                    startauswahl=startup,build=identity)
         code=0
     except Exception as exc:
         values=dict(selbsttest='fehlgeschlagen',fehler=str(exc),details=traceback.format_exc());code=1

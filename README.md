@@ -6,6 +6,19 @@ Lokale Desktop-Anwendung für die monatliche Dienstplanung eines Teams. Oberflä
 
 Im fertigen Windows-Paket `Dienstplan.exe` öffnen; auf macOS `Dienstplan.app` öffnen. Den vollständigen Paketordner behalten. Eine Python-Installation oder ein Terminal ist für diese Pakete nicht nötig. Die ersten Prüfbuilds sind unsigniert; vor einer breiten Auslieferung stehen native Prüfung und Signierung aus.
 
+Beim normalen Start erscheint eine **Startauswahl**: „Bisherige Anwendung öffnen“
+führt zur Oberfläche mit vier Schichten und deinen bisherigen Daten.
+„V2-Prüfbereich öffnen“ zeigt den neuen technischen Prüfbereich mit getrennten
+Testdateien. V2 ist weiterhin keine fertig freigegebene Produktivversion.
+Version und Buildkennung werden angezeigt; neue Archivnamen enthalten den
+zugehörigen Commit. Die folgenden acht Schritte beschreiben die bisherige Anwendung.
+
+Gespeicherte Dienstpläne liegen außerhalb des Programmpakets im lokalen
+Benutzerdatenordner. Deshalb sind sie nach einem Paketwechsel weiterhin da.
+Sie sind keine mitgelieferten Testdaten und werden weder gelöscht noch automatisch
+nach V2 migriert. Neue Pakete vollständig in einen eigenen Ordner entpacken;
+unter Windows die EXE zusammen mit ihrem Paketordner behalten.
+
 1. Monat und Jahr wählen. Die Monatslänge wird automatisch berücksichtigt.
 2. Team mit Namen, Wochenstunden, Anfangssaldo und gewünschtem Endsaldo erfassen. Wochenstunden dürfen Nachkommastellen haben.
 3. Drei tägliche Schichten und die wöchentliche besondere Schicht mit Wochentag konfigurieren. Standardbesetzung: zwei verschiedene Personen je Termin. Start, Ende, Pause und Besetzung gelten für den gewählten Monat.
@@ -25,7 +38,7 @@ Version 0.2.0: [Bestandsaufnahme](docs/V2_BESTANDSAUFNAHME.md),
 [Architektur/Migration](docs/V2_ARCHITEKTUR_UND_MIGRATION.md) und
 [Abnahmetestkatalog](docs/V2_ABNAHMETESTS.md). Etappe A beschreibt den Umbau;
 die dortigen V2-Regeln sind noch keine produktiv freigegebene Planungsfunktion.
-Der Menüpunkt **V2-Prüfbereich (Testprofile)** bietet inzwischen echte Optimierung,
+Die Startauswahl beziehungsweise die Schaltfläche **V2-Prüfbereich öffnen** bietet echte Optimierung,
 Korrekturstapel, getrennte Speicherung und konsistente Exportpakete. Anleitung:
 [V2-Prüfbereich](docs/V2_BEDIENUNG.md), aktueller Prüfstand und Grenzen:
 [V2-Fortschritt](docs/V2_FORTSCHRITT.md). Die normale Anwendung behält ihre bisherige Datei.
@@ -145,6 +158,7 @@ Die ausdrücklich gewählten Testgrenzen sind **11 Stunden Ruhezeit, 12 Tagesstu
 ## Pakete erstellen und Prüfstand
 
 Auf dem jeweiligen Zielbetriebssystem mit Python 3.12 und den Entwicklungsabhängigkeiten:
+Für die Paketkennung im Git-Checkout bauen; das Buildskript erfasst Commit und lokale Änderungen.
 
 ```sh
 python scripts/build.py

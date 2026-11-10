@@ -1,5 +1,32 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
+## Folgeauftrag: Artefakte wirken wie die alte Version
+
+Die Rückmeldung wurde am 10.11.2026 nachvollzogen: Auch das neue Paket startete
+in `MainWindow` der bisherigen Vier-Schichten-App und öffnete deren lokale
+Benutzerdatenbank. Das war wegen der ausdrücklich nicht beauftragten produktiven
+V2-Umschaltung so angelegt; der alleinige Menüeinstieg in den V2-Prüfbereich war
+jedoch zu wenig sichtbar. Die Paketversion 0.2.0 allein unterschied die neuen
+Entwicklungsstände ebenfalls nicht. Alte Benutzerdaten waren nicht im Build
+gebündelt und wurden nicht nach V2 migriert.
+
+Korrektur: explizite Startauswahl vor jedem Datenbankzugriff beim normalen Start,
+sichtbare V2-Schaltfläche und reguläres Bereiche-Menü in der bisherigen App,
+eindeutiger Fenstertitel für den Vier-Schichten-Bereich und Offline-Paketkennung
+mit Commit in beiden Fenstern. V2-Auswahl öffnet keine Legacy-Datenbank. Direkte
+Entwickleraufrufe `--v2`/`--legacy`; bisherige explizite Datenbank-/Demoaufrufe
+bleiben kompatibel. Archivnamen enthalten künftig die Build-Commitkennung.
+Keine produktive Aktivierung und keine Änderung/Löschung echter Benutzerdaten.
+
+Regression: normale Startauswahl und `--v2` mit echtem Qt-Ereignisloop,
+unveränderter synthetischer Altdatei und verbotenem Legacy-Store-Zugriff;
+Abbruch legt keine Datei an. Paketprobe verlangt nun Startauswahl, eingebettete
+Commitkennung und Übereinstimmung mit dem Buildbericht. Gesamtlauf:
+**339 bestanden in 96,90 s**; gezielte Start-/Einstieg-/Paketprüfungen danach
+**13 bestanden in 0,73 s**. Der aktualisierte Startdialog wurde offscreen visuell
+geprüft. Neue native Pakete werden vor Verlinkung tatsächlich gebaut/geprüft;
+vorherige native Belege bleiben getrennt in `native-vor-startauswahl.json` erhalten.
+
 Basis: Etappe A `0a0bc48`, Arbeitsbranch `feat/v2-implementation`.
 Aktueller geprüfter Programm-/Teststand: `fa61c12`, **330 lokale Tests grün**,
 alle drei nativen Zielarchitekturen einschließlich Paket-/V2-Selbsttests grün in

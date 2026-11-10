@@ -47,6 +47,8 @@ class Workbench(QDialog):
         self.proofs=();self.generation=0;self.worker=None;self.pending=None;self.batch=None;self.loading=False
         layout=QVBoxLayout(self)
         label=QLabel('V2-Testbereich: kein vollständiger Betriebsmonat, keine KV-/Tariffreigabe. Die normale Anwendung und ihre Datei bleiben getrennt.');label.setWordWrap(True);layout.addWidget(label)
+        from ..build_info import build_label
+        self.build_identity=QLabel(build_label());self.build_identity.setWordWrap(True);layout.addWidget(self.build_identity)
         self.location=QLabel('Temporärer Teststand – für dauerhafte Aufbewahrung „Neue Testdatei“ wählen.');layout.addWidget(self.location)
         top=QHBoxLayout();layout.addLayout(top)
         for text,handler in (('Neue Testdatei',self.new_file),('Testdatei öffnen',self.open_file),('Testmonat wählen',self.new_month),('Arbeitsstand speichern',self.save),('Exportpaket',self.export),('Testmonat bestätigen',self.confirm)):

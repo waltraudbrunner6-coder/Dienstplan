@@ -1,9 +1,25 @@
 # V2-Prüfbereich – technischer Stand
 
 Die normale Anwendung arbeitet weiter mit ihren bisherigen Daten und Regeln.
-Über **V2-Prüfbereich (Testprofile)** öffnet sich ein getrenntes Fenster innerhalb
-derselben Anwendung. Dieser Bereich dient der fachlichen Prüfung. Er schaltet
+In der neuen **Startauswahl** „V2-Prüfbereich öffnen“ wählen. Aus der bisherigen
+Oberfläche führen auch die sichtbare Schaltfläche und das Menü **Bereiche →
+V2-Prüfbereich (Testprofile)** dorthin. Dieser Bereich dient der fachlichen Prüfung. Er schaltet
 keine produktive V2-Planung frei und öffnet die normale Benutzerdatenbank nicht.
+
+Die bisherigen Artefakte öffneten direkt die bisherige Oberfläche. Deshalb waren
+zunächst dieselben vier Schichten und die bereits gespeicherten Daten zu sehen,
+obwohl der V2-Code enthalten war. Die Daten liegen im Benutzerkonto außerhalb des
+Programmpakets; der erneute Download löscht sie nicht. Das war keine automatische
+Übernahme alter Daten in V2. Der Zugriff war insbesondere über ein verstecktes
+Menü zu wenig erkennbar und ist mit der Startauswahl korrigiert.
+
+Bei den neuen Paketen wird die Buildkennung in beiden Bereichen angezeigt und
+steht im Archivnamen. Damit lässt sich ein neuer Download von einem früheren
+Paket unterscheiden. Der anfängliche V2-Datensatz ist weiterhin ein fiktiver
+Vier-Termine-Test mit zwölf Personen, kein fertiger betrieblicher Monatsplan.
+Für den direkten Entwicklerstart gibt es `python -m dienstplan --v2` und
+`python -m dienstplan --legacy`; explizite bisherige `--database`-/`--demo`-Aufrufe
+öffnen weiterhin die bisherige Anwendung. Kein Terminal ist für die Pakete nötig.
 
 1. Der Startdatensatz enthält zwölf fiktive Personen und vier WL-Testtermine.
    Das ist ausdrücklich kein vollständiger Betriebsmonat. „Neue Testdatei“ legt

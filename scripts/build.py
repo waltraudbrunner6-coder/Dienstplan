@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime,timezone
 import json
 import os
 from pathlib import Path
@@ -25,6 +26,12 @@ def main() -> int:
     working.mkdir(parents=True, exist_ok=True)
     launcher = working / "desktop_entry.py"
     launcher.write_text('import runpy\nrunpy.run_module("dienstplan", run_name="__main__")\n', encoding="utf-8")
+    commit=subprocess.run(['git','rev-parse','HEAD'],cwd=root,check=True,capture_output=True,text=True).stdout.strip()
+    dirty=bool(subprocess.run(['git','status','--porcelain','--untracked-files=no'],cwd=root,check=True,capture_output=True,text=True).stdout.strip())
+    identity=dict(version=__version__,commit=commit,dirty=dirty,
+                  build_time_utc=datetime.now(timezone.utc).isoformat(),platform=platform.system(),architecture=platform.machine())
+    identity_path=working/'build-info.json'
+    identity_path.write_text(json.dumps(identity,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     command = [
         sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean",
         "--onedir", "--windowed", "--name", "Dienstplan",
@@ -34,6 +41,7 @@ def main() -> int:
         "--collect-data", "tzdata",
         "--add-data", str(root / "README.md") + os.pathsep + ".",
         "--add-data", str(root / "docs") + os.pathsep + "docs",
+        "--add-data", str(identity_path) + os.pathsep + "dienstplan",
     ]
     # Die Linux-Bibliotheken enthalten große Debugsymboltabellen. PyInstaller
     # verwendet das native strip-Werkzeug, das benötigte Laufzeitsymbole erhält.
@@ -66,7 +74,7 @@ def main() -> int:
     byte_count = sum(p.stat().st_size for p in artifact.rglob("*") if p.is_file() and not p.is_symlink())
     platform_name = platform.system()
     architecture = platform.machine()
-    archive_base = output / f"Dienstplan-{platform_name}-{architecture}"
+    archive_base = output / f"Dienstplan-{platform_name}-{architecture}-{commit[:7]}"
     if sys.platform == "win32":
         archive = Path(shutil.make_archive(str(archive_base), "zip", root_dir=output, base_dir=artifact.name))
     else:
@@ -77,6 +85,7 @@ def main() -> int:
             package.add(artifact, arcname=artifact.name)
     result = {
         "version": __version__,
+        "commit": commit,"dirty":dirty,"build_time_utc":identity['build_time_utc'],
         "platform": platform_name, "architecture": architecture,
         "os_version": platform.mac_ver()[0] if sys.platform=='darwin' else platform.version(),
         "python": platform.python_version(), "artifact": str(artifact),
