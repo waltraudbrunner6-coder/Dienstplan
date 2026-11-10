@@ -20,8 +20,15 @@ YELLOW='FFFFFF00'
 
 def _text(value):
     if value is None:return ''
-    if isinstance(value,(datetime,date)):return value.isoformat()[:10]
+    if isinstance(value,(datetime,date)):return value.isoformat()
     return str(value).strip()
+
+
+def _field_text(key,value):
+    if isinstance(value,(datetime,date)):
+        if key=='budgetmonat':return value.strftime('%Y-%m')
+        if key in {'datum','gutschrifttage'}:return value.date().isoformat() if isinstance(value,datetime) else value.isoformat()
+    return _text(value)
 
 
 def read_import(path, *, source_kind='plan'):
@@ -62,7 +69,7 @@ def read_import(path, *, source_kind='plan'):
             for line in sheet.iter_rows(min_row=2):
                 if not any(c.value is not None for c in line):continue
                 if any(c.data_type=='f' for c in line):raise DomainError(f'Zeile {line[0].row}: Formeln sind im Importblatt nicht erlaubt.')
-                item={k:_text(line[header.index(k)].value) if k in header else '' for k in COLUMNS}
+                item={k:_field_text(k,line[header.index(k)].value) if k in header else '' for k in COLUMNS}
                 item['person_id']=mapping.get(item['person_ref'],'') or item['person_id']
                 rows.append(item)
             return tuple(rows),mapping,tuple(notes)

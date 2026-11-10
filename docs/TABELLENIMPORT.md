@@ -57,7 +57,7 @@ Beispiel!B4;Zeile 4;P01;2026-11-11;freiwunschtag;;;;;;Übergehbarer Wunsch
   Monat; Abwesenheiten über Monatsgrenzen müssen den Monat tatsächlich berühren.
 - `fixiert`: ja / nein. Importierte Dienste standardmäßig ja; beide Plätze werden
   durch zwei Zeilen mit unterschiedlichen IDs besetzt. Doppelte Zeilen zählen einmal.
-- `beginn`/`ende`: vollständige ISO-Zeitpunkte mit Datum, bei mehrdeutiger Ortszeit
+- `beginn`/`ende`: vollständige ISO-Zeitpunkte mit Datum oder echte Excel-Datum/Uhrzeit-Zellen; bei mehrdeutiger Ortszeit
   ausdrücklicher Offset. Für Katalogdienste gelten deren Zeiten; FK benötigt beide.
 - `gutschrifttage`: ausdrücklich anrechenbare Urlaubstage, mit `|` getrennt.
 - Optional: `pause_von`, `pause_bis` als konkrete ISO-Zeitpunkte. Leer bedeutet

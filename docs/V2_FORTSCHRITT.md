@@ -128,6 +128,21 @@ sind in Run 42894838022 dokumentiert. Neue native Prüfung folgt mit dieser
 präzise benannten Testkonfiguration. Lokal gezielte Fairness- und unveränderte
 Timeout-/Startplanregression: **2 bestanden in 31,62 s**.
 
+Kalibrierter vollständiger Lauf: **401 bestanden in 134,30 s**. Zusätzlich
+native Excel-Zelltypen geprüft: Datum/Gutschrifttag bleiben reine Daten,
+Beginn/Ende/Pause behalten ihre Uhrzeit statt auf Mitternacht gekürzt zu werden.
+Regression: FK 15:00–23:00 mit Pause 19:00–19:30 bleibt 450 Arbeitsminuten,
+Gutschrifttag als echte Excel-Datumszelle bleibt 10.11.2026.
+Relevante gesamte Tabellen-/Qt-Prüfung: **44 bestanden in 29,49 s**.
+Keine weitere fachliche Interpretation von R/U/KC15/Donnerstagswünschen.
+
+Letzter vollständiger Lauf einschließlich nativer Excel-Zelltypen und
+kalibriertem unverändertem Fairnessziel: **402 bestanden in 136,65 s**.
+Die Intel-Matrix des vorangehenden Testkalibrierungsstands besteht nun ebenfalls
+die Tests; Windows und Apple Silicon dort bereits vollständig erfolgreich.
+Die abschließenden Programmdateien werden einschließlich Uhrzeit-Erhalt aus
+echten Excel-Zellen erneut gebaut; danach folgen nur noch Prüfbericht/Links.
+
 Nächster Schritt: geprüften Code pushen und endgültige Paketlinks/Messwerte sichern. Die von Fachantworten abhängigen Importzeilen
 bleiben bis zur Klärung vorgemerkt.
 

@@ -307,3 +307,19 @@ def test_required_month_work_excludes_outside_month_and_bounds_unplaced_breaks()
     blocks=tuple(automatic_pause_choices(term,pid)[0] for pid in ('P01','P02'))
     assert required_work_range((term,),blocks,2026,12)==(120,120)
     assert required_work_range((),(),2026,12,boundary=blocks+blocks)==(120,120)
+
+
+def test_native_excel_datetime_cells_preserve_shift_and_pause_times(tmp_path):
+    data,_,_=demonstration_month();path=tmp_path/'typed-times.xlsx'
+    book=Workbook();sheet=book.active;sheet.title='Import';sheet.append(COLUMNS)
+    values=row(kind='dienst',code='FK',beginn=datetime(2026,11,10,15),ende=datetime(2026,11,10,23),pause_von=datetime(2026,11,10,19),pause_bis=datetime(2026,11,10,19,30))
+    values['datum']=datetime(2026,11,10)
+    sheet.append([values.get(key,'') for key in COLUMNS])
+    leave=row(pid='P02',kind='urlaub',code='',gutschrifttage=datetime(2026,11,10));sheet.append([leave.get(key,'') for key in COLUMNS]);book.save(path)
+    rows,_,_=read_import(path);assert rows[0]['datum']=='2026-11-10'
+    assert rows[0]['beginn']=='2026-11-10T15:00:00'
+    result=prepare_plan_import(data,rows);assert result.ready,result.errors
+    block=result.blocks[0]
+    assert block.attendance.start.astimezone(vienna()).hour==15
+    assert block.work_minutes==450 and block.breaks[0].start.astimezone(vienna()).hour==19
+    assert result.inputs.absences[0].credit_days==frozenset({date(2026,11,10)})
