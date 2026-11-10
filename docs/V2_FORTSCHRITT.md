@@ -1,6 +1,11 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
 Basis: Etappe A `0a0bc48`, Arbeitsbranch `feat/v2-implementation`.
+Aktueller Sicherungsstand: Code/Testkorrektur bis `fa61c12` gepusht, **330 lokale
+Tests grün**. Letzter nativer Korrekturlauf gestartet, anschließend GitHub-Anmeldung
+abgelaufen (`401 Bad credentials`, ungültiger GH_TOKEN, Git-Anmeldung ebenfalls
+nicht abrufbar). Abschlussstatus/letzter Berichtspush deshalb technisch blockiert.
+Belegte native Zwischenstände und Größen: [V2_NATIVE_PRUEFUNG.md](V2_NATIVE_PRUEFUNG.md).
 Die produktive Altanwendung bleibt unverändert; keine V2-Umschaltung, kein Merge
 nach main und keine Migration einer echten Benutzerdatenbank.
 
@@ -356,4 +361,8 @@ Gesamtlauf nach dieser Präzisierung: **330 bestanden in 94,71 s**.
 
 Nutzer hat am 10.11.2026 selbstständige Fortsetzung bestätigt.
 Nächster Schritt: native Prüfungen ausführen und konkrete Fehler korrigieren;
+dafür zuerst die GitHub-Verbindung der Cloud-Umgebung erneuern, dann den letzten
+Lauf für `fa61c12` abfragen und den lokal gesicherten Abschlussbericht pushen.
+Nicht ungeprüft Erfolg des Intel-Korrekturlaufs behaupten. Der Programmcode ist
+bereits gepusht; nur der nach Zugangsausfall ergänzte Bericht ist noch lokal.
 keine produktive Umschaltung oder echte Datenmigration ohne gesonderten Auftrag.

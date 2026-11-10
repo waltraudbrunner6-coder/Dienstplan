@@ -29,6 +29,9 @@ Der Menüpunkt **V2-Prüfbereich (Testprofile)** bietet inzwischen echte Optimie
 Korrekturstapel, getrennte Speicherung und konsistente Exportpakete. Anleitung:
 [V2-Prüfbereich](docs/V2_BEDIENUNG.md), aktueller Prüfstand und Grenzen:
 [V2-Fortschritt](docs/V2_FORTSCHRITT.md). Die normale Anwendung behält ihre bisherige Datei.
+Lokal sind inzwischen **330 Tests** geprüft. Tatsächlich gebaute native Pakete,
+gemessene Größen und der getrennte Nachweisstatus stehen unter
+[Native V2-Prüfungen](docs/V2_NATIVE_PRUEFUNG.md); dies ist keine produktive V2-Umschaltung.
 
 Python 3.12 verwenden. Die folgenden Befehle sind für Entwickler*innen; Nutzer*innen erhalten ein fertiges Paket. `requirements-lock.txt` hält die in Linux geprüften direkten und transitiven Versionen fest; die nativen Builds installieren die direkt festgelegten Versionen aus `requirements-dev.txt` mit passenden Plattformabhängigkeiten.
 
