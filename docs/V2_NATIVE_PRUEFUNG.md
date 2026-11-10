@@ -1,41 +1,34 @@
-> Folgeversion 0.4.3 korrigiert die manuelle Zuordnung und erhält Zuteilungen
-> beim Einrichten der Wochenregel. Die folgenden Downloads gehören noch zu
-> 0.4.2; neue native Nachweise werden nach erfolgreichem Build ergänzt.
+# Dienstplan 0.4.3 – direkte manuelle Zuordnung und Bedienprüfung
 
-# Dienstplan 0.4.2 – Terminänderungen ohne Planverlust
+Stand 11.11.2026. Geprüfter Programm-/Testcommit **1ef36fe**. Windows x64, macOS Sequoia ARM64 und Intel: Testsuite, Paketbuild und die Prüfung des gebauten Programms erfolgreich.
 
-Stand 10.11.2026. Programm-/Testcommit **304f3e1**. Alle drei nativen Ziele haben Testsuite, Paketbuild und die Prüfung des gebauten Programms erfolgreich abgeschlossen.
+[Prüflauf 42924260302](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42924260302). Rohdaten: `examples/v2/native-pruefung.json`; vorheriger 0.4.2-Nachweis: `examples/v2/native-0-4-2.json`. Nachfolgende reine Nachweiscommits ändern den geprüften Programm-/Testcode nicht.
 
-[Prüflauf 42917710392](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42917710392). Rohdaten: `examples/v2/native-pruefung.json`. Der vorige 0.4.1-Nachweis bleibt unter `examples/v2/native-0-4-1.json` erhalten. Nachfolgende reine Dokumentationscommits ändern diesen Programm-/Testcode nicht.
+## Aktuelle Downloads
 
-## Downloads
+- [Dienstplan-Windows-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42924260302/artifacts/13813586611)
+- [Dienstplan-macOS-Sequoia-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42924260302/artifacts/13813493122)
+- [Dienstplan-macOS-Sequoia-arm64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42924260302/artifacts/13812938898)
 
-- [Dienstplan-macOS-Sequoia-arm64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42917710392/artifacts/13810187585)
-- [Dienstplan-macOS-Sequoia-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42917710392/artifacts/13810034153)
-- [Dienstplan-Windows-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42917710392/artifacts/13809214082)
+Alte App schließen, neue Archive vollständig entpacken. Windows: vollständigen Dienstplan-Ordner behalten und darin die EXE öffnen. macOS: ARM64 für Apple Silicon, x64 für Intel; vollständiges App-Bundle behalten. Im Fenster muss **Version 0.4.3 · Build 1ef36fe** stehen. Python und Terminal sind nicht erforderlich. Bestehende Monatsdatei weiterverwenden; keine Migration oder erneuter Import erforderlich.
 
-Archive vollständig entpacken. Windows: vollständigen Dienstplan-Ordner behalten und darin die EXE öffnen. macOS: ARM64 für Apple Silicon, x64 für Intel; vollständiges App-Bundle behalten. Im Fenster muss **Version 0.4.2 · Build 304f3e1** stehen. Python und Terminal werden nicht benötigt.
+## Korrekturen und Prüfumfang
 
-## Fehlerkorrektur und Wiederaufnahme
+- „Zuteilung ändern“ öffnet direkt die Personenauswahl. Manuelle Änderungen, Entfernen und Fixieren benötigen kein BK/WL-Wochenprofil; vorhandene Termine bleiben unverändert.
+- Fixierungen werden bei einem bestätigten Personenwechsel übertragen bzw. beim Entfernen mit entfernt. Termin-/Personen-ID bestimmt ihre Identität, abweichende Metadaten erzeugen keine Doppelanlage. Gleiche Person oder Abbruch erhält Pause und bisherigen Stand.
+- Explizite Wochenkonfiguration erhält vorhandene Zuteilungen. Optionale Datumswahl bleibt innerhalb der gewählten Quoten für die spätere automatische Planung frei.
+- Dateikopie schützt vor Übernahme des falschen Standes hinter einer Vorschau und übernimmt keinen fremden Korrekturstapel als aktive Bearbeitung. Ursprünglicher Stapel bleibt in seiner Datenbank.
+- Erneute Funktionsprüfung: normale Monatsoberfläche mit synthetischem Import, manuelle Änderungen, Speicherung, beide Exporte, Kopie/Öffnen, Monatsnavigation sowie bestehende Termin-, Import-, Vertrags-, Historien- und Solverprüfungen. Einzelheiten: `V2_BEDIENPRUEFUNG_0_4_3.md`.
+- Lokal abschließender Gesamtlauf: **437 bestanden in 257,35 s**. Der verschärfte native Paket-Selbsttest führt im gebauten Programm zuordnen → fixieren → Person ändern → entfernen ohne Wochenprofil aus. `manual_assignment=true` ist auf allen drei Plattformen nachgewiesen.
 
-- Termin entfernen: nur diesen Termin, seine Zuteilungen und Fixierungen entfernen; alle übrigen Dienste erhalten. Die Änderung wird vor der Anzeige atomar gespeichert.
-- Termin ergänzen: ebenfalls kein Verwerfen des restlichen Plans. Bestehende Regelprüfung und ausdrückliche Übersteuerung bleiben erhalten.
-- Reimport: Fixierungen eindeutig nach Termin und Person zuordnen. Originalpausen wiederverwenden; keine Doppelanlage durch abweichende Pausen-/Override-Objekte.
-- Nach dem alten Löschfehler: vorhandene Monatsdatei öffnen. Falls der Plan noch leer ist, ursprünglichen Novemberplan erneut importieren. Erhaltene Fixierungen werden in der Vorschau ausdrücklich als wiederhergestellt ausgewiesen. Regelverletzungen wie zuvor bestätigen; keine neue Datenbank erforderlich.
-- „Datei kopieren“ heißt eindeutig, was vorher „Neue Datei“ bedeutete: bestehender Arbeitsstand mit Fixierungen in einer separaten Datei, kein leeres Zurücksetzen.
-
-## Prüfungen und gemessene Größen
-
-Lokal abschließend **418 Tests bestanden in 152,68 s**. Neue synthetische Regressionen decken den früher geleerten Zustand, Reimport, Dateikopie, Terminergänzung/-entfernung, Erhalt der übrigen Dienste, Abbruch und Schreibfehler sowie Speicherung/Neustart ab. Domain-Duplikatschutz und Solverregeln bleiben unverändert streng.
+## Tatsächlich gemessene Paketgrößen
 
 | Plattform | Native Archivgröße | Entpacktes Programm |
 | --- | ---: | ---: |
-| Darwin x86_64 | 71,018,197 Bytes / 67.73 MiB | 187,807,718 Bytes / 179.11 MiB |
-| Darwin arm64 | 64,243,794 Bytes / 61.27 MiB | 181,296,771 Bytes / 172.90 MiB |
-| Windows AMD64 | 87,404,516 Bytes / 83.36 MiB | 241,332,732 Bytes / 230.15 MiB |
+| Darwin x86_64 | 71,024,978 Bytes / 67.73 MiB | 187,820,588 Bytes / 179.12 MiB |
+| Darwin arm64 | 64,246,490 Bytes / 61.27 MiB | 181,309,641 Bytes / 172.91 MiB |
+| Windows AMD64 | 87,412,044 Bytes / 83.36 MiB | 241,345,464 Bytes / 230.16 MiB |
 
-Die GitHub-Artifact-Hülle kann durch zusätzliche Kompression eine andere Downloadgröße haben. Alle Builds: Python 3.12.10; Windows 10.0.26100, macOS Sequoia 15.8.2 (ARM64) und 15.7.9 (Intel).
+Die GitHub-Artifact-Hülle kann durch zusätzliche Kompression eine andere Downloadgröße haben. Plattform-/Pythonversionen und Bytewerte stehen im Rohbericht.
 
-Automatisierte native Qt-Prüfung, keine vollständige manuelle Bedienabnahme. Pakete sind nicht signiert/notarisiert. Keine Rechts-/Tariffreigabe durch synthetische Tests. Keine echte Benutzerdatenbank geöffnet oder migriert. Bestehende Monatsdateien bleiben lesbar.
-
-Die Regelübersteuerung aus 0.4.1 sowie Tabellenimport und Exporte bleiben enthalten; unbekannte IDs, undefinierte Dienstzeiten und beschädigte Daten sind weiterhin zu korrigieren. Bedienung: `V2_BEDIENUNG.md` und `TABELLENIMPORT.md`.
+Automatisierte native Qt-Prüfung, keine vollständige manuelle Bedienabnahme jeder Eingabekombination. Pakete sind nicht signiert/notarisiert. Keine betriebliche Rechts-/Tariffreigabe durch synthetische Tests; offene Profile bleiben offen. Keine echte Benutzerdatenbank geöffnet oder migriert. Keine Lockerung der Solverregeln.

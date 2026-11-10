@@ -861,3 +861,13 @@ Abschließende Gesamtprüfung: `QT_QPA_PLATFORM=offscreen .venv/bin/python -m
 pytest -q --disable-warnings --maxfail=1`: **437 bestanden in 257,35 s**.
 `git diff --check` fehlerfrei. Version 0.4.3. Native Windows-/macOS-Builds werden
 mit diesem geprüften Programm-/Teststand und verschärfter Paketprobe erzeugt.
+
+Native Lieferung 0.4.3: **Run 42924260302**, Programm-/Testcommit **1ef36fe**.
+Windows x64, macOS Sequoia ARM64 und Intel vollständig erfolgreich. Je Plattform
+Testsuite, Build und Selbsttest des gebauten Programms; ausdrücklich neu geprüft:
+`manual_assignment=true` (Zuordnen/Fixieren/Ändern/Entfernen ohne Wochenprofil).
+Der längere Intel-Testlauf endete erfolgreich ohne geänderte Anforderungen oder
+Wiederholung. Rohdaten: `examples/v2/native-pruefung.json`; 0.4.2 unter
+`native-0-4-2.json` archiviert. Aktuelle Links und Paketgrößen:
+`V2_NATIVE_PRUEFUNG.md`. Keine Datenmigration, kein Merge nach main. Reine spätere
+Nachweiscommits ändern diesen geprüften Programm-/Teststand nicht.
