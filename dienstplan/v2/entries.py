@@ -99,6 +99,7 @@ def _check_rows(original, rows, existing, budgets, month, parse_errors=(),allow_
             kind=values['typ'];person=values['person_id']
             span=Interval.local(values['von'],values['bis'])
             credits=frozenset(date.fromisoformat(d) for d in values.get('gutschrifttage','').split('|') if d)
+            if kind=='urlaub' and not credits:credits=frozenset(d for d,_ in day_segments(span))
             key=json.dumps([person,kind,span.start.isoformat(),span.end.isoformat()],ensure_ascii=False)
             ident=values.get('entry_id') or sha256(key.encode()).hexdigest()
             entry=Entry(ident,person,kind,span,credits,values.get('kommentar',''),month if kind=='wochenendwunsch' else None,allow_rules)

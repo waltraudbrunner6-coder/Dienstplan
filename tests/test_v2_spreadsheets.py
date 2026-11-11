@@ -31,7 +31,8 @@ def test_colored_wishes_and_fixed_services_are_distinct_and_sources_preserved(tm
     s['B4']='x';s['B4'].fill=PatternFill('solid',fgColor='FF00FF00')
     s['C4']='W17';s['D4']='U';b.save(path);before=path.read_bytes()
     rows,mapping,notes=read_import(path,source_kind='wishes')
-    assert [r['art'] for r in rows]==['freiwunschtag','dienst','u_zuordnung_offen']
+    assert [r['art'] for r in rows]==['freiwunschtag','dienst','urlaub']
+    assert rows[2]['gutschrifttage']=='2026-12-04'
     assert rows[1]['dienst']=='W17' and rows[1]['fixiert']=='ja' and mapping=={'Zeile 4':''}
     assert path.read_bytes()==before
     target=tmp_path/'normal.xlsx';write_import_template(target,rows,mapping,notes)
@@ -193,7 +194,7 @@ def test_duplicate_leave_preserves_existing_identity_and_is_idempotent(tmp_path)
     from dienstplan.v2.entries import Entry
     from dienstplan.v2.time import Interval
     data,p,_=demonstration_month()
-    entry=Entry('original-entry','P01','urlaub',Interval.local('2026-11-23T00:00','2026-11-24T00:00'))
+    entry=Entry('original-entry','P01','urlaub',Interval.local('2026-11-23T00:00','2026-11-24T00:00'),frozenset((date(2026,11,23),)))
     data=replace(data,absences=(entry,))
     proposal=prepare_plan_import(data,[row(day='2026-11-23',kind='urlaub',code='')])
     assert proposal.ready and proposal.inputs.absences==(entry,)
@@ -201,6 +202,17 @@ def test_duplicate_leave_preserves_existing_identity_and_is_idempotent(tmp_path)
         store.apply_sheet_import(proposal,p,expected_revision=0)
         store.apply_sheet_import(proposal,p,expected_revision=store.input_revision)
         assert store.entries()==(entry,)
+
+
+def test_new_u_import_does_not_silently_rewrite_old_unresolved_leave():
+    from dienstplan.v2.entries import Entry
+    from dienstplan.v2.time import Interval
+    data,_,_=demonstration_month()
+    legacy=Entry('old-unresolved','P01','urlaub',Interval.local('2026-11-23T00:00','2026-11-24T00:00'))
+    data=replace(data,absences=(legacy,))
+    proposal=prepare_plan_import(data,[row(day='2026-11-23',kind='urlaub',code='')])
+    assert not proposal.ready and any('Gutschrifttage' in e for e in proposal.errors)
+    assert data.absences==(legacy,) and not legacy.credit_days
 
 
 def test_shared_week_work_is_not_counted_twice_between_boundary_and_assignments():
@@ -214,7 +226,7 @@ def test_shared_week_work_is_not_counted_twice_between_boundary_and_assignments(
 def test_fixed_month_assignment_is_a_real_solver_lock():
     data,p,_=demonstration_month()
     # Small genuine CP-SAT problem, explicitly synthetic; remaining month omitted.
-    term=event('W17',date(2026,11,10));data=replace(data,events=(term,),candidates=())
+    term=event('W17',date(2026,11,10));data=replace(data,events=(term,),candidates=(),optional_ids=frozenset(),fallbacks=())
     proposal=prepare_plan_import(data,[row()]);assert proposal.ready
     result=solve_feasibility(proposal.inputs,time_limit=3,existing=proposal.blocks,existing_events=proposal.events)
     assert any(b.person_id=='P01' for b in result.blocks) and not result.open_slots
@@ -254,7 +266,7 @@ def test_duplicate_absence_from_another_workspace_keeps_global_id(tmp_path):
     from dienstplan.v2.entries import Entry
     from dienstplan.v2.time import Interval
     data,p,_=demonstration_month()
-    entry=Entry('global-existing','P01','urlaub',Interval.local('2026-11-23T00:00','2026-11-24T00:00'))
+    entry=Entry('global-existing','P01','urlaub',Interval.local('2026-11-23T00:00','2026-11-24T00:00'),frozenset((date(2026,11,23),)))
     with V2Store(tmp_path/'db.sqlite3',create=True) as store:
         first=prepare_plan_import(replace(data,absences=(entry,)),[])
         store.apply_sheet_import(first,p,expected_revision=0)

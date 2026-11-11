@@ -35,6 +35,7 @@ class PlanningInput:
     locked: tuple = ()
     manual_override: bool = False
     override_notes: tuple[str, ...] = ()
+    fallbacks: tuple = ()
 
     def __post_init__(self):
         if not self.profile_label:raise DomainError('Das Machbarkeitsmodell benötigt eine explizite Profilbezeichnung.')
@@ -53,7 +54,11 @@ class PlanningInput:
         if not self.optional_ids<=terms.keys():raise DomainError('Unbekannte optionale Terminkennung.')
         if self.quotas and self.week_policy is None:raise DomainError('Wochenquoten benötigen ein ausdrückliches Wochenprofil.')
         if len({q.id for q in self.quotas})!=len(self.quotas):raise DomainError('Doppelte Wochenquoten.')
+        from .fallback import validate_groups
+        object.__setattr__(self,'fallbacks',tuple(sorted(self.fallbacks,key=lambda g:g.id)))
+        fallback_ids=validate_groups(self)
         for key in self.optional_ids:
+            if key in fallback_ids:continue
             e=terms[key]
             if e.service.code not in {'WL','BK'} or sum(q.code==e.service.code and q.dates.includes(e.attendance.start_day) for q in self.quotas)!=1:
                 raise DomainError('Optionale WL/BK-Termine müssen genau einer Wochenquote zugeordnet sein.')
@@ -135,6 +140,8 @@ def verify(inputs,blocks,*,check_fixed=True,active_events=None):
     core=check_core(inputs.people,active_events,blocks,absences=inputs.absences,boundary=inputs.boundary,check_fixed=check_fixed)
     if inputs.quotas:configuration.extend(check_quotas(inputs.quotas,active_events,policy=inputs.week_policy))
     configuration.extend(check_coverage(active_events,blocks,inputs.coverage))
+    from .fallback import check_fallbacks
+    configuration.extend(check_fallbacks(inputs,active_events,blocks))
     if check_fixed:
         for fixed in inputs.locked:
             if fixed not in blocks:configuration.append(Issue('manual_fixed',fixed.person_id,fixed.id,'Die manuell fixierte Zuteilung einschließlich Pause fehlt oder wurde geändert.'))
@@ -155,7 +162,8 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
     def score(blocks,events):
         if objective_profile is None:
             core,_=verify(inputs,blocks,active_events=events)
-            return (('coverage',sum(n for _,n in core.open_slots)),)
+            from .fallback import with_fallback_objective
+            return with_fallback_objective(inputs,events,(('coverage',sum(n for _,n in core.open_slots)),))
         from .objectives import evaluate
         return evaluate(inputs,blocks,events,objective_profile)
 
@@ -178,7 +186,9 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
             return FeasibilityResult(fallback_status,(),(),last_issues,last_unchecked,False,monotonic()-started,key,inputs.profile_label)
         core,calendar=verify(inputs,best,active_events=best_events)
         if core.issues or calendar.issues:raise DomainError('Der beste Zwischenstand bestand die abschließende Prüfung nicht.')
-        unchecked=tuple(dict.fromkeys(inputs.unchecked+calendar.unchecked))
+        from .fallback import fallback_notes
+        notes=fallback_notes(inputs,best_events)
+        unchecked=tuple(dict.fromkeys(inputs.unchecked+calendar.unchecked+notes))
         status='incomplete' if core.open_slots else 'conditional' if unchecked else 'feasible'
         final_values=score(best,best_events)
         if final_values!=best_values:raise DomainError('Endgültige Zielwerte stimmen nicht mit dem besten Entwurf überein.')
@@ -212,6 +222,12 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
     y={e.id:model.new_bool_var(f'term_{e.id}') for e in inputs.events}
     for e in inputs.events:
         if e.id not in inputs.optional_ids:model.add(y[e.id]==1)
+    for group in inputs.fallbacks:
+        a,b=(y[k] for k in group.regular_ids);replacement=y[group.replacement_id]
+        model.add(a==b);model.add(a+replacement==1)
+        if any(terms[k].fixed_people for k in group.regular_ids):model.add(a==1)
+        # Kein leerer Ersatz zur rein rechnerischen Verringerung des Bedarfs.
+        model.add(sum(x[i] for i,c in enumerate(candidates) if c.id==group.replacement_id)==replacement)
     for q in inputs.quotas:
         model.add(sum(y[e.id] for e in inputs.events if e.service.code==q.code and q.dates.includes(e.attendance.start_day))==q.required)
     if inputs.week_policy is not None:
@@ -295,7 +311,9 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
             model.add(sum(x[i] for i in working)>=filled-(term.service.staff-rule.minimum_working)*y[term.id])
     required=sum((e.service.staff or 0)*y[e.id] for e in inputs.events)
     assigned=sum(x[i] for i,b in enumerate(candidates) if terms[b.id].service.staff is not None)
-    if objective_profile is None:goals=(('coverage',required-assigned),)
+    if objective_profile is None:
+        from .fallback import with_fallback_model_objective
+        goals=with_fallback_model_objective(inputs,y,(('coverage',required-assigned),))
     else:
         from .objectives import compile_objectives
         goals=compile_objectives(inputs,candidates,x,y,model,objective_profile,required-assigned)

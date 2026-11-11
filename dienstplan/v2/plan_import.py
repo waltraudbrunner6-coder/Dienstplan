@@ -10,7 +10,7 @@ from .entries import Entry, preview as absence_preview, HEADER
 from .errors import DomainError
 from .pauses import automatic_pause_choices
 from .solver import verify
-from .time import Interval, midnight
+from .time import Interval, midnight, day_segments
 from .calendar_rules import extra_events_conflict
 
 
@@ -29,7 +29,8 @@ class PlanImport:
 def selected_events(inputs, preferred=()):
     """Konkreter offener Startentwurf mit erfüllten Terminquoten, ohne Personenwahl."""
     mandatory=[e for e in inputs.events if e.id not in inputs.optional_ids]
-    selected=list(mandatory)
+    from .fallback import default_fallback_events
+    selected=list(mandatory)+list(default_fallback_events(inputs,preferred))
     if inputs.week_policy is not None and any(extra_events_conflict(a,b,inputs.week_policy) for i,a in enumerate(selected) for b in selected[i+1:]):raise DomainError('Feste BK/WL-Termine liegen am selben ausgeschlossenen Tag.')
     preferred_ids={e.id for e in preferred}
     weeks={}
@@ -56,9 +57,20 @@ def selected_events(inputs, preferred=()):
 
 def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard_unfixed=False,allow_rules=False):
     errors=[];notes=[];groups={};new_entries=[]
+    rows=tuple(rows)
+    affected={f"{r.get('datum')}/{str(r.get('dienst','')).strip().upper()}" for r in rows
+              if r.get('art','').strip().lower() in {'dienst','termin'} and str(r.get('dienst','')).strip().upper() in {'KC10','KC16','KC15'}}
+    keep={key for key in affected if key.endswith('/KC15')}
+    from .fallback import dissolve_fallback_groups
+    prior=inputs
+    inputs=dissolve_fallback_groups(inputs,affected,keep_replacement_ids=keep)
+    dissolved_removed={e.id for e in prior.events}-{e.id for e in inputs.events}
+    if not allow_rules and any(b.id in dissolved_removed for b in prior.locked):
+        errors.append('Eine importierte Alternative würde einen fixierten Dienst entfernen; Fixierung ausdrücklich lösen.')
+    if dissolved_removed:notes.append('Importierte Dienstwahl ersetzt ausschließlich die zugehörigen KC10/KC16/KC15-Alternativen; andere Termine bleiben erhalten.')
     people={p.id:p for p in inputs.people};terms={e.id:e for e in inputs.events}
     selected=set(e.id for e in (events or ()) if e.id in inputs.optional_ids)
-    requested=set();removed=set();locks={(b.id,b.person_id):b for b in inputs.locked}
+    requested=set();removed=set(dissolved_removed);locks={(b.id,b.person_id):b for b in inputs.locked}
     retained=tuple(b for b in blocks if not discard_unfixed or b in locks.values())
     if not blocks and events is None and locks:
         retained=tuple(locks.values())
@@ -67,7 +79,11 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
     for n,row in enumerate(rows,2):
         source=row.get('quelle') or f'Importzeile {n}'
         try:
-            row=dict(row);kind=row.get('art','').strip().lower();row['art']=kind
+            row=dict(row);kind=row.get('art','').strip().lower()
+            if kind=='u_zuordnung_offen':
+                kind='urlaub';row['gutschrifttage']=row.get('gutschrifttage') or row.get('datum','')
+                notes.append(f'{source}: U als markierter Urlaubstag angerechnet (Wochenstunden ÷ 5).')
+            row['art']=kind
             if kind=='ignorieren':notes.append(f'{source}: ausdrücklich ignoriert.');continue
             day=date.fromisoformat(row['datum'])
             if (day.year,day.month)!=(inputs.year,inputs.month) and kind not in {'freiwunschtag','urlaub','wochenendwunsch'}:raise DomainError('Datum liegt außerhalb des geöffneten Monats; im passenden Monat importieren.')
@@ -80,6 +96,7 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
                 month_span=Interval(midnight(date(inputs.year,inputs.month,1)),midnight(date(inputs.year+int(inputs.month==12),inputs.month%12+1,1)))
                 if not span.overlaps(month_span):raise DomainError('Abwesenheit liegt außerhalb des geöffneten Monats.')
                 credits=frozenset(date.fromisoformat(d) for d in row.get('gutschrifttage','').split('|') if d)
+                if kind=='urlaub' and not credits:credits=frozenset(d for d,_ in day_segments(span))
                 ident='sheet/'+sha256(str((pid,kind,span)).encode()).hexdigest()
                 entry=Entry(ident,pid,kind,span,credits,row.get('kommentar',''),(row.get('budgetmonat') or f'{inputs.year:04d}-{inputs.month:02d}') if kind=='wochenendwunsch' else None,allow_rules)
                 if entry.identity in absences and absences[entry.identity].credit_days!=credits:raise DomainError('Identischer Zeitraum hat andere Gutschrifttage.')
@@ -87,16 +104,24 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
                 absences[entry.identity]=entry;new_entries.append(entry)
                 if kind=='urlaub' and not credits:notes.append(f'{source}: verbindlicher Urlaub; Gutschrifttage noch ausdrücklich ergänzen.')
                 continue
-            if kind=='u_zuordnung_offen':raise DomainError('Bedeutung von U noch bestätigen; für Urlaub art=urlaub setzen und Gutschrifttage ausdrücklich ergänzen.')
             if kind not in {'dienst','termin'}:raise DomainError('art muss dienst, termin, freiwunschtag, wochenendwunsch, urlaub oder ignorieren sein.')
             code=row.get('dienst','').strip().upper()
             if code=='NH':notes.append(f'{source}: NH wie beauftragt ignoriert.');continue
-            if code=='R':raise DomainError('R benötigt das genaue Zeitfenster: R_early oder R_late; Arbeitsbewertung bleibt separat erforderlich.')
+            if code=='R':
+                if row.get('beginn') and row.get('ende'):
+                    span=Interval.local(row['beginn'],row['ende'])
+                    matches=[key for key in ('R_early','R_late') if template(key).on(day)==span]
+                    if len(matches)==1:code=matches[0]
+                if code=='R':raise DomainError('Reserve-Zeitfenster auswählen: R_early (10:15–16:15) oder R_late (16:00–00:00 Folgetag). Beide zählen als normale Arbeit.')
+            if code=='KC10' and day.weekday()==3:
+                code='KCT10';notes.append(f'{source}: Donnerstag KC10 als bestätigte Variante KCT10 bis 17:30 übernommen.')
             code={'R_EARLY':'R_early','R_LATE':'R_late'}.get(code,code)
             template(code)
             if kind=='dienst' and pid not in people:raise DomainError('Personen-ID fehlt oder ist unbekannt. Für reinen Termin art=termin verwenden.')
             key=(day,code);groups.setdefault(key,[]).append((source,pid,row))
         except (ValueError,KeyError,DomainError) as exc:errors.append(f'{source}: {exc}')
+    for day in {d for d,c in groups if c=='KC15'}:
+        if any((day,c) in groups for c in ('KC10','KC16')):errors.append(f'{day}: KC15 ersetzt KC10 und KC16; beide Varianten können nicht gleichzeitig importiert werden.')
     for (day,code),items in groups.items():
         try:
             service=template(code)
@@ -107,7 +132,7 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
                 spans={Interval.local(r['beginn'],r['ende']) for _,_,r in items}
                 if len(spans)!=1:raise DomainError('FK-Zeiten widersprechen einander.')
                 attendance=spans.pop()
-            replacements={'TS':{'T'},'T':{'TS'},'W16':{'W17'},'W17':{'W16'}}.get(code,set())
+            replacements={'TS':{'T'},'T':{'TS'},'W16':{'W17'},'W17':{'W16'},'KC15':{'KC10','KC16'},'KC10':{'KC15'},'KC16':{'KC15'}}.get(code,set())
             for old in tuple(terms.values()):
                 if old.attendance.start_day==day and old.service.key in replacements:removed.add(old.id);terms.pop(old.id)
                 if code in {'TS','T'} and old.attendance.start_day==day and old.service.code=='LB':
@@ -118,7 +143,6 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
             if old is not None and old!=replace(term,rule_override=old.rule_override):raise DomainError('Vorhandener Termin hat abweichende feste Personen oder Zeiten.')
             if old is not None:term=old
             terms[term.id]=term;requested.add(term.id)
-            if service.code=='R' and assigned:raise DomainError('Reserve-Arbeitsbewertung fehlt; Termin kann ohne Zuteilung importiert werden.')
         except (ValueError,KeyError,DomainError) as exc:errors.append(f'{day}/{code}: {exc}')
     if not allow_rules and any(b.id in removed for b in locks.values()):errors.append('Eine importierte Alternative würde einen fixierten Dienst entfernen; Fixierung ausdrücklich lösen.')
     retained=tuple(b for b in retained if b.id not in removed)
@@ -129,7 +153,6 @@ def prepare_plan_import(inputs,rows,*,blocks=(),events=None,budgets=None,discard
         for source,pid,row in items:
             if row['art']!='dienst':continue
             try:
-                if term.service.code=='R':continue
                 if bool(row.get('pause_von')) != bool(row.get('pause_bis')):raise DomainError('Beide Pausenzeitfelder gemeinsam ausfüllen.')
                 choices=(term.assign(pid,(Interval.local(row['pause_von'],row['pause_bis']),),allow_rules=allow_rules),) if row.get('pause_von') and row.get('pause_bis') else automatic_pause_choices(term,pid,allow_rules=allow_rules)
                 if not choices:raise DomainError('Keine zulässige konkrete Pause möglich.')

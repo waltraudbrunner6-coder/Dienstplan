@@ -30,6 +30,7 @@ CATALOG = (
     Template("KC10","KC10",time(10,15),time(16,15),1),
     Template("KCT10","KCT10",time(10,15),time(17,30),1,"T"),
     Template("KC16","KC16",time(16),time(0),1),
+    Template("KC15","KC15",time(15),time(0),1),
     Template("KCT","KCT",time(14,30),time(0),1,"T"),
     Template("TS","TS",time(14,30),time(19,30),None,"TS"),
     Template("W17","W17",time(17),time(1),2),
@@ -81,7 +82,7 @@ class Event:
             raise DomainError("Terminzeiten passen nicht zur Vorlage.")
         if not self.rule_override and (self.service.code in {"T","TS","KCT10","KCT","TW","LB"} and day.weekday()!=3):
             raise DomainError("Diese Dienstvorlage gilt nur donnerstags.")
-        if not self.rule_override and (self.service.code in {"KC10","KC16","W17","W16"} and day.weekday()==3):
+        if not self.rule_override and (self.service.code in {"KC10","KC16","KC15","W17","W16"} and day.weekday()==3):
             raise DomainError("Donnerstags ist die Teamvariante erforderlich.")
         if not self.rule_override and (self.service.code=="R" and not ((day.month==12 and day.day>=24) or (day.month==1 and day.day<=6))):
             raise DomainError("Reservedienste gelten ausschließlich vom 24.12. bis 06.01.")
@@ -101,8 +102,6 @@ class Event:
     def assign(self, person_id: str, breaks=(), *, reserve_profile: str | None = None, allow_rules=False) -> WorkBlock:
         if not allow_rules and self.fixed_people and person_id not in self.fixed_people:
             raise DomainError("Diese Person entspricht nicht der festen Terminzuteilung.")
-        if self.service.code == "R" and reserve_profile != "full_work_test":
-            raise DomainError("Reservebewertung F02 fehlt; volle Arbeit nur mit ausdrücklich gewähltem Testprofil.")
         return WorkBlock(self.id,person_id,self.service.code,self.attendance,tuple(breaks),self.protected,allow_rules)
 
 
@@ -133,7 +132,7 @@ class FixedTerm:
 @dataclass(frozen=True, slots=True)
 class CalendarInput:
     ts_days: frozenset[date] = frozenset()
-    lb_anchor: date | None = None
+    lb_anchor: date | None = date(2026,12,3)
     lb_people: tuple[str, ...] = ()
     fixed: tuple[FixedTerm, ...] = ()
     w16_reasons: tuple[tuple[date,str], ...] = ()
@@ -158,6 +157,13 @@ class CalendarResult:
     missing: tuple[str, ...]
 
 
+def lb_dates(year,month,anchor=date(2026,12,3)):
+    """Bestätigter 14-Tage-Rhythmus ab erstem Donnerstag Dezember 2026."""
+    if anchor.weekday()!=3:raise DomainError('LB beginnt an einem Donnerstag.')
+    return tuple(date(year,month,n) for n in range(1,calendar.monthrange(year,month)[1]+1)
+                 if date(year,month,n)>=anchor and (date(year,month,n)-anchor).days%14==0)
+
+
 def month_calendar(year: int, month: int, settings: CalendarInput) -> CalendarResult:
     days = [date(year,month,n) for n in range(1,calendar.monthrange(year,month)[1]+1)]
     events, missing = [], ["F06: WL/BK-Wochenprofil noch ausdrücklich wählen; keine Wochenquote erzeugt."]
@@ -174,8 +180,11 @@ def month_calendar(year: int, month: int, settings: CalendarInput) -> CalendarRe
                 events.append(event("LB_TS" if day in settings.ts_days else "LB",day,people=settings.lb_people))
         if (day.month==12 and day.day>=24) or (day.month==1 and day.day<=6):
             events.extend((event("R_early",day),event("R_late",day)))
-    if settings.lb_anchor is None or not settings.lb_people:
-        missing.append("F08: LB-Referenzdatum bzw. feste Personen fehlen.")
+    if settings.lb_anchor is None:
+        missing.append("LB: Startdatum für den 14-tägigen Rhythmus fehlt.")
+    elif not settings.lb_people:
+        pending=lb_dates(year,month,settings.lb_anchor)
+        if pending:missing.append("LB am "+", ".join(d.strftime("%d.%m.%Y") for d in pending)+": zwei feste Personen auswählen.")
     for term in settings.fixed:
         if term.day not in days:
             raise DomainError("Sondertermin liegt außerhalb des gewählten Monats.")
@@ -185,9 +194,6 @@ def month_calendar(year: int, month: int, settings: CalendarInput) -> CalendarRe
     for code, count in (("INT",2),("N17",1)):
         if sum(e.service.code==code for e in events)!=count:
             missing.append(f"{code}: genau {count} feste Monatstermine benötigt.")
-    missing.append("F09: FK-Wiederholungsprofil nicht festgelegt.")
-    if any(e.service.code=="R" for e in events):
-        missing.append("F02: Reservebewertung ungeklärt.")
     return CalendarResult(tuple(sorted(events,key=lambda e:(e.attendance.start,e.id))),tuple(missing))
 
 

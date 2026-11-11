@@ -34,6 +34,35 @@ def check_manual_controls(window):
         QMessageBox.question=staticmethod(question)
 
 
+def check_leave_controls(window):
+    from datetime import date
+    from dataclasses import replace
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QDialog
+    from .absence_ui import AbsenceDialog
+    from .entries import Entry
+    from .time import Interval
+    from .reporting import hours_rows
+    old=Entry('selftest-urlaub','P01','urlaub',Interval.local('2026-11-17T00:00','2026-11-18T00:00'))
+    window.inputs=replace(window.inputs,absences=(old,))
+    window.store.save_workspace(window.inputs,window.profile,window.blocks,window.events,expected_revision=window.store.input_revision)
+    window.fill();blocks,events=window.blocks,window.events
+    original=QDialog.exec
+    def choose(dialog):
+        assert isinstance(dialog,AbsenceDialog) and dialog.selected_days()==frozenset((date(2026,11,17),))
+        assert '5,00 h' in dialog.total.text()
+        dialog.save.click()
+        return QDialog.DialogCode.Accepted
+    try:
+        QDialog.exec=choose
+        window.repair_leave()
+    finally:QDialog.exec=original
+    assert window.inputs.absences[0].credit_days==frozenset((date(2026,11,17),))
+    assert not window.missing_leave_entries() and window.blocks==blocks and window.events==events
+    values=hours_rows(window.inputs.people,window.blocks,window.inputs.absences,2026,11,accounts=window.profile.accounts,target_profile=window.profile.target_profile,month_profile=window.profile.month_profile)
+    assert values[0].credits_known and values[0].credits==300
+
+
 def run(report_path=None):
     values={}
     try:
@@ -79,16 +108,17 @@ def run(report_path=None):
             window.show();app.processEvents()
             assert window.isVisible() and window.team.rowCount()==12
             assert 'Prüfbereich' not in window.windowTitle()
-            assert window.catalog_table.rowCount()==19 and len(window.inputs.events)==94
+            assert window.catalog_table.rowCount()==20 and len(window.inputs.events)==120 and len(window.events)==94
             assert window.team.horizontalHeaderItem(6).text()=='Ausgeschlossene Dienste'
             assert window.team.horizontalHeaderItem(3).text()=='Anfang (h)'
             assert window.inputs.people[0].rights[0].excluded_codes==frozenset()
             check_manual_controls(window)
+            check_leave_controls(window)
             window.team.item(0,1).setText('Dauerhaft gespeicherte Beispielperson')
             window.save();window.close();app.processEvents()
             reopened=Workbench(database=Path(directory)/'hauptoberflaeche.sqlite3')
             assert reopened.inputs.people[0].name=='Dauerhaft gespeicherte Beispielperson'
-            assert len(reopened.inputs.events)==94
+            assert len(reopened.inputs.events)==120 and len(reopened.events)==94
             reopened.close()
             preview_window=Workbench(database=Path(directory)/'vorschau.sqlite3',initial=(inputs,profile,old),year=2026,month=11)
             from .serialization import fingerprint
@@ -124,7 +154,7 @@ def run(report_path=None):
         values=dict(selbsttest='bestanden',scope='Hauptoberfläche mit Standardmonat; Rechenkette separat mit synthetischer Fixture',
                     personen=12,zuteilungen=8,tzdata=TZDATA_VERSION,iana=IANA_VERSION,
                     dst=True,solver_pruefer=True,sqlite=True,exportpaket=True,qt=True,
-                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,vorschau_anzeige=True,excel_import_export=True,automatic_pause=True,weekly_configuration=True,manual_assignment=True,build=identity)
+                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,vorschau_anzeige=True,excel_import_export=True,automatic_pause=True,weekly_configuration=True,manual_assignment=True,leave_calendar=True,build=identity)
         code=0
     except Exception as exc:
         values=dict(selbsttest='fehlgeschlagen',fehler=str(exc),details=traceback.format_exc());code=1

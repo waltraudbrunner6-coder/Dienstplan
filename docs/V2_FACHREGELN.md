@@ -1,26 +1,32 @@
 # V2 – Fachregeln
 
-**Folgeauftrag Tabellenimport (10.11.2026):** zwei WL und ein BK pro Woche
-unabhängig von der Saison; BK/WL niemals am selben lokalen Startdatum. Die
-Randwochenentscheidung bleibt ausdrücklich auszuwählen. Manuelle Zuteilungen
-wählen ihre konkrete Pause automatisch vor 22 Uhr, sonst möglichst in der
-Dienstmitte, jeweils unter allen harten Regeln. Donnerstagswünsche/KC15/R und
-KC10 am Donnerstag werden aus unklaren Excel-Angaben nicht neu interpretiert.
-Siehe [Tabellenimport](TABELLENIMPORT.md).
+Stand 11.11.2026, konsolidiert für die Änderungen 0.5.0. Diese Fachregeln
+enthalten die seit Etappe A bestätigten Folgeaufträge. V2 ist die normale
+Desktop-Anwendung und kein zusätzlicher Testbereich. Historische Altversionen
+werden nicht als aktueller Parallelbetrieb beschrieben.
 
-**Aktualisierung 10.11.2026:** Der ausdrückliche Folgeauftrag ersetzt ab Version 0.3.0 die alte Oberfläche durch die V2-Hauptanwendung. Es gibt keinen zusätzlichen Testbereich mehr. Dienstrechte werden als zeitgültige **Ausschlüsse** bedient; gespeicherte Rechte bleiben durch verlustfreie Komplementdarstellung erhalten. Zeitmengen erscheinen in Stunden, intern bleiben Minuten/Brüche. Neue Monate erhalten den Standardkatalog und die bestimmten Tagesmuster automatisch. Dieser Oberflächenauftrag entscheidet keine offenen Fach-/Tarifprofile und autorisiert keine Migration echter Altdateien. Historische Aussagen zum parallelen Altbetrieb weiter unten beschreiben den vorherigen Stand. Details: [Bedienung](V2_BEDIENUNG.md), [Fortschritt](V2_FORTSCHRITT.md).
+Die sieben Rückfragen und drei Folgefragen sind beantwortet: U-Daten einschließlich
+Wochenenden/Feiertagen zählen mit W/5; zwei Urlaubstage Anspruch werden angespart
+mit persönlichem Anfangsbestand und kalendertagsanteiliger Teilmonatsrechnung;
+gleichzeitige Pausen sind erlaubt; R zählt normal;
+KC15 ist die definierte Ersatzwahl; LB beginnt 03.12.2026 im 14-Tage-Rhythmus;
+Sonntag bestimmt den Wochenendmonat; Dienste werden vollständig im Startmonat
+gebucht; KC10 am Donnerstag 31.12. ist der lange KCT10. FK wird nur einzeln
+erfasst, und die enge Freitags-W17-Ausnahme gilt auch für Wochenendwünsche.
+Einzelheiten stehen unten.
 
-Aktueller Implementierungs- und Prüfstand: [Fortschritt](V2_FORTSCHRITT.md),
-[Zuordnung aller 125 Abnahmefälle](V2_ABNAHMESTATUS.md) und
-[Bedienung des technischen Prüfbereichs](V2_BEDIENUNG.md). Die nachfolgende
-Etappe-A-Spezifikation bleibt die fachliche Grundlage; Testprofile ersetzen sie nicht.
+Fachliche Regeln sind für die automatische Planung verbindlich. Bei manueller
+Änderung, Import und Monatsbestätigung sind ausdrückliche Benutzer-Ausnahmen
+nach sichtbarer Warnung erlaubt. Die unabhängige Prüfung meldet die Abweichung
+weiterhin; technisch widersprüchliche IDs/Zeiten und undefinierte Berechnungen
+werden nicht erfunden. Bereits bestätigte Geschichte bleibt unveränderlich.
 
-Stand 09.11.2026, Etappe A. **Soll-Spezifikation, keine implementierte V2-Funktion.**
-Die Altversion bleibt nach [Spezifikation 0.2](SPEZIFIKATION.md) bedienbar.
-Feste Anforderungen dieses Dokuments werden nicht erneut zur Entscheidung gestellt.
-`Fxx` bezeichnet eine tatsächlich offene Entscheidung in
-[V2_OFFENE_FRAGEN.md](V2_OFFENE_FRAGEN.md). Technische Festlegungen sind als solche
-benannt; Testprofile ersetzen keine betriebliche/rechtliche Bestätigung.
+Eine beschriebene Regel ist kein Implementierungs- oder Plattformnachweis.
+Tatsächliche Ergebnisse: [Fortschritt](V2_FORTSCHRITT.md),
+[Abnahmestatus](V2_ABNAHMESTATUS.md), [native Prüfungen](V2_NATIVE_PRUEFUNG.md).
+Echte Restfragen: [offene Angaben](V2_OFFENE_FRAGEN.md); Bedienung:
+[Anleitung](V2_BEDIENUNG.md). Technische Profile ersetzen keine ungeklärten
+betrieblichen Rechts-/Tarifnachweise.
 
 ## 1. Identitäten und Begriffe
 
@@ -41,8 +47,8 @@ Funktion, mit der beliebige Einsätze zu einem legalen Block zusammengeklebt wer
 ## 2. Vollständiger Dienstkatalog
 
 Alle Uhrzeiten sind **Europe/Vienna**; `+1` ist der folgende Kalendertag.
-Arbeitswerte gelten ohne Zeitumstellung und, bei R, ausschließlich bei bestätigter
-voller Arbeitsbewertung. Die Pause ist bereits in der Anwesenheit enthalten.
+Arbeitswerte gelten ohne Zeitumstellung. R zählt wie ein normaler Dienst.
+Die Pause ist bereits in der Anwesenheit enthalten.
 
 | Kürzel | Anwesenheit | Auftreten / Bedarf | Pause / bezahlte Arbeit im Normalfall |
 | --- | --- | --- | --- |
@@ -50,6 +56,7 @@ voller Arbeitsbewertung. Die Pause ist bereits in der Anwesenheit enthalten.
 | KC10 | 10:15–16:15 | Täglich außer Donnerstag, Innendienst früh, 1 Person | 0 / 360 min |
 | KCT10 | 10:15–17:30 | Jeden Donnerstag, Innendienst früh mit vollständigem T, 1 Person; anstelle KC10 | 30 / 405 min |
 | KC16 | 16:00–00:00 +1 | Täglich außer Donnerstag, Innendienst spät, 1 Person | 30 / 450 min |
+| KC15 | 15:00–00:00 +1 | Ersatz für das gemeinsame KC10-/KC16-Paar bei sonst fehlender Besetzung, 1 Person; nicht zusätzlich zu beiden | 30 / 510 min |
 | KCT | 14:30–00:00 +1 | Jeden Donnerstag, Innendienst spät mit vollständigem T, 1 Person; anstelle KC16 | 30 / 540 min |
 | TS | 14:30–19:30 | Ausgewählte Donnerstage, ersetzt die T-Veranstaltung; weiches Teilnahmeziel | 0 / 300 min |
 | W17 | 17:00–01:00 +1 | Täglich außer Donnerstag, Außendienst, 2 verschiedene Personen | 30 / 450 min je Person |
@@ -58,11 +65,11 @@ voller Arbeitsbewertung. Die Pause ist bereits in der Anwesenheit enthalten.
 | WL | 18:00–02:00 +1 | Zusatz-Außendienst; **Neue Vorgabe 10.11.2026: 2 verschiedene Termine je Bezugswoche in jedem Monat**; je 2 Personen | 30 / 450 min je Person |
 | BK | 20:00–04:00 +1 | Zusatz-Außendienst; 1 Termin je Bezugswoche, 2 Personen | 30 / 450 min je Person |
 | VN | 10:00–12:00 | Festgelegte Tage, jeweils festgelegte Person, 1 Platz | 0 / 120 min |
-| LB | 12:00–17:30; an TS-Tagen bis 19:30 | Jeder zweite Donnerstag ab Referenzdatum, 2 festgelegte Personen; enthält T bzw. gesamte TS-Veranstaltung | regulär 0 / 330 min; TS-Tag 30 / 420 min |
+| LB | 12:00–17:30; an TS-Tagen bis 19:30 | Alle 14 Tage ab Donnerstag 03.12.2026, 2 festgelegte Personen; enthält T bzw. gesamte TS-Veranstaltung | regulär 0 / 330 min; TS-Tag 30 / 420 min |
 | INT | 16:00–00:00 +1 | Zwei festzulegende Tage pro Monat, jeweils festgelegte Person, 1 Platz | 30 / 450 min |
 | N17 | 17:00–01:00 +1 | Ein festzulegender Tag pro Monat, festgelegte Person, 1 Platz | 30 / 450 min |
-| R | früh 10:15–16:15; spät 16:00–00:00 +1 | Zusätzlich täglich 24.12.–06.01. einschließlich, je Zeitfenster 1 Person; zwei separate Bedarfe, niemals dieselbe Person in beiden | bei voller Arbeit: früh 0 / 360 min; spät 30 / 450 min; Bewertung noch F02 |
-| FK | individuell | Ein festzulegender Tag, festgelegte Person, Wiederholungszeitraum F09 | aus dem konkreten Zeitraum; über 6 h genau 30 min aus dieser Vorgabe |
+| R | früh 10:15–16:15; spät 16:00–00:00 +1 | Zusätzlich täglich 24.12.–06.01. einschließlich, je Zeitfenster 1 Person; zwei separate Bedarfe, niemals dieselbe Person in beiden | früh 0 / 360 min; spät 30 / 450 min; normale Arbeitsbewertung |
+| FK | individuell | Ein konkret erfasster Einzeltermin mit festgelegter Person, kein automatischer Rhythmus | aus dem konkreten Zeitraum; über 6 h genau 30 min aus dieser Vorgabe |
 
 Die feste operative Donnerstagsgrundbesetzung ist damit KCT10=1, KCT=1, TW=2.
 Keine zusätzlichen KC10/KC16/W17-Termine an diesem Donnerstag erzeugen.
@@ -76,10 +83,17 @@ Wochentags-/Datumsfilter schränkt Kandidaten ein; ein festgelegter Termin wird
 nicht verschoben. Eine Datumsfixierung fixiert keine Person. Personenfixierungen
 sind eigenständige Vorgaben. Unvereinbare fixe Daten werden gemeldet, nicht
 stillschweigend umgeplant. Sonntag/Feiertag möglichst vermeiden, nicht verbieten.
-WL/BK-Ausschluss ist verbindlich; seine Abgrenzung ist F07. Wochenbesitz,
-Randquoten und November/Dezember-/Jänner/Februar-Übergänge sind F06.
-LB verwendet einen echten Zweiwochenrhythmus über Monats-/Jahresgrenzen (F08),
-keinen Neustart am ersten Donnerstag jedes Monats.
+BK und WL dürfen nicht am selben lokalen Startdatum liegen. Die vorhandene
+ISO-Wocheneinstellung bestimmt gemeinsame Randwochen oder nur volle Monatswochen.
+LB läuft ab 03.12.2026 alle 14 Tage über Monats-/Jahresgrenzen weiter, ohne Neustart
+in jedem Monat. Feste LB-Personen sind normale Eingaben. Donnerstag-KC10 aus der
+Dezemberdatei ist als KCT10 bis 17:30 zu übernehmen, insbesondere am 31.12.2026.
+
+KC15 ist eine echte Modellalternative: entweder das reguläre Paar KC10/KC16 oder
+ein mit einer Person besetzter KC15. Beide Varianten zugleich sind keine zulässige
+Doppelbesetzung. Bei gleicher Besetzbarkeit werden weniger KC15-Ersatztermine
+bevorzugt, bevor Wünsche und Fairness optimiert werden. Bei Zeitlimit bleibt der
+Nachweis, dass eine reguläre Lösung nicht möglich wäre, gegebenenfalls offen.
 
 ## 3. Personen und Beschäftigung
 
@@ -139,7 +153,8 @@ Die kombinierten Katalogblöcke erzeugen jeweils nur ihren ausgeschriebenen
 operativen Bedarf und die ausdrückliche Teilnahmezuordnung. Sie decken nicht
 automatisch weitere, gleichzeitig gesondert verlangte Tätigkeiten ab. Ergibt
 ein bestätigtes Profil einen unabhängigen durchgängigen Besetzungsbedarf,
-muss auch dessen reale Erfüllbarkeit während Teamzeit/Pausen geprüft werden.
+wäre dessen reale Erfüllbarkeit separat zu bestätigen und zu prüfen. Die aktuelle
+Vorgabe erlaubt gleichzeitige Pausen und verlangt keine zusätzliche Vertretung.
 
 ## 5. Zeit und Pausen
 
@@ -156,8 +171,9 @@ die automatische Terminwahl kann diesen Kandidaten vermeiden.
 
 Anwesenheit, tatsächliche Arbeit, Pausen, Arbeitszeitgutschrift und Zulagenmengen
 sind getrennte Summen. Ohne besondere Gutschriftregel ist die physische Arbeit
-die UTC-Dauer der Arbeitsabschnitte. Etwaige Zeitumstellungs-/Bereitschaftsgutschriften
-brauchen ein bestätigtes Profil, keine fiktiven zusätzlichen Arbeitsminuten (F01/F02/F04).
+die UTC-Dauer der Arbeitsabschnitte. Etwaige zusätzliche Zeitumstellungs- oder Tarifgutschriften
+brauchen ein bestätigtes Profil, keine fiktiven zusätzlichen Arbeitsminuten.
+R wird arbeitszeitlich bereits wie ein normaler Dienst gerechnet.
 
 Aus dieser betrieblichen Vorgabe gilt: jeder Block mit tatsächlicher Anwesenheit
 über 6 h enthält genau **eine 30-Minuten-Pause**, bei genau 6 h oder weniger keine
@@ -168,9 +184,9 @@ Anwesenheit abzüglich der echten Pause, keine auf ein früheres Ende verkürzte
 
 Pausen möglichst vollständig vor 22:00, aber nur nach allen höheren Zielen.
 Eine Pause darf weder vollständige erforderliche T-/TS-Teilnahme noch bestätigte
-Besetzungs-/Schutzregeln verletzen. Pausenfreiheit und nötige reale Vertretung
-werden nach F03 ausdrücklich modelliert. Unbekannte kontinuierliche Besetzung
-darf nicht als eingehalten ausgewiesen werden.
+Besetzungs-/Schutzregeln verletzen. Gleichzeitige Pausen mehrerer Personen sind ausdrücklich erlaubt. Es wird keine
+zusätzliche durchgängige Mindestbesetzung oder Vertretung aus fehlenden Angaben
+abgeleitet. Geschützte T-/TS-Arbeitsfenster bleiben davon unberührt.
 
 W17 17:00–01:00 mit Pause 21:00–21:30: 450 Arbeitsminuten, davon 180 Nachtminuten.
 Mit Pause 22:00–22:30: ebenfalls 450, davon 150 Nachtminuten. Kein Nachtbonus für Pause.
@@ -189,7 +205,8 @@ Ob zusätzliche Zeitgutschriften anfallen, wird getrennt durch das Profil bestim
    neuen Tag nicht; Dienstanwesenheit bis 00:01 schon. Belegte Tage und bezahlte
    Arbeitsminuten sind deshalb getrennte Auswertungen.
 3. Mindestens **zwei freie Wochenenden** pro Monat, regulär Samstag/Sonntag.
-   Monatszuordnung und Teilmonate sind F10; die Zahl zwei ist bestätigt.
+   Der Sonntag bestimmt den Monatsbesitzer. Die Teilmonatsquote und Einbeziehung
+   teilweise beschäftigter Wochenenden bleiben gesondert offen.
 4. Vor einem belegten Samstag/Sonntag liegen **zwei vollständig freie,
    aufeinanderfolgende Kalendertage** innerhalb des unmittelbar davorliegenden
    Montag–Freitag. Ein Sonntag bis Montag 01:00 verhindert einen freien Montag,
@@ -199,19 +216,22 @@ Ob zusätzliche Zeitgutschriften anfallen, wird getrennt durch das Profil bestim
 6. Nur ein **W17 mit Start Freitag und Ende Samstag**, ohne sonstige Arbeit am
    Samstag/Sonntag, darf für die Wochenendzählung als freies Wochenende gelten.
    Diese enge Ausnahme ändert weder Arbeit noch Ruhe noch die Fünf-Tage-Folge.
-   Kein Übertrag auf WL, BK, N17 oder nur ähnlich lange Dienste. Der Einfluss auf
-   Wochenendwünsche ist F11. Tatsächliche Wochenendbelegung bleibt für das
+   Kein Übertrag auf WL, BK, N17 oder nur ähnlich lange Dienste. Die enge Ausnahme
+   gilt auch für Wochenend-Freiwünsche; zusätzliche Samstag-/Sonntagsarbeit bleibt
+   eine Wunschverletzung. Tatsächliche Wochenendbelegung bleibt für das
    vorgeschriebene Vorwochen-Freipaar maßgeblich: die eng begrenzte Zählausnahme
    wird nicht zu einer zusätzlichen Befreiung von dieser Schutzregel erweitert.
 7. Urlaub, Beschäftigungsgrenzen, Dienstberechtigungen, ein Block je Startdatum,
    echte Überschneidungsfreiheit und bestätigte feste Vorgaben bleiben verbindlich.
-   Feste illegale Zuteilungen werden nicht unter Berufung auf ihre Fixierung erlaubt.
+   Eine Fixierung allein legalisiert keinen Konflikt; manuelle ausdrückliche
+   Übersteuerung wird als solche dokumentiert und ändert keine automatische Regel.
 8. W16 braucht eine dokumentierte Begründung, erhält den Außendienstbedarf und
    ist eine Ausnahmealternative. WL/BK-Ausschluss und Wochenquoten gelten nach
-   den ausdrücklich festgelegten Randparametern F06/F07.
+   der ausdrücklich gewählten ISO-Wochen-/Randregel.
 
 Tages-/Wochenhöchstzeiten und zusätzliche Schutz-/Durchrechnungsregeln nicht aus
-alten Beispielen erben. Anwendbare Rechts-/Betriebsprofile sind F01/F04. Aus den
+alten Beispielen erben. Zusätzliche Rechts-/Betriebsprofile brauchen die in F01
+benannten Belege. Die Startmonatsbuchung ist bereits entschieden. Aus den
 betrieblichen Regeln allein folgt kein Nachweis vollständiger Rechtskonformität.
 
 Der Planungshorizont umfasst ganze betroffene Wochen und Wochenenden sowie genug
@@ -223,49 +243,58 @@ ausgewählter Dienste muss dabei transaktional mitgeführt werden.
 
 ## 7. Urlaub, Freiwünsche und Korrekturvormerkung
 
-Urlaub ist verbindliche Abwesenheit auch für T/TS und auch donnerstags. Er darf
-länger als 24 h sein und mehr als vier Tage umfassen. Keine alte P1-Grenze auf
-Urlaub übertragen. Ein Abwesenheitsintervall und seine **expliziten anrechenbaren
-Gutschrifttage** sind getrennt; Auswahl dieser Tage ist F05. Pro Person/Datum
-höchstens eine Urlaubsgutschrift, auch bei Duplikaten/Überlappungen.
+Urlaub ist verbindliche Abwesenheit auch für T/TS und donnerstags. Er darf länger
+als 24 Stunden sein und mehr als vier Tage umfassen. Alte P1-Grenzen werden nicht
+auf Urlaub übertragen. Jedes ausdrücklich mit U markierte Kalenderdatum zählt als
+ein Urlaubstag, auch Samstag, Sonntag und Feiertag. Ein ausdrücklich ausgewählter
+Urlaubszeitraum zeigt alle darin enthaltenen Tage; diese werden bei Übernahme
+angerechnet. Abwesenheit und die sichtbar festgelegte Gutschrifttagesmenge bleiben
+getrennte Daten. Pro Person/Datum höchstens eine Gutschrift, auch bei Überlappung.
 
-Freiwünsche sind weiche Ziele mit einstellbarer Zahl einzelner Tage plus einem
-gewünschten freien Wochenende je Person/Monat. Ein Wochenendwunsch ist ein
-eigenständiger mehrtägiger Wunsch, bei Verletzung einmal gezählt; kein automatisches
-Gewicht zwei. Für Budgetzählung/Verletzung zählen eindeutige Wunschidentitäten,
-UI und CSV gemeinsam. Reimport und Monatsgrenzen dürfen Identitäten nicht vervielfachen.
-Die genaue Gewichtung und frühere Bevorzugung kleiner Wunschzahlen sind F12/F13.
+Der Anspruch beträgt zwei Urlaubstage je Monat und wird angespart. Ein persönlicher
+Anfangsbestand und Kontenstart sind ausdrücklich erfassbar. Ein voller
+Beschäftigungsmonat bringt zwei Tage. Bei Teilmonaten gilt exakt
+`2 × Beschäftigungskalendertage / Kalendertage_des_Monats`; diese Werte werden als
+Brüche ohne pauschale Tagesrundung summiert und fortgeführt. Anspruch ist kein
+Verbrauchs-Hartlimit: mehr als zwei gebuchte Tage in einem Monat sind möglich;
+ein negativer prognostizierter
+Rest ist ein Hinweis. Fehlende Anfangsbestände und nicht belegte Verbräuche werden
+nicht als null erfunden. Bestätigte Urlaubskonten bleiben eingefroren.
 
-**Am Donnerstag sind aktive Freiwünsche unzulässig**, auch ein Mittwoch-
-Nachtwunsch mit echtem Donnerstagsanteil. Ende Donnerstag exakt 00:00 enthält
-keinen Donnerstagsanteil. Urlaub ist davon nicht betroffen.
+Freiwünsche sind weiche Ziele mit einstellbaren Tages-/Wochenendbudgets. Ein
+Wochenendwunsch ist ein eigenständiger Wunsch und wird bei mehreren betroffenen
+Diensten nur einmal als übergangen gezählt. Gleiche Identitäten zählen beim
+Reimport und über Monatsgrenzen nicht mehrfach. Relevanz setzt Überschneidung mit
+mindestens einem aktiven Dienst voraus.
 
-**Klärung durch die Bedienperson am 09.11.2026:** Solche UI-/CSV-Einträge werden
-**zur Korrektur vorgemerkt**. Der ursprüngliche widersprüchliche Ablehnungs-Test
-wird entsprechend präzisiert:
+Nach Minimierung der gesamten Übergehungen werden Wünsche von Personen mit weniger
+relevanten Wünschen stärker geschützt; danach wird die historische plus aktuelle
+Belastung innerhalb gleicher Wunschzahlen ausgeglichen. Nur bestätigte Vormonate
+gehen in die Historie ein. Die frühere Formulierung „kleine Wunschzahlen noch
+offen“ ist durch die ausdrücklichen Folgeaufträge ersetzt.
 
-- Originalinhalt und betroffene Daten/Zeilen sichtbar erhalten, Status
-  „Zur Korrektur vorgemerkt – noch nicht in Planung übernommen“.
-- Keine stille Kürzung, Löschung oder Umwandlung in Urlaub; keine automatische
-  Donnerstag-Ausnahme. Die Vormerkung ist kein aktiver Freiwunsch.
-- Ein eigener, lokal wiederherstellbarer Korrekturentwurf darf gespeichert werden;
-  aktive Sperren, Wünsche und bestätigte Monatsstände bleiben unverändert.
-- Ein fehlerhafter Import bleibt als kompletter Stapel vorgemerkt; keine teilweise
-  Übernahme seiner gültigen Zeilen. Erst nach Korrektur und vollständiger gemeinsamer
-  Prüfung erfolgt die atomare Übernahme. Verwerfen entfernt nur die Vormerkung.
-- Korrekturdatensätze zählen weder zu Wunschbudget noch Solver, Übergehungsstatistik
-  oder bestätigter Historie. Die bestätigten historischen Wünsche werden nicht
-  rückwirkend nach dem neuen Donnerstagsverbot verändert.
+Donnerstags-Freiwünsche erzeugen nach der bestehenden Regel einen Konflikt,
+auch bei einem echten Donnerstagsanteil eines Nachtwunsches. Die Bedienperson
+darf diesen wie andere fachliche Regeln nach Warnung übergehen. Urlaub ist davon
+nicht betroffen. Ende Donnerstag exakt 00:00 enthält keinen Donnerstagsanteil.
+
+UI- und CSV-Korrekturen erhalten Originalinhalt und konkrete Zeilenfehler. Eine
+fehlende Zustimmung oder ein technischer Fehler lässt den gesamten Import
+vorgemerkt; keine teilweise Aktivierung. Es gibt keine stille Kürzung, Löschung
+oder Umwandlung in Urlaub. Fachliche Abweichungen sind nach ausdrücklicher
+Zustimmung atomar übernehmbar. Reine Korrekturdaten zählen nicht zu aktiven
+Wünschen oder Historie. Bereits bestätigte Wünsche werden nicht rückwirkend
+umgeschrieben.
 
 Alte P1 sind allgemeine verbindliche Sperren ohne belegte Urlaubstage. Sie bleiben
 Legacy-Sperren, ohne Urlaubslabel oder Gutschrift. Alt-CSV wird ausdrücklich als
 Altformat gelesen; eine Übernahme nach V2 braucht eine nachvollziehbare Typzuordnung.
 
-Technischer Entwurf für das getrennte **CSV-Format 2**, umzusetzen in B2:
+Getrenntes **CSV-Format 2** für Abwesenheiten:
 
 ```csv
 format_version;person_id;entry_id;typ;von;bis;gutschrifttage;kommentar
-2;A;urlaub-a-1;urlaub;2026-11-09T00:00+01:00;2026-11-16T00:00+01:00;2026-11-09|2026-11-10|2026-11-11|2026-11-12|2026-11-13;Eine Woche abwesend
+2;A;urlaub-a-1;urlaub;2026-11-09T00:00+01:00;2026-11-14T00:00+01:00;2026-11-09|2026-11-10|2026-11-11|2026-11-12|2026-11-13;Fünf ausdrücklich markierte Urlaubstage
 2;A;wunsch-a-1;freiwunschtag;2026-11-11T22:00+01:00;2026-11-12T01:00+01:00;;Zur Korrektur vormerken
 ```
 
@@ -302,12 +331,19 @@ je Person/Monat getrennt exakt aufsummieren und jeweils **einmal** kaufmännisch
 auf Minuten runden. Keine einzelne Tagesgutschrift vor der Summierung runden.
 Abweichende zwingende Profilrundung ist versioniert auszuweisen.
 
-Die bisherige Regel `W × Kalendertage / 7` ist ein **Legacy-/Testprofil**, nicht
-bereits die bestätigte V2-Sollregel. Eine technisch mögliche zeitabhängige
-Fortschreibung ist `Σ (W_des_Tages / 7)` über Beschäftigungstage. Ihre rechtliche
-Zulässigkeit, Feiertagseffekte, Durchrechnung und Monatszuordnung von Arbeit/
-Gutschrift bleiben F04. Physische Arbeits-/Zulagenmengen werden unabhängig davon
-stets an lokalen Kalender-/Monats-/Jahresgrenzen segmentiert.
+Die bestätigte Sollregel lautet `W × Kalendertage / 7`. Zeitgültige Verträge
+werden als Summe `W_des_Tages / 7` über Beschäftigungstage berücksichtigt. Die
+Formel wird nicht erneut als bloß unbestätigtes Testprofil zur Wahl gestellt.
+Zusätzliche tarifliche Sonderregeln werden nur nach ausdrücklicher Bestätigung
+abgebildet und verhindern diese normale Planungsrechnung nicht pauschal.
+
+Die Monatsbuchung M1 rechnet die gesamte bezahlte Dienstzeit in den Monat des
+lokalen Dienstbeginns. Ein Dienst 30.11. 17:00–01:00 mit 30 Minuten Pause zählt
+mit 450 Minuten zum Novemberkonto. Physische Kalender-/Nacht-/Feiertagsmengen
+bleiben tatsächlich segmentiert. M0 bleibt für alte Daten die kalendarische
+Arbeitszuordnung; bestätigte M0-Monate werden nicht nachträglich umgerechnet.
+Neue offene reguläre Monate verwenden M1. Optimierungskoeffizienten, Stundenbericht,
+Bestätigung und Export müssen dieselbe Buchungsregel verwenden.
 
 Bei negativem rohem Arbeitsziel keine negativen Dienste erzeugen: null Arbeit
 als untere Grenze, rechnerische Überdeckung und unvermeidliche Zielabweichung
@@ -318,14 +354,15 @@ auch bei negativem Rohziel nur innerhalb aller harten Regeln zugeteilt werden.
 Vorab belastbare Grenzen statt einer scheinexakten Bedarfssumme: fester operativer
 Bedarf, minimale/maximale Zusatz-/Teilnahme-/Reserveanteile und zulässige Kapazität
 gesondert. Nachher tatsächliche Summen des gewählten Plans zeigen. T/TS-Zahl,
-WL/BK-Tage, Varianten und Reservebewertung können den Bedarf beeinflussen.
+WL/BK-Tage und Varianten wie KC15 können den Bedarf beeinflussen. R zählt normal.
 Keine unbestellten Dienste oder zusätzlichen T-Einträge zum Füllen der Stunden.
 
 ## 9. Kalender, Nacht und Zulagen
 
 Bestätigt sind Europe/Vienna, Nachtfenster **22:00–06:00**, bundesweite gesetzliche
-Feiertage Österreichs einschließlich beweglicher Feiertage und ein zeitlich gültiges
-Caritas-/VkA-Profil für Kältetelefon Wien mit belegten Betriebsvereinbarungen.
+Feiertage Österreichs einschließlich beweglicher Feiertage. Ein konkret
+anwendbares Caritas-/VkA-/BV-Profil für zusätzliche Rechts-/Euroaussagen ist
+dadurch nicht belegt und bleibt mit Quellen und Gültigkeitsdaten nachzuweisen.
 
 Kalender-Sollkatalog: 01.01., 06.01., Ostermontag, 01.05., Christi Himmelfahrt,
 Pfingstmontag, Fronleichnam, 15.08., 26.10., 01.11., 08.12., 25.12., 26.12.
@@ -352,27 +389,30 @@ personenbezogene Anwendbarkeit. „Außendienst“ belegt keinen KV-Tatbestand.
 KV 2026 ist ohne neue Prüfung kein bestätigter Tarif für 2027 oder jeden anderen Monat.
 Fehlt Zuordnung/Fassung/Bemessungsgrundlage/Kumulationsregel, Zeitmengen zeigen und
 Euro als **ungeklärt** ausweisen, nicht als 0 oder als verbindliche Prognose.
-Stunden-/Ruhe-/Reserveprüfungen mit fehlendem Pflichtprofil bleiben ebenfalls offen.
+Nicht bestätigte zusätzliche Rechts-/Tarifprüfungen bleiben als offen benannt.
+Sie blockieren die ausdrücklich bestätigte normale Urlaubs-, Reserve- und
+Planungsrechnung nicht pauschal.
 
 ## 10. Optimierung, Nachweis und Ausgabe
 
-Harte Regeln stehen stets außerhalb einer handelbaren Zielfunktion. Innerhalb
-gültiger Ergebnisse ist folgender **Arbeitsvorschlag, noch F13**, vorgesehen:
+Für die automatische Planung stehen harte Regeln außerhalb einer handelbaren
+Zielfunktion. Der aktuelle lexikografische Kern erhält höhere Ziele bei jeder
+niedrigeren Verbesserung:
 
-1. Offene verbindliche operative Plätze minimieren.
-2. Unerfüllte T-/TS-Teilnahmeziele minimieren, bestätigte Ausnahmen berücksichtigen.
-3. Wunschübergehungen minimieren, dann historisch ausgleichen (F11/F12).
-4. Vermeidbare WL/BK-Sonn-/Feiertagstermine und nötige W16-Ausnahmen reduzieren.
-5. Größte verbleibende Stundenabweichung, dann Saldenstreuung minimieren.
-6. Historische Nacht-/Feiertags-/Reservegerechtigkeit und weitere Dienstverteilung.
-7. Änderungen gegenüber geprüftem Entwurf reduzieren.
-8. Sonst gleichwertige Pausen vollständig vor 22:00 bevorzugen.
+1. Offene operative Plätze minimieren.
+2. Bei gleicher Besetzung weniger KC15-Ersatztermine wählen.
+3. Wunschübergehungen minimieren, kleine relevante Wunschzahlen schützen und
+   innerhalb gleicher Gruppen historische plus aktuelle Belastungen ausgleichen.
+4. Größte normalisierte Stundenabweichung und anschließend deren Streuung verringern.
+5. Vertragsstundenbezogene Dienstverteilung mit bestätigter Historie ausgleichen;
+   WL/BK haben erhöhtes Gewicht.
+6. Unter gleichwertigen höheren Zielen Pausen vor 22:00 bevorzugen.
 
-Die bisherige gewichtete gemeinsame Stunden-/Schichtquadratsumme nicht unverändert
-auf die neuen Ziele oder Eurobeträge ausdehnen. Stunden- und Zulagenfairness brauchen getrennte, verständliche Maße,
-Berechtigungs-/Beschäftigungsbezug, Zeitraum und ggf. bestätigte Toleranzen (F12/F13).
-Unbesetzte Stellen dürfen Fairnessnenner nicht künstlich verbessern.
-V2-Gruppenbevorzugung bei wenigen Wünschen ist noch unentschieden.
+T/TS bleiben freiwillig. Ihr relativer weicher Optimierungsrang sowie spätere
+Euro-/Zulagenfairness benötigen die noch offenen Entscheidungen aus F13 und
+belegte Tarifdaten. Das ist keine offene Frage mehr zum bereits bestätigten
+Schutz kleiner Wunschzahlen. Stunden- und Zulagenfairness bleiben getrennte
+Maße; unbekannte Eurobeträge werden nicht mit null gleichgesetzt.
 
 Vorhandener gültiger Plan bleibt unter **derselben** Eingabe-/Regel-/Profilversion
 Startpunkt und Rückfall; nur bessere bzw. erlaubte gleichwertige Ergebnisse

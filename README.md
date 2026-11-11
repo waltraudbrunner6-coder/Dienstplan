@@ -1,108 +1,127 @@
 # Dienstplan
 
-**Neu in 0.4.0:** XLSX-/CSV-Import für Termine, einzelne oder vollständige
-Dienstzuteilungen sowie gemischte Wünsche/Urlaub; bearbeitbare Gesamtvorschau mit
-zentraler Personen-ID-Zuordnung. Monatsübersicht mit Wochentagen, Excel-Tabellenexport
-und automatische Pausenwahl bei manueller Zuteilung. BK/WL: zwei WL und ein BK pro
-Woche, niemals am selben Startdatum; Wochen-/Randprofil einmal ausdrücklich wählen.
-Die erste normale Berechnung fordert diese Auswahl an; Folgemonate übernehmen sie.
-Details und offene Zuordnungen: [Tabellenimport und Excel-Export](docs/TABELLENIMPORT.md).
-Unbekannte Kürzel oder widersprüchliche Altangaben werden nicht still umgedeutet.
-
 Lokale, deutschsprachige Desktop-Anwendung für Monatsdienstpläne mit Python/Qt,
 OR-Tools CP-SAT und SQLite. Planung und Speicherung funktionieren offline.
-Ergebnisse sind Planprognosen, keine tatsächlich erfassten Arbeitszeiten.
+Die Stunden sind Prognosen aus dem Dienstplan, keine erfassten Ist-Arbeitszeiten.
 
-**Anzeigekorrektur 0.3.1:** Berechnete Vorschläge erscheinen sofort im Reiter
-**Dienstplan**, einschließlich zugeteilter Namen und zugehöriger Stundenübersichten.
-Erst **Ergebnis übernehmen** speichert den Vorschlag; bestehende Pläne bleiben
-bis dahin erhalten. Die Vorschau lässt sich verwerfen oder direkt exportieren.
+**Änderungen für 0.5.0:** Urlaub mit Kalender, verständlicher Tages-/Stundenübersicht
+und angespartem Urlaubskonto; Termine mit Datum, Uhrzeit und Namensauswahl;
+Reserve als normale Arbeit; KC15 als echte Ersatzwahl; Nachtdienste vollständig
+im Startmonat. Die bestätigten Antworten stehen in den
+[Fachregeln](docs/V2_FACHREGELN.md). Tatsächlich geprüfte Versionen, Builds und
+Downloads sind im [nativen Prüfbericht](docs/V2_NATIVE_PRUEFUNG.md) ausgewiesen.
+Eine Beschreibung neuer Funktionen ist kein Nachweis eines abgeschlossenen Builds.
 
 ## Start
 
-Windows: den vollständigen Paketordner entpacken und `Dienstplan.exe` öffnen.
-macOS: das enthaltene `Dienstplan.app` öffnen. Python und Terminal sind dafür
-nicht erforderlich. Die Pakete sind derzeit unsigniert.
+Windows: Paket vollständig entpacken und `Dienstplan.exe` öffnen.
+macOS: das vollständige `Dienstplan.app` für Apple Silicon oder Intel öffnen.
+Python und Terminal sind dafür nicht erforderlich. Version und Buildkennung
+stehen im Fenster. V2 ist die normale Hauptanwendung; eine Startauswahl oder
+zusätzliche Testoberfläche gibt es nicht.
 
-**Ab Version 0.3.0 startet ausschließlich die neue V2-Hauptoberfläche.** Es gibt
-keine Startauswahl und keinen zusätzlichen Testbereich mehr. Version und
-Buildkennung stehen im Fenster; der Commit steht auch im Archivnamen.
-Die bisherigen Vier-Schichten-Pakete beziehungsweise Pakete mit Startauswahl
-enthalten noch diesen früheren Programmstand.
+## Einfacher Ablauf
 
-## Bedienung
+1. **Monat wählen.** Vorhandene Monate werden geladen; neue Monate enthalten die
+   regulären Tages- und Donnerstagsdienste sowie die vorgesehenen Reservefenster.
+2. **Personen** erfassen: Namen, Wochenstunden, Anfangssaldo und gewünschter
+   Endsaldo. Im Personeneditor Beschäftigung, Verträge und ausgeschlossene Dienste
+   prüfen. Ein Häkchen bedeutet „ausgeschlossen“; N17 braucht bestätigten Führerschein.
+3. **Monatstermine** prüfen. **Termin hinzufügen** verwendet Kalender, Uhrzeiten
+   und Namen statt technischer Personenlisten. **LB-Termine ergänzen** fragt die
+   beiden Personen und ergänzt die fehlenden Termine der Monatsserie ab 03.12.2026
+   im 14-Tage-Rhythmus. Bereits erfasste LB-Paare bleiben erhalten.
+4. Unter **Urlaub und Wünsche** Einträge hinzufügen oder eine Tabelle importieren.
+   Im Urlaubskalender zählen alle angezeigten ausgewählten Daten, auch Wochenenden
+   und Feiertage. Pro Tag wird die gültige Wochenarbeitszeit ÷ 5 gutgeschrieben.
+5. In der **Urlaubsübersicht** einmal den Kontenstart und Anfangsbestand je Person
+   eintragen. Zwei Tage Anspruch je vollem Beschäftigungsmonat werden angespart;
+   Teilmonate zählen anteilig nach Beschäftigungskalendertagen.
+   Anspruch in Tagen und Stundengutschrift sind unterschiedliche Größen.
+6. **Dienstplan erstellen**, Vorschlag prüfen und **Ergebnis übernehmen**.
+   Erst die Übernahme ersetzt den gespeicherten Entwurf. Die Suche läuft im
+   Hintergrund, hat ein Zeitlimit und kann abgebrochen werden.
+7. Manuell zuordnen, fixieren, exportieren oder den **Monat bestätigen**.
+   Regelverstöße werden angezeigt und sind bei manuellen Änderungen, Import und
+   Monatsbestätigung nach ausdrücklicher Warnung übersteuerbar. Offene Plätze
+   bleiben sichtbar; bestätigte Abweichungen werden nicht als regelkonform bezeichnet.
 
-1. **Monat wählen.** Neue Monate enthalten automatisch die regulären KC10-,
-   KC16- und W17-Termine; donnerstags stattdessen KCT10, KCT, TW und T.
-   Der vollständige Standardkatalog mit **17 Dienstkürzeln / 19 Varianten**
-   steht unter **Dienste und Planungsangaben**, einschließlich Zeiten, Besetzung
-   und Auftreten. Die Reservefenster werden vom 24.12. bis 06.01. erzeugt.
-2. Unter **Personen** Namen, Wochenstunden und Konten erfassen. Neue Dateien
-   enthalten keine erfundenen Teammitglieder. **Person ergänzen** öffnet
-   Beschäftigung, Vertragsversionen und die **ausgeschlossenen Dienste**.
-   In der Auswahlliste bedeutet ein Häkchen „ausgeschlossen“; eine leere Liste
-   schließt keinen Dienst aus. N17 benötigt zusätzlich bestätigten Führerschein.
-3. **Monatstermine** prüfen und feste Sondertermine mit Datum und Personen
-   ergänzen. Für WL/BK fehlt weiterhin das bestätigte Wochenprofil; für LB
-   Referenzdatum und Personen. Diese Angaben werden sichtbar benannt und nicht
-   erfunden. TS, VN, INT, N17 und FK brauchen die vorgesehenen konkreten Eingaben.
-4. Urlaub und Wünsche manuell vormerken oder als **CSV-Format 2** importieren.
-   Fehlerhafte Einträge bleiben gemeinsam bearbeitbar zur Korrektur vorgemerkt;
-   es gibt keine teilweise Übernahme. Donnerstagswünsche bleiben unzulässig.
-5. Das Rechenprofil ausdrücklich wählen, **Arbeitsstand speichern**, danach
-   **Dienstplan erstellen**. Die Suche läuft im Hintergrund, ist zeitlich
-   begrenzt und abbrechbar. **Ergebnis übernehmen** ersetzt den Entwurf erst
-   nach der unabhängigen Prüfung. Offene Plätze bleiben als **OFFEN** sichtbar.
-6. Zuteilungen im Dienstplan ändern, entfernen oder fixieren; Stundenprognose,
-   Verteilung und Freiwünsche prüfen. **Exportpaket** enthält konsistente CSVs,
-   den exakten Arbeitsstand und ein Prüfmanifest. Nur gültige vollbesetzte
-   Rechenstände lassen sich unveränderlich bestätigen.
+BK/WL: ganzjährig zwei WL und ein BK je Woche, nie am selben Startdatum.
+Die Wochen-/Randregel wird über **BK/WL automatisch: 2 WL + 1 BK** bzw. vor der
+entsprechenden automatischen Planung eingerichtet. Manuelles Zuordnen öffnet
+direkt die Personenauswahl und verändert diese Termine nicht nebenbei.
 
-Dauern, Salden und Prognosen werden in **Stunden mit Dezimalkomma** angezeigt
-und eingegeben: `7,5` entspricht siebeneinhalb Stunden. CSV-Zeitmengen stehen
-in Stunden mit eindeutigen Spaltennamen. Intern bleiben ganze Minuten und exakte
-Brüche erhalten; unverändertes Speichern gerundeter Anzeigen verliert keine
-Minute. Neue V2-Konten haben Wunschende null; vorhandene Anfangssalden bleiben.
+KC15 15:00–00:00 mit einer Person kann KC10 und KC16 gemeinsam ersetzen, wenn
+sonst Besetzung fehlt. Der Solver bevorzugt bei gleicher Besetzbarkeit die
+reguläre Variante. Bei Zeitlimit ist die Notwendigkeit eines Ersatzes nicht
+automatisch bewiesen. Gleichzeitige Pausen sind erlaubt; die normale enthaltene
+30-Minuten-Pause bei mehr als sechs Stunden bleibt bestehen.
 
-## Speicherung und bestehende Daten
+## Stunden und Urlaub
 
-Die neue Hauptanwendung speichert dauerhaft in `dienstplan-v2.sqlite3` im
-lokalen Anwendungsdatenordner. Beim nächsten Start wird der zuletzt vorhandene
-Monatsarbeitsstand geladen. Über **Datei öffnen** sind bisherige V2-Dateien
-mit Schema 3 weiter nutzbar. **Datei kopieren** legt eine getrennte Datei an.
-Für Sicherungen die Anwendung schließen und die SQLite-Datei kopieren.
+Anzeigen und Eingaben verwenden Stunden mit Dezimalkomma: `7,5` ist siebeneinhalb
+Stunden. Intern bleiben ganze Minuten und exakte Brüche erhalten.
 
-Die frühere `dienstplan.sqlite3` wird weder geöffnet noch verändert, gelöscht
-oder automatisch umgedeutet. Eine V1-Datei wird beim Öffnen verständlich
-abgewiesen; Migration und Übernahme bedürfen weiterhin einer ausdrücklich
-geprüften Zuordnung. Bestätigte historische Daten bleiben geschützt.
+```text
+Monatssoll S = Wochenstunden × Kalendertage ÷ 7
+Urlaubsgutschrift G = Summe der gültigen Wochenstunden ÷ 5 je Urlaubstag
+Arbeitsziel = S + gewünschter Endsaldo E − Anfangssaldo B − G
+Prognose-Endsaldo = B + geplante Stunden P + G − S
+```
 
-## Rechenannahmen und noch offene Grundlagen
+Vertragswechsel werden tagweise berücksichtigt; Soll und Urlaubsgutschrift
+werden jeweils erst am Monatsende einmal auf Minuten gerundet. Neue Konten
+haben Wunschendsaldo null. Ein negatives Arbeitsziel erzeugt keine negative Arbeit.
 
-Der Oberflächenwechsel ersetzt keine fachlich fehlende Profilbestätigung.
-Vor einer Berechnung ist das vorhandene technische Profil **S0/M0/E0**
-ausdrücklich auszuwählen. S0 summiert die je Tag gültigen Wochenstunden / 7
-und rundet einmal am Monatsende auf Minuten; M0 ordnet tatsächliche
-Arbeitssegmente ihrem Kalendermonat zu. Urlaubsgutschrift: gültige Wochenstunden
-/ 5 je ausdrücklich anrechenbarem Urlaubstag.
+Die neue Monatsbuchung **M1** rechnet die gesamte bezahlte Dienstzeit zum Monat
+des lokalen Dienstbeginns. Ein Nachtdienst am 30.11. bis 01.12. zählt deshalb
+vollständig zum Novemberkonto. Physische Nacht-/Sonn-/Feiertagsmengen bleiben
+nach tatsächlichen Kalendertagen getrennt. Alte bestätigte M0-Monatsstände werden
+unverändert gelesen und nicht nachträglich umgerechnet. Eine technische
+Profilauswahl ist für die normale Bedienung nicht erforderlich.
 
-`Arbeitsziel = S + E − B − G`; `Prognose-Endsaldo = B + P + G − S`.
-Ein negatives Ziel erzeugt keine negative Arbeitszuteilung. E0 ist die benannte
-technische Zielreihenfolge; Profile und nicht bewiesene Ziele werden mitexportiert.
-Fehlende Randdaten gelten nicht als nachgewiesene Freizeit.
+Urlaub: Jeder ausdrücklich markierte U-Tag zählt, auch am Wochenende/Feiertag;
+25 Wochenstunden ergeben fünf Stunden Gutschrift je Tag. Doppelte Einträge
+zählen denselben Personen-/Kalendertag einmal. Zwei monatliche Anspruchstage
+sind keine Grenze für die Zahl gebuchter Tage. Fehlende Anfangsbestände oder
+nicht belegte historische Verbräuche werden als unbekannt gezeigt.
+Für Ein-/Austritt gilt exakt: zwei Tage × Beschäftigungskalendertage ÷
+Kalendertage des Monats. Diese Bruchteile werden ohne pauschale Tagesrundung
+angespart.
 
-Ungeklärte Rechts-/Tarifprofile, Reservebewertung, durchgängige Pausenabdeckung,
-WL/BK-Wochenregeln und weitere Entscheidungen bleiben sichtbar offen. Ein
-bestätigter Rechenstand ist keine Rechts-, KV-/BV- oder Abrechnungsfreigabe.
-Ein vollständiger Standardkatalog bedeutet nicht, dass alle Sondertermine und
-Betriebsprofile eines Monats bereits konfiguriert sind.
+## Import, Dateien und Exporte
 
-Details: [Bedienungsanleitung](docs/V2_BEDIENUNG.md),
-[Fachregeln](docs/V2_FACHREGELN.md), [offene Entscheidungen](docs/V2_OFFENE_FRAGEN.md),
-[Architektur/Migration](docs/V2_ARCHITEKTUR_UND_MIGRATION.md),
-[Fortschritt und aktuelle Tests](docs/V2_FORTSCHRITT.md),
-[125 Abnahmefälle und tatsächlicher Status](docs/V2_ABNAHMESTATUS.md),
-[native Pakete und Messwerte](docs/V2_NATIVE_PRUEFUNG.md).
+XLSX/CSV unterstützt Dienstpläne, einzelne fixierte Dienste, Termine und
+Urlaub/Freiwünsche mit Personen-ID-Zuordnung und bearbeitbarer Vorschau.
+Ein fehlerhafter Import wird nicht teilweise übernommen. Wiederholte Importe
+legen identische Fixierungen nicht doppelt an. Details und CSV-Beispiele:
+[Tabellenimport](docs/TABELLENIMPORT.md), [Bedienung](docs/V2_BEDIENUNG.md).
+
+Die App speichert lokal in `dienstplan-v2.sqlite3` im Anwendungsdatenordner.
+**Datei öffnen** lädt eine vorhandene V2-Datei. **Datei kopieren** legt den
+Arbeitsstand separat ab; sie setzt ihn nicht zurück. Für eine vollständige
+Sicherung die App schließen und die SQLite-Datei kopieren.
+Die alte V1-Datei wird nicht automatisch verändert oder umgedeutet.
+
+**Monatstabelle als Excel exportieren** liefert die übersichtliche Personen-
+und Tagesmatrix. **Exportpaket** enthält zusammengehörige CSVs, exakte
+Monatsdaten und Prüfmanifest. Alle Daten beziehen sich auf denselben sichtbaren
+Stand. Bestehende Exportdateien werden nicht überschrieben.
+
+## Noch benötigte Angaben und Nachweise
+
+Feste Personen und konkrete Sondertermine bleiben normale Eingaben. FK wird
+ausschließlich als Einzeltermin erfasst. Die enge Freitags-W17-Ausnahme gilt
+auch für Wochenend-Freiwünsche; sonstige Wochenendarbeit bleibt zu berücksichtigen.
+Wirklich offene Sonderfälle sind noch Teilmonats-Wochenendquoten, die relative
+Priorität freiwilliger Teamteilnahme und gegebenenfalls Euro-/Tarifdaten.
+Sie blockieren nicht pauschal Urlaub und lokale Dienstplanung.
+Eine Bestätigung ist kein Rechts-/Tarifnachweis.
+
+- [Bedienungsanleitung](docs/V2_BEDIENUNG.md)
+- [Fachregeln](docs/V2_FACHREGELN.md) und [verbleibende Fragen](docs/V2_OFFENE_FRAGEN.md)
+- [Informationsprüfung](docs/V2_INFO_AUDIT.md) und [Fortschritt](docs/V2_FORTSCHRITT.md)
+- [Abnahmestatus](docs/V2_ABNAHMESTATUS.md) und [native Downloads/Messwerte](docs/V2_NATIVE_PRUEFUNG.md)
 
 ## Entwicklung und Builds
 
@@ -120,30 +139,14 @@ python scripts/build.py
 python scripts/check_package.py
 ```
 
-`--demo` ist eine ausdrückliche Option mit zwölf fiktiven Personen und dem
-Standardmonat November 2026. Ein vorhandener Monatsstand wird dabei bewahrt.
-`--database` bezeichnet jetzt eine V2-Datei; `--v2` ist ein kompatibler Alias.
-`--legacy` startet keine alte Oberfläche mehr und wird abgewiesen.
+`--demo` erzeugt ausdrücklich zwölf fiktive Personen. Normale neue Dateien
+enthalten kein erfundenes Team. Ein bestehender Monatsstand wird nicht durch
+einen Demostart ersetzt. `--database` bezeichnet eine V2-Datei; `--v2` bleibt
+kompatibel, `--legacy` startet keine alte Oberfläche.
 
-PyInstaller erstellt eine selbstständig startbare Ordneranwendung.
-Windows-Pakete auf Windows bauen, macOS-Sequoia-Pakete auf macOS 15 jeweils
-für ARM64/Intel. Die [GitHub-Actions-Matrix](.github/workflows/build.yml)
-führt Tests, Build und Paketprobe auf allen drei Zielen aus. Die Paketprobe
-verlangt die tatsächliche Hauptoberfläche mit Standarddiensten, Ausschlussliste,
-Stundenanzeige und persistentem Neustart sowie Solver, SQLite und Wiener DST.
-Sie verwendet ausschließlich temporäre synthetische Daten. Linux-Tests ersetzen
-keinen nativen Windows-/macOS-Nachweis. Aktuelle Downloadlinks sind im nativen
-Prüfbericht ausdrücklich einem Commit zugeordnet.
-
-Ab Version 0.4.1 können manuelle Änderungen und Importe nach ausdrücklicher Warnung
-auch trotz Regelverstößen übernommen werden. Der Plan und Exporte kennzeichnen
-diese Abweichungen dauerhaft. Siehe [Regelübersteuerung](docs/TABELLENIMPORT.md).
-
-Ab 0.4.3 öffnet die manuelle Zuordnung direkt die Personenauswahl, auch nach einem
-Import ohne BK/WL-Wochenprofil. Fixierungen werden bei einem bestätigten Wechsel
-korrekt auf die neue Person übertragen. Umfang der erneuten Funktionsprüfung:
-[Bedienprüfung 0.4.3](docs/V2_BEDIENPRUEFUNG_0_4_3.md).
-
-Ab 0.4.4 darf ein Monat nach Warnung auch mit Regelverstößen oder offenen Plätzen
-bestätigt werden. Die Abweichungen bleiben im bestätigten Stand dokumentiert und
-nach Neustart sichtbar. Bereits bestätigte Monate bleiben unveränderlich.
+PyInstaller baut eine selbstständig startbare Ordneranwendung. Windows auf
+Windows bauen, macOS Sequoia jeweils nativ für ARM64 und Intel. Die
+[GitHub-Actions-Matrix](.github/workflows/build.yml) führt Tests, Build und die
+Prüfung des gebauten Programms aus. Linux-Tests ersetzen keinen nativen
+Plattformnachweis. Nur der aktuelle Prüfbericht belegt tatsächlich erstellte
+Pakete; die Pakete sind ohne gesonderten Nachweis nicht signiert/notarisiert.

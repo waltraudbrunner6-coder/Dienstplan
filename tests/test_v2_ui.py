@@ -1,6 +1,8 @@
 import os
 os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
 from fractions import Fraction
+from datetime import date,timedelta
+from PySide6.QtCore import QDate
 
 import pytest
 from PySide6.QtCore import QEventLoop,QTimer
@@ -32,15 +34,16 @@ def wait_worker(w):
 def test_real_qt_input_solver_explicit_acceptance_storage_and_export(workbench,tmp_path,monkeypatch):
     w=workbench
     assert w.team.rowCount()==12 and w.plan.rowCount()==8
+    original=w.blocks
     w.team.item(0,2).setText('25,04');w.team.item(0,3).setText('10,00');w.team.item(0,4).setText('0')
     w.save()
     assert w.inputs.people[0].contracts.versions[0].weekly_hours==Fraction(626,25)
     w.seconds.setValue(1);w.start();wait_worker(w)
-    assert w.pending and not w.blocks
+    assert w.pending and w.blocks==original
     assert w.tabs.currentWidget() is w.plan.parentWidget()
     assert all(w.plan.item(row,3).text()!='OFFEN' for row in range(w.plan.rowCount()))
     assert 'VORSCHLAG' in w.plan_state.text()
-    assert w.store.load_workspace(2026,11)[2]==()
+    assert w.store.load_workspace(2026,11)[2]==original
     assert any(w.hours.item(row,6).text()!='0,00' for row in range(w.hours.rowCount()))
     w.apply_result()
     assert len(w.blocks)==8 and w.store.load_workspace(2026,11)[2]==w.blocks
@@ -66,7 +69,7 @@ def test_manual_change_and_individual_fixation_use_independent_rules(workbench):
 
 
 def test_thursday_csv_stays_editable_then_atomic_application_after_correction(workbench):
-    w=workbench
+    w=workbench;before_blocks=w.blocks;before_events=w.events
     text='format_version;person_id;entry_id;typ;von;bis;gutschrifttage;kommentar\n2;A;wish;freiwunschtag;2026-11-12T00:00;2026-11-13T00:00;;Korrigieren\n'
     w.batch=preview(text,existing=(),budgets=w.budgets(),month='2026-11')
     w.store.save_correction('ui-current',w.batch);w.fill_batch()
@@ -77,7 +80,7 @@ def test_thursday_csv_stays_editable_then_atomic_application_after_correction(wo
     w.corrections.item(0,fields.index('bis')+1).setText('2026-11-12T00:00')
     w.promote()
     assert len(w.store.entries())==len(w.inputs.absences)==1 and w.batch is None
-    assert w.store.load_workspace(2026,11)[0]==w.inputs and w.events is None
+    assert w.store.load_workspace(2026,11)==(w.inputs,w.profile,before_blocks,before_events) and w.blocks==before_blocks
 
 
 def test_invalid_term_does_not_remove_current_valid_draft(workbench):
@@ -120,8 +123,9 @@ def test_manual_wish_edit_stays_staged_then_replaces_without_double_budget(workb
     w=workbench
     def stage_dates(start,end):
         def edit(dialog):
-            lines=dialog.findChildren(QLineEdit);lines[0].setText(start);lines[1].setText(end)
-            next(b for b in dialog.findChildren(QPushButton) if b.text()=='Zur Korrektur/Übernahme vormerken').click()
+            dialog.first.setDate(QDate.fromString(start[:10],'yyyy-MM-dd'))
+            dialog.last.setDate(QDate.fromString(str(date.fromisoformat(end[:10])-timedelta(days=1)),'yyyy-MM-dd'))
+            dialog.save.click()
             return 1
         monkeypatch.setattr(QDialog,'exec',edit)
     w.day_budget.setValue(1)
@@ -278,7 +282,7 @@ def test_unplanned_weekly_view_counts_required_slots_not_all_date_options(tmp_pa
     qt=QApplication.instance() or QApplication([])
     w=Workbench(database=tmp_path/'open-weekly.sqlite3',year=2026,month=11)
     w.inputs=automatic_weekly(w.inputs);w.fill()
-    assert len(w.inputs.optional_ids)==84
+    assert len([e for e in w.inputs.events if e.id in w.inputs.optional_ids and e.service.code in {'BK','WL'}])==84
     assert sum(e.service.code=='BK' for e,b in w.plan_rows)==12
     assert sum(e.service.code=='WL' for e,b in w.plan_rows)==24
     assert w.plan.rowCount()==156  # 120 regular slots + 6 weeks × 6 weekly slots.

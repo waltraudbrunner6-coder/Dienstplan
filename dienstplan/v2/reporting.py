@@ -25,9 +25,24 @@ class HoursRow:
     credits_known: bool = True
 
 
+def month_booking_description(month_profile):
+    if month_profile=='M0':return 'M0: tatsächliche Arbeitszeit im jeweiligen Kalendermonat'
+    if month_profile=='M1':return 'M1: gesamte bezahlte Dienstzeit im Monat des lokalen Dienstbeginns'
+    raise DomainError('Unbekannte Monatsbuchung; M0 (Kalendermonat) oder M1 (Dienstbeginn) erforderlich.')
+
+
+def booked_work_minutes(block,year,month,*,month_profile):
+    """Buchungsmenge; physische Tages-/Nacht-/Feiertagsmengen bleiben unverändert."""
+    month_booking_description(month_profile)
+    date(year,month,1)  # Auch für M1 ungültige Monatsangaben nicht still akzeptieren.
+    if month_profile=='M1':
+        return block.work_minutes if (block.attendance.start_day.year,block.attendance.start_day.month)==(year,month) else 0
+    return sum(q.work_minutes for q in quantities(block) if (q.day.year,q.day.month)==(year,month))
+
+
 def hours_rows(people,blocks,entries,year,month,*,accounts,target_profile,month_profile):
-    if target_profile!='S0' or month_profile!='M0':
-        raise DomainError('Diese Rechenfunktion benötigt ausdrücklich S0 und M0 als Testprofile.')
+    if target_profile!='S0':raise DomainError('Diese Sollrechnung benötigt ausdrücklich das Profil S0.')
+    month_booking_description(month_profile)
     people=tuple(people);entries=tuple(entries);accounts=tuple(accounts)
     unique={}
     for b in blocks:
@@ -45,7 +60,7 @@ def hours_rows(people,blocks,entries,year,month,*,accounts,target_profile,month_
         credit_days=frozenset(d for e in entries if e.person_id==p.id and e.kind=='urlaub' for d in e.credit_days)
         credits=next((v for v in leave_credits(p.contracts,p.employment,credit_days) if v.month==key),None)
         raw_g=credits.raw_minutes if credits else Fraction(0);g=credits.minutes if credits else 0
-        work=sum(q.work_minutes for b in blocks if b.person_id==p.id for q in quantities(b) if (q.day.year,q.day.month)==(year,month))
+        work=sum(booked_work_minutes(b,year,month,month_profile=month_profile) for b in blocks if b.person_id==p.id)
         goal=account.goal(target.minutes,g).raw_minutes
         known=not any(e.person_id==p.id and e.kind=='urlaub' and not e.credit_days and e.span.overlaps(month_span) for e in entries)
         rows.append(HoursRow(p.id,target.minutes,account.opening_minutes,account.desired_minutes,g,goal,work,
@@ -115,17 +130,18 @@ def quantity_rows(blocks,holidays=frozenset()):
     return tuple(QuantityRow(*key,*values) for key,values in sorted(totals.items()))
 
 
-def required_work_range(events,blocks,year,month,*,boundary=()):
+def required_work_range(events,blocks,year,month,*,boundary=(),include_reserve=False):
     """Operativer Monatsbedarf; noch freie Pausen über Monatsgrenzen als Bandbreite.
 
-    Freiwillige T/TS-Teilnahme und ungeklärte Reservebewertung sind ausgenommen.
+    Freiwillige T/TS-Teilnahme ist ausgenommen. R zählt bei ausdrücklich gesetztem
+    include_reserve=True als normaler Dienst; False erhält die frühere API-Semantik.
     Bereits bekannte, hineinragende Randdienste werden einmal berücksichtigt.
     """
     events=tuple(events);blocks=tuple(blocks)
     span=Interval(midnight(date(year,month,1)),midnight(date(year+int(month==12),month%12+1,1)))
     minimum=maximum=0;event_ids={e.id for e in events}
     for term in events:
-        if term.service.staff is None or term.service.code=='R':continue
+        if term.service.staff is None or (term.service.code=='R' and not include_reserve):continue
         assigned={b.person_id:b for b in blocks if b.id==term.id}
         known=sum(hit.minutes for b in assigned.values() for part in b.work if (hit:=part.intersection(span)) is not None)
         minimum+=known;maximum+=known
@@ -141,8 +157,46 @@ def required_work_range(events,blocks,year,month,*,boundary=()):
         minimum+=missing*low;maximum+=missing*high
     seen=set()
     for b in boundary:
-        if b.id in event_ids or b.code in {'R','T','TS'} or (b.id,b.person_id) in seen:continue
+        if b.id in event_ids or b.code in {'T','TS'} or (b.code=='R' and not include_reserve) or (b.id,b.person_id) in seen:continue
         seen.add((b.id,b.person_id))
         value=sum(hit.minutes for part in b.work if (hit:=part.intersection(span)) is not None)
         minimum+=value;maximum+=value
     return minimum,maximum
+
+
+def booked_required_work_range(events,blocks,year,month,*,month_profile,boundary=(),include_reserve=True):
+    """Mitarbeiterstundenbedarf passend zur expliziten Monatsbuchung.
+
+    M0 bleibt kalendarisch geteilt, M1 bucht Dienste vollständig beim Beginn.
+    Nicht zugeteilte normale Dienste verwenden die enthaltene Standardpause;
+    konkrete übersteuerte Pausen zugeteilter Dienste verwenden deren echte Dauer.
+    """
+    month_booking_description(month_profile)
+    date(year,month,1)
+    events,blocks,boundary=tuple(events),tuple(blocks),tuple(boundary)
+    if month_profile=='M0':
+        return required_work_range(events,blocks,year,month,boundary=boundary,include_reserve=include_reserve)
+    event_ids={e.id for e in events};total=0
+    for term in events:
+        if term.service.staff is None or (term.service.code=='R' and not include_reserve):continue
+        if (term.attendance.start_day.year,term.attendance.start_day.month)!=(year,month):continue
+        selected={}
+        for block in blocks:
+            if block.id!=term.id:continue
+            prior=selected.get(block.person_id)
+            if prior is not None and prior!=block:raise DomainError('Widersprüchliche Versionen desselben Dienstes im Monatsbedarf.')
+            selected[block.person_id]=block
+        total+=sum(booked_work_minutes(b,year,month,month_profile=month_profile) for b in selected.values())
+        paid=term.attendance.minutes-(30 if term.attendance.minutes>360 else 0)
+        total+=max(0,term.service.staff-len(selected))*paid
+    seen={}
+    for block in boundary:
+        if block.id in event_ids or block.code in {'T','TS'} or (block.code=='R' and not include_reserve):continue
+        key=block.id,block.person_id
+        prior=seen.get(key)
+        if prior is not None:
+            if prior!=block:raise DomainError('Widersprüchliche Randdienste im Monatsbedarf.')
+            continue
+        seen[key]=block
+        total+=booked_work_minutes(block,year,month,month_profile=month_profile)
+    return total,total

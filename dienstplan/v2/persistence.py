@@ -222,7 +222,49 @@ class V2Store:
         from .codec import restore_workspace
         key=f'workspace:{year:04d}-{month:02d}'
         row=self.connection.execute('SELECT r.payload FROM v2_meta m JOIN v2_revisions r ON m.value=r.id WHERE m.key=?',(key,)).fetchone()
-        return restore_workspace(json.loads(row[0])) if row else None
+        if row is None:return None
+        inputs,profile,blocks,events=restore_workspace(json.loads(row[0]))
+        # Neue ausdrücklich bestätigte Regeln nur auf offene normale Entwürfe
+        # anwenden. Gespeicherte Revisionen und bestätigte Vergangenheit bleiben
+        # bytegetreu; Speicherung erfolgt erst bei einer Benutzeränderung.
+        from .application import OPEN_PROFILE,SELECTED_PROFILE
+        confirmed=self.connection.execute('SELECT 1 FROM v2_meta WHERE key=?',(f'confirmation:{year:04d}-{month:02d}',)).fetchone()
+        if not confirmed and inputs.profile_label in (OPEN_PROFILE,SELECTED_PROFILE):
+            from dataclasses import replace
+            from .calendar_rules import WeekendPolicy
+            from .fallback import with_kc15_fallbacks
+            changed=profile.month_profile!='M1' or inputs.weekend_policy is None or inputs.weekend_policy.owner!='sunday' or not profile.wish_policy.weekend_friday_exception
+            profile=replace(profile,month_profile='M1',wish_policy=replace(profile.wish_policy,weekend_friday_exception=True))
+            if inputs.weekend_policy is None or inputs.weekend_policy.owner!='sunday':
+                inputs=replace(inputs,weekend_policy=WeekendPolicy('sunday','Betriebliche Vorgabe: Wochenende zählt zum Monat des Sonntags',synthetic=False))
+            # Frühere Versionen erzeugten für R überhaupt keine Kandidaten.
+            # Die jetzt bestätigte normale Arbeitsbewertung auch in offenen
+            # Altmonaten ermöglichen, konkrete vorhandene Pausen aber erhalten.
+            from .application import service_candidates
+            reserves=tuple(e for e in inputs.events if e.service.code=='R')
+            if reserves:
+                inputs=replace(inputs,candidates=tuple(set(inputs.candidates)|set(service_candidates(reserves,inputs.people))))
+            if not inputs.fallbacks:
+                # KC15 existierte in alten Ausschlusslisten noch nicht. Rechte
+                # nur für Personen erweitern, die beide ersetzten Dienste durften.
+                people=tuple(replace(p,rights=tuple(replace(r,codes=r.codes|{'KC15'}) if {'KC10','KC16'}<=r.codes else r for r in p.rights)) for p in inputs.people)
+                inputs=replace(inputs,people=people)
+                inputs=with_kc15_fallbacks(inputs)
+            obsolete={'F02: Reservebewertung ungeklärt.',
+                      'F01/F03/F04/F10/F12/F13: Rechts-, Abdeckungs-, Abrechnungs- und Optimierungsprofile nicht freigegeben.',
+                      'F08: LB-Referenzdatum bzw. feste Personen fehlen.',
+                      'F09: FK-Wiederholungsprofil nicht festgelegt.'}
+            notes=tuple(n for n in inputs.unchecked if n not in obsolete)
+            if any(n in obsolete for n in inputs.unchecked):
+                notes+=('F01: Geldbeträge und betriebliche Tarifgrundlagen bleiben ungeklärt.',)
+            if 'F08: LB-Referenzdatum bzw. feste Personen fehlen.' in inputs.unchecked:
+                from .catalog import lb_dates
+                present={e.attendance.start_day for e in inputs.events if e.service.code=='LB'}
+                missing=tuple(d for d in lb_dates(year,month) if d not in present)
+                if missing:notes+=('LB am '+', '.join(d.strftime('%d.%m.%Y') for d in missing)+': zwei feste Personen auswählen.',)
+            if changed:notes+=('Offener Altentwurf: Stundenbuchung im Startmonat, Sonntagszuordnung und Freitags-W17-Ausnahme für Wochenendwünsche übernommen; bestehende Zuteilungen erhalten.',)
+            inputs=replace(inputs,unchecked=tuple(dict.fromkeys(notes)))
+        return inputs,profile,blocks,events
 
     def month_snapshots(self,year=None,month=None):
         keys=[r[0].removeprefix('workspace:') for r in self.connection.execute("SELECT key FROM v2_meta WHERE key LIKE 'workspace:%' ORDER BY key")]
@@ -283,8 +325,8 @@ class V2Store:
             self.connection.execute("DELETE FROM v2_meta WHERE key='sheet-stage'")
             return proposal
 
-    def apply_correction(self,id,inputs,profile,*,budgets,expected_revision,allow_rules=False):
-        """Stapel, aktive Eingaben und verworfener Altentwurf atomar aktualisieren."""
+    def apply_correction(self,id,inputs,profile,*,budgets,expected_revision,allow_rules=False,blocks=(),events=None):
+        """Stapel und aktive Eingaben atomar aktualisieren; den übergebenen Plan erhalten."""
         from dataclasses import replace
         from .codec import workspace
         month=f'{inputs.year:04d}-{inputs.month:02d}'
@@ -302,15 +344,15 @@ class V2Store:
             for entry in entries:
                 self.connection.execute('INSERT INTO v2_entries VALUES(?,?,?) ON CONFLICT(id) DO NOTHING',(entry.id,encoded(entry.identity),encoded(entry_payload(entry))))
             merged={e.identity:e for e in tuple(e for e in inputs.absences if e.id!=replaces)+entries}
-            updated=replace(inputs,absences=tuple(merged.values()),manual_override=allow_rules,override_notes=('Wunschregeln/Budget ausdrücklich übergangen.',) if allow_rules else ())
-            value=workspace(updated,profile);revision_id='workspace/'+value['revision_id']
+            updated=replace(inputs,absences=tuple(merged.values()),manual_override=inputs.manual_override or allow_rules,override_notes=tuple(dict.fromkeys(inputs.override_notes+(('Wunschregeln/Budget ausdrücklich übergangen.',) if allow_rules else ()))))
+            value=workspace(updated,profile,blocks,events);revision_id='workspace/'+value['revision_id']
             self._immutable('v2_revisions',revision_id,encoded(value))
             self.connection.execute('INSERT INTO v2_meta VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',('workspace:'+month,revision_id))
             self.connection.execute('DELETE FROM v2_corrections WHERE id=?',(id,))
             self.connection.execute("UPDATE v2_meta SET value=CAST(value AS INTEGER)+1 WHERE key='input_revision'")
             return updated
 
-    def delete_entry(self,id,inputs,profile,*,expected_revision):
+    def delete_entry(self,id,inputs,profile,*,expected_revision,blocks=(),events=None):
         from dataclasses import replace
         from .codec import workspace
         month=f'{inputs.year:04d}-{inputs.month:02d}'
@@ -319,7 +361,7 @@ class V2Store:
             if self.connection.execute('SELECT 1 FROM v2_meta WHERE key=?',('confirmation:'+month,)).fetchone():raise DomainError('Bestätigter Testmonat bleibt geschützt.')
             if not any(e.id==id for e in inputs.absences):raise DomainError('Aktiver Eintrag fehlt.')
             updated=replace(inputs,absences=tuple(e for e in inputs.absences if e.id!=id))
-            value=workspace(updated,profile);revision='workspace/'+value['revision_id']
+            value=workspace(updated,profile,blocks,events);revision='workspace/'+value['revision_id']
             self.connection.execute('DELETE FROM v2_entries WHERE id=?',(id,))
             self._immutable('v2_revisions',revision,encoded(value))
             self.connection.execute('INSERT INTO v2_meta VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',('workspace:'+month,revision))
@@ -365,6 +407,10 @@ class V2Store:
             value=confirmation(inputs,blocks,events,accounts=accounts,wish_policy=wish_policy,fairness_policy=fairness_policy,
                                holidays=holidays,history=self.wish_history(month,policy=wish_policy),target_profile=target_profile,
                                month_profile=month_profile,synthetic=synthetic,allow_violations=allow_violations)
+            from .leave_accounts import leave_account_rows
+            from .serialization import plain
+            value['leave_accounts']=plain(leave_account_rows(self,inputs.people,inputs.year,inputs.month,current_entries=inputs.absences))
+            value['warnings'].extend(message for row in value['leave_accounts'] for message in row.get('diagnostics',()))
             for _,old in self.confirmations():
                 for quota,choices in value['quota_reservations'].items():
                     prior=old.get('quota_reservations',{}).get(quota)

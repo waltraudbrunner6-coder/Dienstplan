@@ -5,6 +5,7 @@ from .plan_import import prepare_plan_import
 
 
 def import_dialog(window,rows,mapping,notes=()):
+    rows=[dict(r,art='urlaub',gutschrifttage=r.get('gutschrifttage') or r.get('datum','')) if r.get('art')=='u_zuordnung_offen' else r for r in rows]
     dialog=QDialog(window);dialog.setWindowTitle('Termine, Dienste und Wünsche importieren');dialog.resize(1220,820)
     layout=QVBoxLayout(dialog)
     intro=QLabel('Personen-IDs zuordnen, Zeilen prüfen und danach den gesamten Import übernehmen. Fehler bleiben bearbeitbar vorgemerkt.');intro.setWordWrap(True);layout.addWidget(intro)

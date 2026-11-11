@@ -19,7 +19,7 @@ def pause(day,clock='21:00',end='21:30'):
 
 @pytest.mark.parametrize('key,day,staff,paid,clock',[
     ('T',12,None,180,None),('KC10',11,1,360,None),('KCT10',12,1,405,'13'),
-    ('KC16',11,1,450,'21'),('KCT',12,1,540,'21'),('TS',12,None,300,None),
+    ('KC16',11,1,450,'21'),('KC15',11,1,510,'21'),('KCT',12,1,540,'21'),('TS',12,None,300,None),
     ('W17',11,2,450,'21'),('TW',12,2,540,'21'),('W16',11,2,450,'21'),
     ('WL',11,2,450,'21'),('BK',11,2,450,'21'),('VN',11,1,120,None),
     ('LB',12,2,330,None),('LB_TS',12,2,420,'13'),('INT',11,1,450,'21'),
@@ -34,8 +34,8 @@ def test_catalog_staff_duration_and_participation_protection(key,day,staff,paid,
     assert (term.service.staff,duty.work_minutes)==(staff,paid)
 
 
-def test_complete_catalog_contains_all_seventeen_codes():
-    assert {t.code for t in CATALOG}==set('T KC10 KCT10 KC16 KCT TS W17 TW W16 WL BK VN LB INT N17 R FK'.split())
+def test_complete_catalog_contains_all_eighteen_codes():
+    assert {t.code for t in CATALOG}==set('T KC10 KCT10 KC16 KC15 KCT TS W17 TW W16 WL BK VN LB INT N17 R FK'.split())
 
 
 def test_thursday_generation_lb_rhythm_and_missing_parameters():
@@ -50,18 +50,18 @@ def test_thursday_generation_lb_rhythm_and_missing_parameters():
     assert not any(e.service.code in {'WL','BK'} for e in result.events)
 
 
-def test_reserve_cross_year_two_windows_requires_explicit_assessment():
+def test_reserve_cross_year_two_windows_count_as_normal_work():
     terms=[]
     for year,month in ((2026,12),(2027,1)):
         result=month_calendar(year,month,CalendarInput())
         terms.extend(e for e in result.events if e.service.code=='R')
-        assert any('F02' in s for s in result.missing)
+        assert not any('F02' in s for s in result.missing)
     assert len(terms)==28
-    with pytest.raises(DomainError,match='Reserve'):terms[0].assign('A')
+    assert terms[0].assign('A').work_minutes==360
     total=0
     for term in terms:
         breaks=(pause(term.attendance.start_day),) if term.service.key=='R_late' else ()
-        total+=term.assign('A',breaks,reserve_profile='full_work_test').work_minutes
+        total+=term.assign('A',breaks).work_minutes
     assert total==11340
 
 

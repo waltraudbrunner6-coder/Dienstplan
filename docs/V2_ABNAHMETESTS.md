@@ -2,13 +2,52 @@
 
 Aktueller Implementierungs- und Prüfstand: [Fortschritt](V2_FORTSCHRITT.md),
 [Zuordnung aller 125 Abnahmefälle](V2_ABNAHMESTATUS.md) und
-[Bedienung des technischen Prüfbereichs](V2_BEDIENUNG.md). Die nachfolgende
-Etappe-A-Spezifikation bleibt die fachliche Grundlage; Testprofile ersetzen sie nicht.
+[Bedienung der Desktop-Anwendung](V2_BEDIENUNG.md). Die nachfolgende
+Etappe-A-Spezifikation gilt mit den datierten Nutzerergänzungen; alte Testprofile ersetzen diese Antworten nicht.
 
 Stand 09.11.2026. **Geplante Abnahme für die Folgeimplementierung**, keine Behauptung,
-diese Tests seien bereits implementiert oder bestanden. Die aktuell ausgeführten
-158 Legacy-Tests sind getrennt in [Bestandsaufnahme](V2_BESTANDSAUFNAHME.md) belegt.
+diese Tests seien bereits implementiert oder bestanden. Die damals ausgeführten
+158 Legacy-Tests sind als historischer Ausgangsbericht getrennt in [Bestandsaufnahme](V2_BESTANDSAUFNAHME.md) belegt.
 Regeln: [Fachregeln](V2_FACHREGELN.md); offene Profile: [Fragen](V2_OFFENE_FRAGEN.md).
+
+## Verbindliche Überlagerung: Nutzerantworten vom 11.11.2026 / Version 0.5.0
+
+Die nachstehenden 125 IDs bleiben erhalten. Ihre nun aktualisierten Erwartungen
+richten sich nach den ausdrücklich beantworteten Fachfragen; die unveränderten
+Etappe-A-Beispiele sind kein Grund, die neuen Antworten wieder als offen zu behandeln.
+Dies ist ein **Abnahmekatalog**, keine Erklärung, alle Fälle seien implementiert
+oder bestanden. Ausgeführte Befehle, aktuelle Testzahlen und native Nachweise
+stehen ausschließlich im [Fortschritt](V2_FORTSCHRITT.md).
+
+- **Urlaub:** Jedes neu ausdrücklich als Urlaub markierte U-Datum zählt, auch am
+  Wochenende oder Feiertag, genau einmal mit dem an diesem Tag gültigen W/5.
+  Neue Urlaubszeiträume wählen die enthaltenen Kalendertage entsprechend sichtbar
+  aus. Alte, bereits explizit gespeicherte Tages-Teilmengen bleiben unverändert
+  lesbar: U01 und I01 sind bewusst **Legacy-/Kompatibilitätsfälle**, keine neue
+  Aufforderung, Wochenenden bei Urlaub wegzulassen. U05 prüft die neue Eingabe.
+- **Urlaubsanspruch:** Zwei Tage je vollem Beschäftigungsmonat werden angespart;
+  Anfangsbestand und Kontostart werden ausdrücklich erfasst. Bei Teilmonaten gilt
+  exakt `2 × beschäftigte Kalendertage / Kalendertage des Monats`, ohne vorzeitige
+  Tagesrundung. Fehlende frühere Verbrauchsmonate bleiben als unbekannt gekennzeichnet.
+  Negativer Urlaubsrest ist eine nachvollziehbare Prognose, kein neues Hartlimit.
+- **Pausen:** Gleichzeitige Pausen sind ausdrücklich erlaubt. Strengere
+  `CoverageRule`-Tests bleiben als technisch ausdrücklich gewählte Zusatzprofile
+  sinnvoll, dürfen aber nicht als betrieblicher Standard ausgegeben werden.
+- **Dienste:** R zählt wie normale Arbeit; KC15 ersetzt bei erforderlichem Ersatz
+  gemeinsam KC10 und KC16 durch einen Dienst 15:00–00:00 mit einer Person und
+  30 Minuten Pause. Reguläre vollständige Besetzung wird bevorzugt. LB beginnt
+  am 03.12.2026, danach alle 14 Tage mit zwei ausdrücklich gewählten festen Personen.
+  FK ist ein Einzeltermin ohne automatische Wiederholung. Für den 31.12. ist KCT10 bis 17:30 bestätigt. WL/BK bleiben ganzjährig 2/1 je Woche.
+- **Kalender/Buchung:** Freie Wochenenden gehören zum Monat ihres Sonntags.
+  Die enge Freitags-W17-Ausnahme gilt auch für Wochenend-Freiwünsche; ein sonst
+  freies Samstag/Sonntag-Wochenende wird durch diesen W17 nicht als Wunschverletzung gezählt.
+  M1 bucht die gesamte bezahlte Arbeit im Monat des Dienstbeginns; physische
+  Tages-/Nacht-/Feiertagsmengen bleiben tatsächlich segmentiert. M0 bleibt für
+  alte bestätigte Stände und bewusst benannte Vergleichstests unverändert erhalten.
+- **Übersteuerung:** Eine Meldung „unzulässig“ bezeichnet die unabhängige Prüfung
+  und den automatischen Solver. Sie verbietet nicht die bereits genehmigte
+  manuelle/Import-Übernahme bzw. Monatsbestätigung nach ausdrücklicher Warnung.
+  Technische Identitätsfehler und unveränderliche bestätigte Fakten bleiben geschützt.
 
 ## Gemeinsame Testkonvention
 
@@ -27,12 +66,14 @@ Regeln: [Fachregeln](V2_FACHREGELN.md); offene Profile: [Fragen](V2_OFFENE_FRAGE
   operativen Monatsplan. Integration prüft anschließend alle harten Regeln gemeinsam.
 - Pausen liegen in den ausdrücklich angegebenen zulässigen Fenstern; ohne weitere
   Angabe Testprofil mit frei wählbarer 30-Minuten-Pause innerhalb des Blocks und
-  außerhalb verpflichtender Teamzeit. Das ist **keine bestätigte Pausen-/Rechtsregel**.
+  außerhalb verpflichtender Teamzeit. Gleichzeitige Pausen sind erlaubt; eine zusätzliche
+  durchgehende Mindestabdeckung wird nur unter ausdrücklich ausgewähltem Zusatzprofil geprüft.
 - Für bedingte Fälle wird das Profil explizit angegeben. Testprofil **S0**:
   Soll `Σ(W_d × 60/7)` über eingeschlossene Beschäftigungstage, pro Person/Monat
   einmal `ROUND_HALF_UP`; Gutschrift getrennt ebenso. Für Monatsschnitte gilt im
-  Testprofil **M0** der tatsächliche lokale Arbeitsmonat. S0/M0 sind nicht als
-  betrieblich bestätigter Standard auszugeben (F04).
+  Legacy-/Vergleichsprofil **M0** der tatsächliche lokale Arbeitsmonat. Der neue
+  bestätigte Standard **M1** bucht dagegen den ganzen Dienst im Startmonat.
+  S0 entspricht der bereits bestätigten Kalendertage-Sollregel; keine Tarifregel daraus ableiten.
 - Einzelergebnis enthält Regel-ID/Person/Termin, konkrete Werte und verständliche
   Ursache. „Zulässig“ für eine Einzelregel ersetzt keinen Gesamtnachweis bei
   unbekannten Randdaten oder fehlendem Rechts-/Reserveprofil.
@@ -41,18 +82,18 @@ Regeln: [Fachregeln](V2_FACHREGELN.md); offene Profile: [Fragen](V2_OFFENE_FRAGE
 
 | ID | Eingabe | Erwartetes Ergebnis |
 | --- | --- | --- |
-| D01 | KC10, KC16, W17 am Mi 11.11.2026 | Je ein Termin, Plätze 1/1/2; Arbeit 360/450/450 min je Person. Gesamtbedarf 1710 min, 4 Plätze. |
+| D01 | KC10, KC16, W17 am Mi 11.11.2026; zusätzlich zulässiger KC15-Ersatzfall bei fehlender regulärer Besetzung | Regulär je ein Termin, Plätze 1/1/2, Arbeit 360/450/450 min je Person: 1710 min und 4 Plätze. Bei KC15-Ersatz entfallen KC10 und KC16 gemeinsam: KC15 15:00–00:00, eine Person, 510 bezahlte min; W17 bleibt unverändert. Dann 1410 min und 3 Plätze. Ersatz und geänderter Bedarf sind sichtbar; kein leerer Ersatz zum Verbergen offener Plätze. |
 | D02 | Regulärer Do 12.11., keine TS/LB/R-Zusätze | KCT10=1 Platz/405 min, KCT=1/540, TW=2/je 540; keine zusätzlichen KC10/KC16/W17. Operativer Bedarf 2025 min, 4 Plätze. |
 | D03 | D02: A KCT10, B KCT, C/D TW, E–L T; vollständige zulässige Pausen außerhalb T | Alle 12 erfüllen T genau einmal. Nur acht eigenständige T-Zuteilungen. Gesamte Arbeit 3465 min, enthaltene T-Zeit nicht nochmals addieren. |
 | D04 | Do 12.11. als TS-Tag; A KCT10, B KCT, C/D TW, E–L TS | Eine TS-Veranstaltung statt T. A–D erfüllen T und sind vom zusätzlichen TS-Ziel ausgenommen. E–L erfüllen TS. Keine vier falschen T-Fehlmeldungen, keine zusätzlichen T-Blöcke. |
-| D05 | LB am regulären Do 12.11. für E/F | Zwei Plätze, je 12:00–17:30, 330 min Arbeit, kein automatischer Pausenabzug; beide erfüllen T ohne zweite T-Zuteilung. |
-| D06 | LB E/F am TS-Do 12.11.; Pause 13:00–13:30 | Je ein Block 12:00–19:30, 450 min Anwesenheit, 420 Arbeit, genau eine Pause; volle TS und T enthalten, keine zusätzlichen T/TS-Stunden. |
+| D05 | Manuell vorgegebener LB am regulären Do 12.11. für E/F (Legacy-Einzelfunktionsfall, kein neuer Rhythmusanker) | Zwei Plätze, je 12:00–17:30, 330 min Arbeit, kein automatischer Pausenabzug; beide erfüllen T ohne zweite T-Zuteilung. Automatische Rhythmustermine beginnen erst 03.12.2026, siehe Q09. |
+| D06 | Manuell vorgegebener LB E/F am TS-Do 12.11.; Pause 13:00–13:30 (Legacy-Einzelfunktionsfall) | Je ein Block 12:00–19:30, 450 min Anwesenheit, 420 Arbeit, genau eine Pause; volle TS und T enthalten, keine zusätzlichen T/TS-Stunden. Dieser technische Kombiblocktest setzt keinen November-Rhythmusanker. |
 | D07 | BK bis Do 12.11. 04:00, T 14:30 für dieselbe Person angefragt | Kein unzulässiger zusätzlicher T-Block. 630 min Abstand erklären; BK-Ausnahme/zulässiges Auslassen zeigen, nicht „verbindliche Teamsitzung verletzt“. |
 | D08 | Zwei verschiedene operative Aufgaben mit zufällig gleicher/überlappender Zeit, kein freigegebener gemeinsamer Block | Doppelzuteilung bleibt unzulässig; Intervallvereinigung darf den Konflikt nicht kaschieren. |
 | D09 | TS-Tag, teilnahmeberechtigte Person ohne erfüllenden Block/Teilnahme; keine Ausnahme | Ein unerfülltes Person-Veranstaltungsziel, nicht zwei unabhängige Strafen für T und TS. Erfüllter Umfang 0. |
 | D10 | Eigenständiges T plus KCT10 derselben Person am 12.11. manuell eingetragen | Als Doppel-/Ein-Block-Konflikt zurückweisen, nicht als 585 Arbeitsminuten buchen. Korrekte KCT10-Zuteilung allein 405 min. |
 | D11 | VN am 11.11. und 18.11., jeweils Person G; INT am 10./24.11. für H/I, N17 am 20.11. für J | Je 1 Platz; VN je 120, INT/N17 je 450 min Arbeit; Termine und Personen bleiben fest, keine automatische Ersatzperson/-verschiebung. |
-| D12 | FK einmalig am 21.11. für K, 09:00–16:00, Pause 12:00–12:30; Testperiode einmalig | Ein fester Platz, 420 min Anwesenheit/390 Arbeit. Andere Wiederholungen erst nach F09, keine automatische monatliche Kopie. |
+| D12 | FK einmalig am 21.11. für K, 09:00–16:00, Pause 12:00–12:30; bestätigter Einzeltermin | Ein fester Platz, 420 min Anwesenheit/390 Arbeit. Keine automatische monatliche oder jährliche Wiederholung/Kopie; F09 ist hierfür beantwortet. |
 
 ## P – Personen, Verträge und Berechtigungen
 
@@ -60,7 +101,7 @@ Regeln: [Fachregeln](V2_FACHREGELN.md); offene Profile: [Fragen](V2_OFFENE_FRAGE
 | --- | --- | --- |
 | P01 | A ohne Führerschein, N17 am 20.11. | A ist kein Kandidat; manuelle Fixierung wird vor Übernahme beanstandet. |
 | P02 | Derselbe fehlende Führerschein, explizite Rechte für W17/WL/BK | Nicht allein wegen Führerschein ausschließen; keine erfundene Führerscheinregel außerhalb N17. |
-| P03 | X vom 01.11.–31.12. beschäftigt, Außendienstprofil, Führerschein vorhanden | Nur W17/W16/BK/WL/N17/TW operativ sowie T/TS erlaubt; KC10/KCT10/KC16/KCT/LB/VN/INT/FK/R nicht aus dem Profil ableiten. |
+| P03 | X vom 01.11.–31.12. beschäftigt, Außendienstprofil, Führerschein vorhanden | Nur W17/W16/BK/WL/N17/TW operativ sowie T/TS erlaubt; KC10/KCT10/KC16/KC15/KCT/LB/VN/INT/FK/R nicht aus dem Profil ableiten. |
 | P04 | X am Do 12.11. ohne operativen Block, kein Urlaub, Ruhe erfüllt | X ist für T bzw. TS auf TS-Tag teilnahmeberechtigt und im weichen Ziel enthalten. |
 | P05 | X Beschäftigung bis 31.12.; N17 31.12. 17:00–01.01. 01:00 | Unzulässig: Ende außerhalb Beschäftigung, obwohl Startdatum darin liegt. |
 | P06 | Gleiches Ende; erlaubter Block endet exakt 01.01.2027 00:00 | Beschäftigungsgrenze eingehalten; Start außerhalb am 01.01. wäre unzulässig. |
@@ -86,40 +127,42 @@ Regeln: [Fachregeln](V2_FACHREGELN.md); offene Profile: [Fragen](V2_OFFENE_FRAGE
 | R13 | Urlaub Mo 09./Di 10.11., keine Dienste, je 5 h Gutschrift; Sa 14.11. Arbeit | Mo/Di bilden ein Freipaar; Gutschrift erzeugt keine Arbeits-/Anwesenheitstage. |
 | R14 | Nur W17 Fr 13.11. 17:00–Sa 01:00, sonst Sa/So keine Arbeit; Mo/Di vorher frei | Wochenende darf für Schutzquote als frei zählen; Samstag bleibt tatsächlicher belegter Tag für Folgen/Ruhe/Vorwochenpaar. |
 | R15 | R14 mit WL, BK oder N17 anstelle W17, alternativ zusätzlicher Sa-Dienst | Keine W17-Zählausnahme; Wochenende belegt. Nicht das gleiche Zeitmuster als Berechtigung verwenden. |
-| R16 | Voller November; genau zwei der vier Sa/So-Paare frei, Vergleich nur eines frei | Zwei erfüllen die Schutzquote, eines verletzt sie. Für zusätzlich anzurechnendes 31.10./01.11.-Randwochenende erst F10 anwenden. |
+| R16 | Voller November 2026 mit bekannten Randtagen; genau zwei der fünf sonntagszugeordneten Wochenenden frei, Vergleich nur eines frei | Zwei erfüllen die Schutzquote, eines verletzt sie. 31.10./01.11. zählt wegen des Sonntags zum November. Unbekannte Randtage dürfen nicht als nachgewiesen frei gelten; Teilmonatsquote bleibt gesondert ungeklärt. |
 | R17 | R14, aber in Mo–Fr vorher kein zusammenhängendes Freipaar; zusätzlich Randtag unbekannt | W17-Zählausnahme hebt die Vorwochen-Schutzregel nicht auf. Bei fehlenden nötigen Randdaten außerdem „Prüfung unvollständig“, kein Nachweis durch leere Zukunft. |
 
 ## Q – Quoten, Termine und Jahreswechsel
 
-Die folgenden Quotenbeispiele benutzen das **ausdrückliche Testprofil Q0**:
-ISO-Woche Mo–So, Saison nach Wochenbeginn, gemeinsame Wochen-ID über Monatspläne.
-Es ist ein Test der parametrisierbaren Regel, keine Entscheidung von F06.
+Die folgenden Standardbeispiele benutzen die ausdrücklich gewählte ISO-Woche
+Mo–So mit gemeinsamer Wochen-ID über Monatspläne und ganzjährig zwei WL plus
+einem BK. Ob gemeinsame Randwochen oder nur volle Monatswochen geplant werden,
+bleibt die konkrete gespeicherte Profilwahl. Frühere saisonale Q0-Beispiele bleiben
+als benannte parametrische Legacy-Regressionen erhalten, sind aber kein neuer Standard.
 
 | ID | Eingabe | Erwartetes Ergebnis |
 | --- | --- | --- |
-| Q01 | Vollständige Q0-Woche 09.–15.11., WL/BK automatisch, alle nötigen Personen verfügbar | Genau ein WL und ein BK mit jeweils zwei unterschiedlichen Personen; Solver wählt Daten und Personal gekoppelt, ohne vorgegebene Person. |
-| Q02 | Q0-Woche 07.–13.12.2026, ausreichend zulässige Daten | Zwei WL an zwei verschiedenen Startdaten und ein BK, jeweils zwei Personen; nicht vier WL-Personenplätze an einem einzigen Termin bündeln. |
-| Q03 | Woche 30.11.–06.12.2026 aus November und Dezember nacheinander geöffnet | Unter Q0 einmal gemeinsame November-Ankerquote: 1 WL/1 BK, keine zweite Monatsquote. Testprofil mit Dezemberanker würde 2 WL verlangen; Variante ausdrücklich kennzeichnen. |
-| Q04 | Q0-Woche 25.–31.01.2027 und Woche 01.–07.02.2027 | Erste Woche 2 WL, zweite 1 WL; BK jeweils 1. Kein Quoten-Reset mitten in derselben Woche. |
+| Q01 | Vollständige Woche 09.–15.11., WL/BK automatisch, alle nötigen Personen verfügbar | Genau zwei WL an unterschiedlichen Daten und ein BK mit jeweils zwei unterschiedlichen Personen; Solver wählt Daten und Personal gekoppelt, ohne vorgegebene Person. |
+| Q02 | Vollständige ISO-Woche 07.–13.12.2026, ausreichend zulässige Daten | Zwei WL an zwei verschiedenen Startdaten und ein BK, jeweils zwei Personen; nicht vier WL-Personenplätze an einem einzigen Termin bündeln. |
+| Q03 | Gemeinsame ISO-Randwoche 30.11.–06.12.2026 aus November und Dezember nacheinander geöffnet | Genau eine gemeinsame Quote von zwei WL und einem BK; keine zweite Monatsquote und kein Saisonwechsel innerhalb der Woche. Profilwahl und tatsächlich übernommene Randtermine sichtbar halten. |
+| Q04 | Woche 25.–31.01.2027 und Woche 01.–07.02.2027 | In beiden Wochen zwei WL und ein BK; ganzjährig dieselbe Anzahl, kein saisonaler Wechsel zum Februar. Kein Quoten-Reset mitten in derselben Woche. |
 | Q05 | WL auf 10.11. fixiert, Personal nicht fixiert; A/B dort nicht verfügbar, C/D geeignet | WL bleibt am 10.11.; C/D dürfen gewählt werden. Nicht das Datum verschieben und nicht A/B aus der Datumsfixierung ableiten. |
 | Q06 | WL nur auf 10.11. zugelassen; zusätzliche bestätigte Fixierungen schließen dort alle Plätze aus | Termin bleibt fest und bekommt offene Plätze bzw. konkreten Vorgabenkonflikt; keine stille Verschiebung. Harte Personenkonflikte nicht zugunsten Besetzung verletzen. |
-| Q07 | WL und BK beide gleicher Starttag 13.11., normale Zeiten | Verbindlicher Ausschluss verletzt; unter Starttags- und Intervallprofil gleichermaßen. F07 für abweichende Grenzfälle explizit parametrieren, nicht aus Namen ableiten. |
+| Q07 | WL und BK beide gleicher Starttag 13.11., normale Zeiten | Verbindlicher Ausschluss im Standardprofil verletzt, unabhängig von zufällig getrennten Zeitintervallen. Automatischer Solver wählt keinen solchen Plan; ausdrückliche manuelle Übersteuerung bleibt als Abweichung sichtbar. |
 | Q08 | Zwei gleichwertig besetzbare WL-Tage: Di 17.11. und So 22.11.; gleiche höheren Ziele | Dienstag bevorzugen. Wenn nur Sonntag regelgültig möglich ist, Sonntag zulassen und Präferenzabweichung erklären. |
-| Q09 | LB-Testanker 12.11.2026, monatliche Kalender Nov/Dez/Jänner | Termine 12.11., 26.11., 10.12., 24.12., 07.01.2027; TS-Termin verlängert genau den betreffenden LB, kein Rhythmusreset. |
-| Q10 | Reserveperiode 24.12.2026–06.01.2027, volle Arbeitsbewertung als Testprofil | 14 Startdaten × 2 Zeitfenster = 28 Einpersonentermine; 31.12./01.01. eingeschlossen, 23.12./07.01. nicht. Insgesamt 11340 Arbeitsminuten/189 h. Dieselbe Person darf nie beide Fenster desselben Tages bekommen. |
+| Q09 | Bestätigter LB-Anker 03.12.2026; Kalender November/Dezember 2026/Jänner 2027, zwei feste Personen | November ohne automatische LB-Termine; Dezember 03./17./31., Jänner 14./28. Ein TS-Termin verlängert nur seinen LB, kein Rhythmusreset. Fehlende Termine gemeinsam ergänzen, bestehende LB-Termine/Personen/Zuteilungen unverändert lassen; ohne gewählte Personen nichts erfinden. |
+| Q10 | Reserveperiode 24.12.2026–06.01.2027; R als bestätigte normale Arbeit | 14 Startdaten × zwei Zeitfenster = 28 Einpersonentermine; 31.12./01.01. eingeschlossen, 23.12./07.01. nicht. Früh 360, spät nach 30-min-Pause 450 Arbeitsminuten; insgesamt 11340 min/189 h. Dieselbe Person darf automatisch nicht beide Fenster eines Tages übernehmen. M1 bucht je Dienst vollständig im Startmonat. |
 | Q11 | INT-Daten nur einer statt zwei oder N17-Datum/Person fehlt | Konkrete fehlende Monatseingabe nennen; keinen zweiten Termin/keine Person erfinden. Fester VN/FK-Konflikt wird ebenso ausgewiesen. |
 
 ## U – Urlaub und anrechenbare Tage
 
 | ID | Eingabe | Erwartetes Ergebnis |
 | --- | --- | --- |
-| U01 | Urlaub 09.–15.11., explizite Gutschrifttage 09.–13.11., W=25 | Ganzer Abwesenheitszeitraum sperrt alle Dienste inkl. T/TS; fünf Gutschrifttage = 1500 min, nicht sieben Tage = 2100 min. Mehr als vier Tage zulässig. |
+| U01 | Legacy-Urlaub 09.–15.11. mit bereits explizit gespeicherten Gutschrifttagen 09.–13.11., W=25 | Kompatibilität: ganzer gespeicherter Abwesenheitszeitraum bleibt erhalten, bestehende fünf explizite Gutschrifttage bleiben 1500 min und werden nicht rückwirkend auf sieben/2100 min umgeschrieben. Neue U-Eingaben richten sich nach U05. Mehr als vier Urlaubstage bleiben zulässig. |
 | U02 | Urlaub Do 12.11., Gutschrifttag ausdrücklich erfasst | Urlaub erlaubt, keine T-/TS-Zuteilung; Urlaub wird nicht wegen Donnerstagsverbot für Wünsche verworfen. |
 | U03 | Derselbe Urlaub zweimal mit anderen Kommentaren, dazu überlappender Urlaubsdatensatz | Person/Datum nur einmal gutschreiben. Abwesenheitsvereinigung nachvollziehbar, keine doppelte Gutschrift/kein doppelter Bedarf. |
 | U04 | Fünf Urlaubstage, zwei mit W=37 und drei nach Wechsel mit W=30 | G = 2×444 + 3×360 = 1968 min. Nicht den neuesten Vertrag rückwirkend für alle Tage anwenden. |
-| U05 | Urlaub über Weihnachten, anrechenbare Tagesmenge nicht bestätigt | Abwesenheit steht fest, Gutschrifttage/Feiertagseffekt noch ungeklärt. Keine pauschale Gutschrift pro Kalendertag; konkrete fehlende Auswahl anzeigen. |
+| U05 | Neue ausdrücklich als U/Urlaub markierte Kalendertage 24.–27.12.2026 einschließlich Feiertagen/Wochenende; W=25 | Jedes der vier markierten Daten zählt einmal: vier Urlaubstage und 4×300=1200 Gutschriftminuten. Neue Datumseingabe/Import übernimmt die sichtbaren U-Tage; kein ungeklärter Feiertags-/Wochenendfilter und keine Nullgutschrift. Alte Datensätze ohne Tagesmenge werden verständlich vervollständigt, bestehende explizite Teilmengen aus U01 nicht umgedeutet. |
 | U06 | Urlaubsgutschrift auf Datum außerhalb der Beschäftigung oder außerhalb des Urlaubs | Als ungültigen Gutschriftbezug melden, keine Stunden erzeugen. Vertrags-/Beschäftigungsbeginn nicht zur Füllung des Saldos verschieben. |
-| U07 | Urlaub und manuell fixierter operativer Dienst mit echter Überschneidung | Fixierung unzulässig, Bestätigung blockiert; keinen Urlaub übergehen, auch nicht für Besetzung oder Teamziel. |
+| U07 | Urlaub und manuell fixierter operativer Dienst mit echter Überschneidung | Konflikt klar benennen; automatische Planung respektiert die Sperre. Manuelle Änderung/Import und Monatsbestätigung dürfen nach ausdrücklicher Warnung übersteuert werden; Konflikt und unveränderlicher Bestätigungsstand bleiben dokumentiert. |
 
 ## W – Wünsche und die bestätigte Korrekturvormerkung
 
@@ -134,13 +177,13 @@ Es ist ein Test der parametrisierbaren Regel, keine Entscheidung von F06.
 | W07 | W05: Problemzeile auf gültigen Mittwoch-Zeitraum korrigieren, dann gesamte Vorschau übernehmen | Gesamten Stapel gegen vorhandene UI-/CSV-Daten erneut prüfen und atomar aktivieren; Korrekturvormerkung erledigt, keine Teilimporte zurücklassen. |
 | W08 | Offene Vormerkung speichern, Anwendung schließen/öffnen, dann verwerfen | Original/Zeilenfehler wiederherstellbar, aktive Planung unverändert; Verwerfen entfernt nur die Vormerkung. Bestätigte Vergangenheit bleibt unberührt. |
 | W09 | Bestätigter Legacy-Donnerstagswunsch; neuer V2-Importregelstand | Historischer Snapshot/Übergehungen unverändert; nicht nachträglich herausfiltern oder umtypisieren. Neue Einträge folgen Korrekturverfahren. |
-| W10 | Wochenendwunsch 14./15.11., nur Freitags-W17 bis Sa 01:00 | Profil F11 „Ausnahme auch für Wunsch“: erfüllt; Profil „tatsächlich frei“: einmal verletzt. Schutz-Wochenendzählung in beiden Fällen nach enger W17-Regel unverändert. |
+| W10 | Wochenendwunsch 14./15.11., nur Freitags-W17 bis Sa 01:00, sonst Samstag/Sonntag ohne Dienst | Im neuen bestätigten Standard ist der Wochenendwunsch erfüllt: die enge Freitags-W17-Ausnahme gilt auch für diesen Wunsch. Eine andere Dienstart oder zusätzlicher Samstag-/Sonntagdienst erfüllt die Ausnahme nicht. Alte ausdrücklich strengere Wunschprofile bleiben als Legacy-Vergleich lesbar, werden aber nicht als neuer Standard eingesetzt. |
 
 ## I – Importtypen und Atomarität
 
 | ID | Eingabe | Erwartetes Ergebnis |
 | --- | --- | --- |
-| I01 | Urlaubzeile des CSV-Format-2-Beispiels aus Fachregeln; W=25; UTF-8/BOM, Semikolon bzw. dieselben Felder komma-getrennt | Gleiche normalisierte Abwesenheit 09.–15.11. und fünf Gutschrifttage/1500 min; kein 24-h-/Vier-P1-Limit; Typ/Zeitraum/Identität sichtbar. |
+| I01 | Legacy-Zeile mit ausdrücklich gespeicherter Teilmenge im CSV-Format 2; W=25; UTF-8/BOM, Semikolon oder dieselben Felder komma-getrennt | Kompatibilität: normalisierte Abwesenheit 09.–15.11. und die fünf expliziten Gutschrifttage bleiben 1500 min. Kein 24-h-/Vier-P1-Limit. Davon getrennt zählt jeder neu importierte markierte U-Tag gemäß U05, auch Wochenende/Feiertag. |
 | I02 | Typ unbekannt, ungültiges Datum, nur eine Uhrzeit, widersprüchlicher Zeitraum in verschiedenen Zeilen | Alle lesbaren Fehler mit Zeilennummern, vollständige Korrekturvormerkung, aktive Daten unverändert. |
 | I03 | Altes `datum;von;bis;prioritaet;kommentar`, P1 an fünf verschiedenen Tagen | Als Altformat erkennen; bestehende Legacy-Validierung erklären. P1 keinesfalls automatisch zu Urlaub machen, um die alte Grenze zu umgehen. Explizite V2-Typzuordnung/Korrektur nötig. |
 | I04 | Gleicher mehrtägiger V2-Wochenendwunsch erneut importiert, anderer Kommentar | Stabile Importidentität wiederverwenden, keine doppelte Budget-/Historienwirkung. |
@@ -152,12 +195,12 @@ Es ist ein Test der parametrisierbaren Regel, keine Entscheidung von F06.
 | ID | Eingabe | Erwartetes Ergebnis |
 | --- | --- | --- |
 | Z01 | KC10/R früh genau 6 h; FK 6:01 h | Erste beiden ohne automatischen Abzug; FK enthält 30 min Pause, 331 min Arbeit. Keine 6-h-Pause allein aus Gewohnheit. |
-| Z02 | KCT10 7:15 h, KC16/W17/W16/WL/BK/INT/N17/R spät je 8 h, KCT/TW 9:30 h | Je eine 30-min-Pause, Arbeit 405/450/540 min wie Katalog, Pause verlängert keinen Block. R-Zahl nur unter voller Arbeitsbewertung. |
+| Z02 | KCT10 7:15 h, KC16/W17/W16/WL/BK/INT/N17/R spät je 8 h, KCT/TW 9:30 h; KC15 9 h | Je eine 30-min-Pause, Arbeit 405/450/540 min wie Katalog; KC15 510 min. Pause verlängert keinen Block. R ist bestätigte normale Arbeit und benötigt kein ungeklärtes Reserve-Bewertungsprofil mehr. |
 | Z03 | W17 17:00–01:00, Pause 21:00–21:30 | 480 Anwesenheit, 450 Arbeit, 180 Nachtminuten; kein Pausenabzug von 22:00–01:00. |
 | Z04 | W17 gleiche Zeiten, Pause 22:00–22:30 | 450 Arbeit, 150 Nachtminuten. Bei sonst exakt gleicher höherer Qualität Z03 bevorzugen. |
 | Z05 | KCT10/TW/KCT mit Pause 15:00–15:30; Vergleich zulässige Pause außerhalb T | Erster Kandidat erfüllt nicht die volle erforderliche T-Teilnahme und ist kein zulässiger erfüllender Kombiblock; nicht fiktiv voll anrechnen. Zweiter korrekt. |
 | Z06 | LB an TS-Tag, Pause 17:00–17:30 | Verletzt vollständige TS-Erfüllung; keine volle TS markieren. Zulässige 13:00–13:30 ergibt dagegen 420 min Arbeit und volle Teilnahme. |
-| Z07 | Zwei Personen decken durchgängig Mindestbesetzung 2; beide gleichzeitig Pause; Vergleich reale geeignete Vertretung | Ohne Vertretung unter bestätigtem Abdeckungsprofil unzulässig. Bloße nominelle Zuteilung reicht nicht. Bei ungeklärtem F03 keine bestandene Abdeckungsprüfung behaupten. |
+| Z07 | Zwei Personen eines normalen Dienstes nehmen gleichzeitig ihre enthaltene 30-min-Pause; Vergleich ausdrücklich zusätzlich aktiviertes CoverageRule-Profil | Im bestätigten Standard sind gleichzeitige Pausen erlaubt und verlangen keine Vertretung. Enthaltene/korrekte Pausen und geschützte Teamfenster bleiben zu prüfen. Ein ausdrücklich separat konfiguriertes strengeres Abdeckungsprofil darf den Vergleichsfall technisch ablehnen; sein Test ist kein Nachweis eines betrieblichen Vertretungszwangs. |
 | Z08 | BK 28.03.2026 20:00–29.03.04:00, Pause 21:00–21:30 | 420 reale Anwesenheitsminuten, 390 Arbeit, 300 reale Nachtminuten. Geld/zusätzliche Gutschrift separat nach Profil. |
 | Z09 | BK 24.10.2026 20:00–25.10.04:00, Pause 21:00–21:30 | 540 Anwesenheit, 510 Arbeit, 420 Nachtminuten; doppelte Herbststunde physisch berücksichtigen. |
 | Z10 | Ende 28.03.2026 20:00 CET; nächster Start 29.03.08:00 CEST; Vergleich 07:59 | Tatsächlich 660 min Ruhe, Vergleich 659; lokale Anzeige von 12 h ist kein korrekter Dauernachweis. |
@@ -174,7 +217,7 @@ Es ist ein Test der parametrisierbaren Regel, keine Entscheidung von F06.
 | K05 | S0 November W=25, fünf erfasste Urlaubstage, B=600, E=0 | G=1500; Ziel `6429−600−1500=4329` min. Rein rechnerisch P=4329 ergibt Ende 0; keine zusätzliche Sollminderung. Kein Anspruch, eine echte Schichtkombination könne dieses Ziel exakt erreichen. |
 | K06 | Fünf Gutschrifttage bei W=25,04 | Roh-G = 5×300,48 = 1502,4 min, nach einmaliger Monatsrundung 1502; nicht fünfmal runden und 1500 buchen. |
 | K07 | S0 November, W=25 an 01.–15., W=30 an 16.–30.; Urlaub 02. und 16. | S roh 49500/7 min → 7071; G=300+360=660 min. Tagesgültigen Vertrag verwenden. |
-| K08 | S0, Eintritt 16.11., W=25, außerhalb Beschäftigung keine Tage | S roh 22500/7 → 3214 min für 15 Beschäftigungstage, nicht ganzer Monat. Unter anderem bestätigtem Sollprofil dessen explizite Ergebnisse prüfen. |
+| K08 | S0, Eintritt 16.11., W=25, außerhalb Beschäftigung keine Tage | S roh 22500/7 → 3214 min für 15 Beschäftigungstage, nicht ganzer Monat. Urlaubserwerb separat exakt 2×15/30 = 1 Tag; Sollstunden- und Urlaubskonto nicht vermischen. Bei 16 Beschäftigungstagen in einem 31-Tage-Monat Erwerb exakt 32/31 Tage, nicht vorzeitig auf ganze Tage runden. |
 | K09 | S=600, B=300, E=0, G=600; Vergleich W=0 | Roh-Arbeitsziel −300, keine negative Zuteilung. Bei P=0 Ende +300 und Abweichung +300 erklären. Bei Nullsoll keine Division durch null in Fairness; Nullfall ausdrücklich anzeigen. |
 
 ## L – Kalender, Zeitmengen und Tarife
@@ -183,15 +226,16 @@ Es ist ein Test der parametrisierbaren Regel, keine Entscheidung von F06.
 | --- | --- | --- |
 | L01 | Nationaler AT-Testkalender 2026 | Ostermontag 06.04., Himmelfahrt 14.05., Pfingstmontag 25.05., Fronleichnam 04.06. sowie neun feste Feiertage aus Fachregeln. Osterdatum selbst ist nicht zusätzlich als Werktagsfeiertag einzusetzen. Primärquellenfreigabe bleibt vor Produktabnahme nötig. |
 | L02 | 24.12., 31.12., 25.12., 26.12.2026 | Erste beiden keine nationalen gesetzlichen Feiertage, letzte beiden ja; zusätzliches KV-Profil darf erste beiden separat markieren. R-Periode verändert den nationalen Kalender nicht. |
-| L03 | N17 30.04.2026 17:00–01.05.01:00, Pause 21:00–21:30 | 450 Arbeits-, 180 Nacht-, 60 gesetzliche Feiertagsminuten; physische Monatssegmente April 390 Arbeit/120 Nacht, Mai 60/60. Monatsgutschrift gemäß F04; M0 liefert diese Arbeitsteilung. |
+| L03 | N17 30.04.2026 17:00–01.05.01:00, Pause 21:00–21:30 | 450 Arbeits-, 180 Nacht-, 60 gesetzliche Feiertagsminuten. Physische Segmente: April 390 Arbeit/120 Nacht, Mai 60/60. M1 bucht dagegen alle 450 Arbeitsminuten auf April und null auf Mai. Alte M0-Buchung bleibt als Legacy-Vergleich unverändert; Mengen werden nicht doppelt gezählt. |
 | L04 | N17 31.10.17:00–01.11.2026 01:00, Pause vor 22:00 | 01.11. ist Sonntag und Feiertag: je 60 Minuten in beiden Kategorien, aber nur 60 physische Arbeitsminuten dort. Keine automatische doppelte Eurovergütung. |
 | L05 | Zeitmengen vorhanden, KV-/BV-Zuordnung oder personenbezogene Bemessungsbasis fehlt | Exakte Mengen, Euro „ungeklärt“, nicht 0 und nicht erfundener Tarif. Nachweisstatus nennt fehlende Grundlage. |
 | L06 | Zwei ausdrücklich bestätigte **synthetische** Testtarife: 2 EUR/Nachtstunde bis 31.12.2026, 3 EUR ab 01.01.2027; je 60 Nachtminuten beiderseits | 2+3=5 EUR nach Zeitgültigkeit; keine Aussage über echte KV-Beträge. Vor Wirksamkeitsbeginn/neben Anwendungsbereich kein passender Tarif statt stiller Übernahme KV 2026. |
 
 ## H – Historie und Fairness
 
-Diese Fälle benötigen ausdrücklich gewählte Testprofile für F11–F13; sie entscheiden
-die betriebliche Gewichtung nicht durch ihre bloße Existenz.
+Die Fälle prüfen die bestätigte Freitags-W17-Ausnahme, vertragliche Fairness,
+Gruppenschutz und eingefrorene Historie. Abweichende alte Profile bleiben explizite
+Legacy-Vergleiche; andere bloß synthetische Zielgewichte entscheiden keine neue Betriebsregel.
 
 | ID | Eingabe | Erwartetes Ergebnis |
 | --- | --- | --- |
@@ -200,7 +244,7 @@ die betriebliche Gewichtung nicht durch ihre bloße Existenz.
 | H03 | Ein Wunsch über Monatsgrenze, durch zwei Dienste in zwei bestätigten Monaten verletzt | In kumulierter Historie einmal dieselbe Wunschidentität; monatliche Einzelberichte dürfen denselben Bezug zeigen, ohne kumuliert zwei zu behaupten. |
 | H04 | A/B gleiche relevanten Rechte/Verträge/Wunschanzahl, historisch A zwei Übergehungen und B null; genau eine weitere unvermeidlich | Unter gewähltem historisch ausgleichendem Testziel eher B belasten; nicht bloß feste Belastungssumme minimieren. Höhere Besetzung/harte Regeln unverändert. |
 | H05 | Nach Wochenstunden gewichtetes Testprofil, A=25/B=50, gleiche Verfügbarkeit und Rechte; drei gleiche Nacht-Einsätze | Sollanteile 1:2, entsprechende Verteilung bevorzugen. Bei fehlender Berechtigung oder Teilbeschäftigung Pool/Gewichte korrekt begrenzen; bei absolutem Profil andere explizite Sollanteile. |
-| H06 | Legacy-Sonderhistorie vorhanden, aber keine belegte V2-Zulagenhistorie; zusätzlich Test A zwei/B sechs Wünsche | Zulagenhistorie „fehlt“, keine BK/WL-Zuordnung erfinden. Kleine Wunschgruppe nur dann schützen, wenn F12 diese bisherige Regel ausdrücklich aktiviert; sonst keine versteckte Gruppenstufe. |
+| H06 | Legacy-Sonderhistorie ohne belegte V2-Zulagenhistorie; zusätzlich A mit zwei und B mit sechs relevanten Wünschen | Fehlende Zulagenhistorie kennzeichnen und keine BK/WL-Zuordnung erfinden. Der bereits bestätigte Schutz kleiner Wunschgruppen gilt weiter: bei gleicher höherer Qualität A stärker schützen; keine erneute offene Grundsatzfrage daraus machen. |
 
 ## M – Speicherung, Kopienmigration und Legacy
 
@@ -233,7 +277,7 @@ die betriebliche Gewichtung nicht durch ihre bloße Existenz.
 
 | ID | Eingabe | Erwartetes Ergebnis |
 | --- | --- | --- |
-| X01 | Monat erfassen → Korrekturstapel bearbeiten → planen → manuell ändern/fixieren → prüfen → bestätigen/exportieren | Deutsche Meldungen, echte Kürzel, sichtbare offene Plätze/W16-Gründe/Ausnahmen; kein Solverjargon im Normalablauf. Ungültige Fixierung blockiert Bestätigung. |
+| X01 | Monat erfassen → Korrekturstapel bearbeiten → planen → manuell ändern/fixieren → prüfen → bestätigen/exportieren | Deutsche Meldungen, Kalender-/Namensauswahl, sichtbare offene Plätze/W16-Gründe/KC15-Ausnahmen und vollständige zugängliche Hinweise. Ungültige Fixierung wird erkannt; ausdrückliche Übernahme/Bestätigung trotz Abweichung ist möglich. Kein falscher Regelkonformitätsnachweis. |
 | X02 | Eingabedaten während Hintergrundrechnung geändert; alten Solverstand übernehmen | Revisionskonflikt erkennen; keine unbemerkte Übernahme auf geänderte Regeln. Abbruch bleibt bedienbar, UI blockiert nicht. |
 | X03 | Dienstplan-, Stunden-, Wunsch-, Zulagen-/Fairness-CSV und Prüfmanifest erzeugen; Fehler mitten im Schreiben injizieren | Alle tragen dieselbe Revisions-ID/Profil-/Historienbasis. Vollständiges Paket atomar veröffentlichen oder gar nicht; keine gemischten Planversionen. |
 | X04 | Mehrmonatsdemo über Dezember/Jänner mit Rand-WL/BK, R, Urlaub, Vertragswechsel, Bestätigung und erneuter Planung | Quoten/Gutschriften/Wunschidentitäten nicht doppeln, nur bestätigte frühere Monate historisieren, Randplanung sichtbar und vom übernommenen Monat getrennt. |

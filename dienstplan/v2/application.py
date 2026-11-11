@@ -2,7 +2,7 @@
 from datetime import date
 
 from .accounting import MonthAccount
-from .calendar_rules import dates
+from .calendar_rules import dates,WeekendPolicy
 from .catalog import CalendarInput, month_calendar
 from .contracts import DateRange
 from .objectives import ObjectiveProfile
@@ -17,10 +17,9 @@ SELECTED_PROFILE = 'Monatsplanung – ausdrücklich gewähltes technisches Reche
 
 
 def service_candidates(terms, people):
-    """Konkrete halbstündliche Pausenvarianten; keine erfundene R-Bewertung."""
+    """Konkrete Pausenvarianten; Reserve zählt als bestätigte volle Arbeit."""
     return tuple(block for term in terms for person in people
-                 if term.service.code != 'R'
-                 and not person.eligibility_errors(term.service.code, term.attendance)
+                 if not person.eligibility_errors(term.service.code, term.attendance)
                  and (not term.fixed_people or person.id in term.fixed_people)
                  for block in pause_candidates(term, person.id,
                      policy=PausePolicy('Pausenraster 0,5 h; Abdeckungsprofil ungeklärt', (term.attendance,), 30)))
@@ -34,15 +33,18 @@ def standard_month(year, month, *, people=(), accounts=(), settings=None, absenc
     span = DateRange(date(year, month, 1), date(year + int(month == 12), month % 12 + 1, 1))
     inputs = PlanningInput(tuple(people), calendar.events, service_candidates(calendar.events, people),
                            year, month, frozenset((p.id, d) for p in people for d in dates(span)),
-                           None, OPEN_PROFILE, absences=tuple(absences),
-                           unchecked=calendar.missing + ('F01/F03/F04/F10/F12/F13: Rechts-, Abdeckungs-, Abrechnungs- und Optimierungsprofile nicht freigegeben.',))
-    # Die vorhandene benannte Rechenvariante bleibt technisch unverändert.
-    # Die Oberfläche verlangt ihre ausdrückliche Auswahl vor einer Berechnung.
+                           WeekendPolicy('sunday','Betriebliche Vorgabe: Wochenende zählt zum Monat des Sonntags',synthetic=False), OPEN_PROFILE, absences=tuple(absences),
+                           unchecked=calendar.missing + ('Teilmonatsquoten für freie Wochenenden benötigen eine ausdrückliche Vorgabe.', 'F01: Geldbeträge und betriebliche Tarifgrundlagen bleiben ungeklärt.',))
+    from .fallback import with_kc15_fallbacks
+    inputs=with_kc15_fallbacks(inputs)
+    # Stundenrechnung folgt den ausdrücklich bestätigten Rechenregeln.
+    # Historische Profilkennungen bleiben als lesbare Datenreferenzen erhalten;
+    # die normale Oberfläche verlangt keine technische Profilauswahl.
     old_accounts = {a.person_id: a for a in accounts}
     profile = ObjectiveProfile('E0 – technisches Vergleichsprofil',
                   ('wishes','groups','burden','hours_max','hours_spread','shifts','late_break'),
                   tuple(old_accounts.get(p.id, MonthAccount(p.id, 0)) for p in people),
-                  WishPolicy('W0','2026-01',False,True,1),FairnessPolicy('F0','contract'))
+                  WishPolicy('W0','2026-01',True,True,1),FairnessPolicy('F0','contract'),month_profile='M1')
     return inputs, profile, ()
 
 

@@ -14,7 +14,8 @@ from PySide6.QtWidgets import QApplication,QDialog,QPushButton,QTableWidget,QInp
 
 from dienstplan.v2.accounting import MonthAccount
 from dienstplan.v2.application import standard_month,demonstration_month,OPEN_PROFILE
-from dienstplan.v2.catalog import CATALOG,event
+from dienstplan.v2.catalog import CATALOG,event,lb_dates
+from dienstplan.v2.plan_import import selected_events
 from dienstplan.v2.contracts import DateRange
 from dienstplan.v2.demo import technical_demo
 from dienstplan.v2.errors import DomainError
@@ -32,13 +33,14 @@ def app():return QApplication.instance() or QApplication([])
 def test_new_month_has_whole_standard_catalog_and_actual_daily_events():
     data,profile,blocks=standard_month(2026,11)
     assert not data.people and not blocks and not data.candidates
-    assert len({t.code for t in CATALOG})==17
-    assert len(data.events)==94 and sum(e.service.staff or 0 for e in data.events)==120
-    assert sum((e.service.staff or 0)*(e.attendance.minutes-(30 if e.attendance.minutes>360 else 0)) for e in data.events)==876*60
+    assert len({t.code for t in CATALOG})==18
+    active=selected_events(data)
+    assert len(data.events)==120 and len(active)==94 and sum(e.service.staff or 0 for e in active)==120
+    assert sum((e.service.staff or 0)*(e.attendance.minutes-(30 if e.attendance.minutes>360 else 0)) for e in active)==876*60
     assert {e.service.code for e in data.events if e.attendance.start_day==date(2026,11,12)}=={'KCT10','KCT','TW','T'}
-    assert {e.service.code for e in data.events if e.attendance.start_day==date(2026,11,16)}=={'KC10','KC16','W17'}
-    assert data.profile_label==OPEN_PROFILE and data.weekend_policy is None
-    assert any('WL/BK' in s for s in data.unchecked) and any('LB' in s for s in data.unchecked)
+    assert {e.service.code for e in active if e.attendance.start_day==date(2026,11,16)}=={'KC10','KC16','W17'}
+    assert data.profile_label==OPEN_PROFILE and data.weekend_policy.owner=='sunday' and profile.month_profile=='M1'
+    assert any('WL/BK' in s for s in data.unchecked) and not lb_dates(2026,11)
 
 
 @pytest.mark.parametrize('year,month',[(2026,12),(2027,1),(2028,2)])
@@ -88,6 +90,7 @@ def test_person_editor_edits_exclusions_and_persists_hours(app,tmp_path,monkeypa
     data,profile,old=technical_demo()
     profile=replace(profile,accounts=(MonthAccount('A',1,-1),)+profile.accounts[1:])
     w=Workbench(database=tmp_path/'people.sqlite3',initial=(data,profile,old),year=2026,month=11)
+    monkeypatch.setattr(w,'confirm_override',lambda messages,**kw:True)
     monkeypatch.setattr('dienstplan.v2.ui.QMessageBox.question',lambda *_:__import__('PySide6.QtWidgets',fromlist=['QMessageBox']).QMessageBox.StandardButton.Yes)
     def edit(dialog):
         if dialog.windowTitle()=='Dienste ausschließen':
@@ -150,11 +153,11 @@ def test_standard_day_replacements_are_atomic_not_duplicate_needs(app,tmp_path,m
     w.code.setCurrentText('W16');w.day.setText('2026-11-16')
     monkeypatch.setattr(QInputDialog,'getText',lambda *_:('Dokumentierter Ausnahmegrund',True))
     w.add_term()
-    assert {e.service.code for e in w.inputs.events if e.attendance.start_day==date(2026,11,16)}=={'KC10','KC16','W16'}
+    assert {e.service.code for e in __import__('dienstplan.v2.plan_import',fromlist=['selected_events']).selected_events(w.inputs) if e.attendance.start_day==date(2026,11,16)}=={'KC10','KC16','W16'}
     w.save();w.close()
     reopened=Workbench(database=tmp_path/'standard.sqlite3')
     assert any(e.service.code=='W16' for e in reopened.inputs.events)
-    assert verify(reopened.inputs,(),active_events=reopened.inputs.events)[0].hard_ok
+    assert verify(reopened.inputs,(),active_events=__import__('dienstplan.v2.plan_import',fromlist=['selected_events']).selected_events(reopened.inputs))[0].hard_ok
     reopened.close()
 
 
@@ -166,7 +169,7 @@ def test_pause_reduction_preserves_month_quantities_fixed_pauses_and_coverage():
     data,profile,_=demonstration_month()
     term=next(e for e in data.events if e.service.code=='W17' and e.attendance.start_day==date(2026,11,30))
     candidates=service_candidates((term,),data.people[:1])
-    data=replace(data,events=(term,),candidates=candidates)
+    data=replace(data,events=(term,),candidates=candidates,optional_ids=frozenset(),fallbacks=())
     reduced=_reduce_pause_choices(data,candidates,profile)
     from dienstplan.v2.work import quantities
     def monthly(b):return sum(q.work_minutes for q in quantities(b) if q.day.month==11)

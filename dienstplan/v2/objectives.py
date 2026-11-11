@@ -5,7 +5,9 @@ from fractions import Fraction
 from .accounting import round_minutes
 from .catalog import participation
 from .errors import DomainError
-from .reporting import hours_rows,shares
+from .fallback import with_fallback_objective,with_fallback_model_objective
+from .leave import missing_leave_message
+from .reporting import hours_rows,shares,booked_work_minutes
 from .work import quantities
 from .wishes import WishHistory,relevant_wishes,violated,wish_rows
 
@@ -36,7 +38,7 @@ class ObjectiveProfile:
         if any(type(n) is not int or n<1 for n in (self.scale,self.minimum_denominator,self.special_weight)):
             raise DomainError('Skalierung, Mindestnenner und Sondergewicht müssen positive ganze Zahlen sein.')
         if self.scale>1000:raise DomainError('Zu große technische Zielskalierung.')
-        if self.target_profile!='S0' or self.month_profile!='M0':raise DomainError('Soll-/Monatsprofil nicht implementiert; ausdrücklich S0/M0 wählen.')
+        if self.target_profile!='S0' or self.month_profile not in {'M0','M1'}:raise DomainError('Soll-/Monatsprofil nicht implementiert; S0 mit M0 oder M1 wählen.')
         if ('groups' in self.order and not self.wish_policy.small_groups):raise DomainError('Gruppenschutz ist im Wunschprofil nicht aktiviert.')
 
 
@@ -77,7 +79,7 @@ def evaluate(inputs,blocks,events,profile):
     hours=hours_rows(inputs.people,all_blocks,inputs.absences,inputs.year,inputs.month,accounts=profile.accounts,
                      target_profile=profile.target_profile,month_profile=profile.month_profile)
     if any(not r.credits_known for r in hours) and any(f.startswith('hours_') for f in profile.order):
-        raise DomainError('Anrechenbare Urlaubstage sind ungeklärt; Stundenoptimierung benötigt ausdrückliche Gutschrifttage.')
+        raise DomainError(missing_leave_message(inputs.people,inputs.absences,inputs.year,inputs.month))
     errors=[_ceil(abs(r.deviation)*profile.scale,max(r.target,profile.minimum_denominator)) for r in hours]
     values['hours_max']=max(errors,default=0);values['hours_spread']=sum(e*e for e in errors)
     targets=share_targets(inputs,events,profile)
@@ -101,7 +103,7 @@ def evaluate(inputs,blocks,events,profile):
         if family=='groups':names.extend(f'groups/{n}' for n in range(1,max_group+1))
         elif family=='burden':names.extend(f'burden/{n}/{kind}' for n in range(1,max_group+1) for kind in ('max','squares'))
         else:names.append(family)
-    return tuple((name,values[name]) for name in names)
+    return with_fallback_objective(inputs,events,tuple((name,values[name]) for name in names))
 
 
 def _night_pause(block):
@@ -168,10 +170,10 @@ def compile_objectives(inputs,candidates,x,y,model,profile,coverage):
         values[f'burden/{n}/max']=b.maximum(burdens,bound);values[f'burden/{n}/squares']=sum(squares)
     baseline=hours_rows(inputs.people,inputs.boundary,inputs.absences,inputs.year,inputs.month,accounts=profile.accounts,target_profile=profile.target_profile,month_profile=profile.month_profile)
     if any(not r.credits_known for r in baseline) and any(f.startswith('hours_') for f in profile.order):
-        raise DomainError('Anrechenbare Urlaubstage sind ungeklärt; Stundenoptimierung benötigt ausdrückliche Gutschrifttage.')
+        raise DomainError(missing_leave_message(inputs.people,inputs.absences,inputs.year,inputs.month))
     normalized=[];squares=[];ratio_bounds=[]
     for row in baseline:
-        amounts=[(i,sum(q.work_minutes for q in quantities(c) if (q.day.year,q.day.month)==(inputs.year,inputs.month))) for i,c in enumerate(candidates) if c.person_id==row.person_id and c not in inputs.boundary]
+        amounts=[(i,booked_work_minutes(c,inputs.year,inputs.month,month_profile=profile.month_profile)) for i,c in enumerate(candidates) if c.person_id==row.person_id and c not in inputs.boundary]
         bound=abs(row.deviation)+sum(v for _,v in amounts)
         error=b.absolute(row.deviation+sum(v*x[i] for i,v in amounts),bound)
         maximum=_ceil(bound*scale,max(row.target,profile.minimum_denominator))
@@ -204,4 +206,4 @@ def compile_objectives(inputs,candidates,x,y,model,profile,coverage):
         else:names.append(family)
     error=model.validate()
     if error:raise DomainError('Optimierungsmodell überschreitet technische Grenzen: '+error)
-    return tuple((name,values[name]) for name in names)
+    return with_fallback_model_objective(inputs,y,tuple((name,values[name]) for name in names))

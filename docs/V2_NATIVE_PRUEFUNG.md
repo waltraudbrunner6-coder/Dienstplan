@@ -1,5 +1,9 @@
 # Dienstplan 0.4.4 – Monatsbestätigung trotz Abweichungen
 
+**0.5.0 in Vorbereitung:** Die neuen Urlaubs-, Bedienungs- und Dienstregeln sind
+noch nicht Bestandteil der unten verlinkten 0.4.4-Pakete. Nach abschließenden
+Quelltests werden neue native Builds und deren tatsächliche Nachweise hier ergänzt.
+
 Stand 11.11.2026. Programm-/Testcommit **90a67d6**. Windows x64, macOS Sequoia ARM64 und Intel: Testsuite, Paketbuild und Prüfung des gebauten Programms erfolgreich.
 
 [Prüflauf 42931888956](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42931888956). Rohdaten: `examples/v2/native-pruefung.json`; voriger 0.4.3-Nachweis: `examples/v2/native-0-4-3.json`. Nachfolgende reine Nachweiscommits ändern den geprüften Programm-/Testcode nicht.

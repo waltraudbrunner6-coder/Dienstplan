@@ -40,7 +40,7 @@ def test_v2_entrypoint_real_event_loop_does_not_touch_legacy_database(app,tmp_pa
     timer.timeout.connect(inspect);timer.start(20);timeout.timeout.connect(app.quit);timeout.start(10000)
     try:
         assert entry.main(['--v2'] if direct else [])==0
-        assert seen==[19]
+        assert seen==[20]
         assert (tmp_path/'dienstplan-v2.sqlite3').is_file()
         assert database.read_bytes()==before
     finally:

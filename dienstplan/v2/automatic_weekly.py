@@ -24,7 +24,7 @@ def automatic_weekly(inputs,*,snapshots=(),full_weeks_only=False):
     options=weekly_options(quotas)
     terms={e.id:e for e in inputs.events if e.service.code not in {'WL','BK'} or e.id not in inputs.optional_ids}
     options_by_id={e.id:e for e in options.events}
-    optional=set(options_by_id)-terms.keys()
+    optional=(set(options_by_id)-terms.keys())|{key for key in inputs.optional_ids if key in terms and terms[key].service.code not in {'BK','WL'}}
     terms.update(options_by_id)
     locks={(b.id,b.person_id):b for b in inputs.locked};boundary={(b.id,b.person_id):b for b in inputs.boundary}
     known=set(inputs.known_days);notes=[];people={p.id for p in inputs.people}

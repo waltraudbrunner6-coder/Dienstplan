@@ -92,7 +92,7 @@ def test_edit_keeps_existing_weekly_dates_and_optional_choices(imported_month,mo
     from dienstplan.v2.automatic_weekly import automatic_weekly
     w=imported_month
     w.inputs=automatic_weekly(w.inputs)
-    w.events=selected_events(w.inputs,tuple(reversed(w.inputs.events)))
+    w.events=selected_events(w.inputs,tuple(e for e in reversed(w.inputs.events) if e.service.code in {'BK','WL'}))
     w.store.save_workspace(w.inputs,w.profile,w.blocks,w.events,expected_revision=w.store.input_revision)
     w.fill();events=w.events;options=w.inputs.optional_ids;select(w)
     choose_person(monkeypatch);w.change_assignment()

@@ -1,6 +1,6 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
-Aktueller Folgeauftrag: **0.4.4 – ausdrückliche Monatsbestätigung trotz Abweichungen**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
+Aktueller Folgeauftrag: **0.5.0 – Urlaubskonten, verständliche Bedienung und geklärte Dienstregeln**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
 die folgenden älteren Etappenberichte bleiben als Verlauf erhalten.
 
 ## Aktueller Folgeauftrag: Excel-Import, Monatsansicht, Pausen und BK/WL (0.4.0)
@@ -902,3 +902,84 @@ Paketbuild und Programm-Selbsttests. Rohdaten: `examples/v2/native-pruefung.json
 0.4.3 unter `native-0-4-3.json` archiviert. Aktuelle Links und Paketgrößen in
 `V2_NATIVE_PRUEFUNG.md`. Keine echte Datenbank verändert, kein Merge nach main.
 Nachfolgende reine Nachweiscommits ändern den geprüften Programm-/Testcode nicht.
+
+## Laufender Folgeauftrag 0.5.0 – Urlaub und verständliche Bedienung (noch nicht freigegeben)
+
+Arbeitsstand nach Unterbrechung: uncommittete Implementierung auf
+`feat/v2-implementation`; letzte veröffentlichte stabile Pakete bleiben 0.4.4.
+Keine neue Test-/Buildfreigabe behaupten. `git status` und gezielte aktuelle Tests
+vor weiteren Schritten prüfen. Neue Module Urlaub, Urlaubskonten, Kalenderdialog,
+Termindialog, M1-Stundenbuchung und KC15-Alternativen werden integriert.
+
+Verbindliche Nutzerantworten: Jedes ausdrücklich markierte U-Datum zählt,
+auch Wochenende/Feiertag; W/5 je Tag. Zwei Urlaubstage Monatsanspruch ansparen,
+Anfangsbestand je Person erfassbar. Gleichzeitige Pausen erlaubt. R zählt volle
+Normalarbeitszeit. KC15 ersetzt bei fehlender regulärer Besetzung KC10 UND KC16:
+15–00 Uhr, eine Person, normale 30-Minuten-Pause. LB ab 03.12.2026 alle14Tage,
+feste Personen nicht erfinden. Freies Wochenende gehört zum Sonntagsmonat.
+Gesamte bezahlte Schicht im Startmonat buchen (M1); bestätigte alte M0-Monate
+unverändert lassen. KC10 am Donnerstag31.12. ist KCT10 bis17:30.
+
+Noch echte Restfragen: Teilmonatsansprüche/aktive Teilwochenenden, FK-Wiederholung,
+R-Fenster bei bloßem Tabellenkürzel R, konkrete feste LB-Personen als normale Eingabe,
+gewünschte Eurotarife und besondere W17-Wochenendwunsch-Ausnahme. Bereits bestätigte
+Grundregeln nicht erneut abfragen. Hauptaufgabe jetzt Integration, Regressionen,
+Dokumentationsbereinigung und erst dann Commit/Push/neue native Pakete.
+
+### Integration und weitere Nutzerantworten
+
+Die vorstehende Liste ist inzwischen weiter präzisiert: Urlaub bei Ein-/Austritt
+im Monat wird **anteilig nach beschäftigten Kalendertagen** erworben, FK wird
+**nur einzeln erfasst**, Freitags-W17 ist **vom Wochenend-Freiwunsch ausgenommen**.
+Teilmonatsurlaub wird exakt als `2 × Beschäftigungstage / Monatskalendertage`
+summiert; keine monatliche Abrundung des Tagesbestands. Die W17-Ausnahme betrifft
+nicht einen normalen Einzel-Freiwunsch und nicht zusätzliche Samstagsdienste.
+Offene normale Altentwürfe übernehmen diese bestätigten Regeln im Speicher;
+bestätigte historische Stände und ihre Profile bleiben unverändert.
+
+Erledigte Änderungssätze: Urlaubskalender und U-Import mit sichtbarer W/5-Gutschrift;
+Korrektur alter fehlender Tagesmengen; angesparte Urlaubskonten mit explizitem
+Start/Anfangsbestand und eingefrorener Bestätigungsstatistik; Kalender-/Namensdialoge
+für Termine; LB-Monatsserie nach Auswahl zweier Namen; Personeneditor mit inklusiven
+letzten Kalendertagen und korrekter exklusiver Domain-Grenze; kurze Statusübersicht
+mit vollständigem Hinweisfenster; Planerhalt bei Urlaub, Namen, Stunden und
+Personendetails; R als Normalarbeit; echte KC15-Alternativen im Solver/Import;
+M1-Kontobuchung in Bewertung, Berichten und Exporten. Keine echte Benutzerdatenbank
+verändert, keine produktive Tarif-/Rechtszuordnung abgeleitet.
+
+Zwischenprüfung: `QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -q
+--disable-warnings --maxfail=5`: **524 bestanden, 2 fehlgeschlagen in 301,69 s**.
+Die beiden Fehler betrafen alte Duplikat-Urlaubsfixtures ohne Gutschrifttage;
+neuer U-Import wählt nach Nutzerantwort alle markierten Tage. Duplikatfixtures
+verwenden nun explizit vollständig erfassten Urlaub. Ein zusätzlicher Test schützt
+den alten ungeklärten Datensatz gegen stille Änderung. Prüfung/Schutz unverändert.
+Gezielter Nachlauf: 69 bestanden, 1 neue Fixture ungültig (Wochenendwunsch ohne
+erforderlichen Budgetmonat); Fixture korrigiert, keine Regel abgeschwächt.
+Vier neue Personendialog-Prüfungen bestanden in 1,51 s. Abschließende Nachläufe
+einschließlich der zusätzlichen Nutzerantworten stehen noch aus.
+
+Quell-Selbsttest `QT_QPA_PLATFORM=offscreen .venv/bin/python -m dienstplan
+--self-test-v2 --self-test-report /tmp/dienstplan-0.5.0-smoke.json` bestanden,
+einschließlich tatsächlichem Urlaubs-Korrekturdialog, Planerhalt, SQLite-Neustart,
+Solver und Export. `leave_calendar=true` ist jetzt auch für native Pakete
+verpflichtend; native 0.5.0-Nachweise folgen erst nach finaler Regression.
+
+Abschließender Gesamtlauf mit den zusätzlichen Nutzerantworten:
+`QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -q --disable-warnings
+--maxfail=3`: **545 bestanden in 300,76 s**. Danach minimaler Löschcallback-Fix
+im neuen Personeneditor: automatisch geführte Datumszellen werden beim Entfernen
+von Versionen korrekt verschoben; ein vorher fehlschlagender Regressionstest
+schützt manuell datierte Folgezeilen. Personendialog-Nachlauf: **5 bestanden
+in 1,78 s**. Zusätzliche Prüfung manueller Terminausnahmen: Kalenderregel darf
+nach Warnung übergangen werden, Ablehnung lässt Daten/Plan/Revision unverändert.
+Gemeinsamer abschließender Nachlauf `tests/test_v2_term_dialog.py
+tests/test_v2_person_dialog.py tests/test_v2_overrides.py
+tests/test_v2_application.py`: **50 bestanden in 14,75 s**. Keine Abschwächung
+der automatischen Solverregeln. Quell-Selbsttest erneut erfolgreich als
+`/tmp/dienstplan-0.5.0-final-smoke.json`; synthetische Qt-Sichtproben von Haupt-,
+Urlaubs- und Personenansicht erstellt und geprüft. `git diff --check` fehlerfrei.
+
+Nächster Schritt: diesen geprüften Programm-/Teststand committen und auf
+`feat/v2-implementation` pushen, native Windows-/macOS-Matrix ausführen und erst
+nach Erfolg die aktuellen Paketlinks und tatsächlich gemessenen Größen eintragen.
+Kein Merge nach main, keine echte Datenbank oder produktive Tarifzuordnung geändert.

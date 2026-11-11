@@ -11,7 +11,7 @@ import zipfile
 
 from .codec import workspace
 from .objectives import evaluate
-from .reporting import hours_rows,quantity_rows,shares
+from .reporting import hours_rows,quantity_rows,shares,month_booking_description
 from .serialization import fingerprint,plain
 from .solver import verify
 from .time import vienna
@@ -27,6 +27,7 @@ def _csv(header,rows):
 def export_package(target,inputs,profile,blocks,events,*,proofs=(),holidays=None,fault=None):
     target=Path(target);blocks=tuple(blocks);events=tuple(events)
     holidays=None if holidays is None else frozenset(holidays)
+    all_blocks=tuple({(b.id,b.person_id):b for b in inputs.boundary+blocks}.values())
     saved=workspace(inputs,profile,blocks,events)
     if holidays is not None:
         saved['snapshot']['holiday_calendar']=sorted(d.isoformat() for d in holidays)
@@ -43,10 +44,10 @@ def export_package(target,inputs,profile,blocks,events,*,proofs=(),holidays=None
                          i+1,b.person_id if b else '',hours_text(b.work_minutes) if b else '', 'zugeteilt' if b else 'OFFEN',e.replacement_reason))
     files={'dienstplan.csv':_csv(('revision_id','beginn','ende','dienst','platz','person_id','arbeitsstunden','status','w16_grund'),plan)}
     report_rows={
-        'stunden.csv':hours_rows(inputs.people,tuple({(b.id,b.person_id):b for b in inputs.boundary+blocks}.values()),inputs.absences,inputs.year,inputs.month,accounts=profile.accounts,target_profile=profile.target_profile,month_profile=profile.month_profile),
+        'stunden.csv':hours_rows(inputs.people,all_blocks,inputs.absences,inputs.year,inputs.month,accounts=profile.accounts,target_profile=profile.target_profile,month_profile=profile.month_profile),
         'verteilung.csv':shares(inputs.people,events,blocks,policy=profile.fairness_policy,absences=inputs.absences),
         'wuensche.csv':wish_rows(inputs.people,inputs.absences,events,blocks+inputs.boundary,policy=profile.wish_policy,history=profile.history),
-        'zeitmengen.csv':quantity_rows(blocks,frozenset() if holidays is None else frozenset(holidays)),
+        'zeitmengen.csv':quantity_rows(all_blocks,frozenset() if holidays is None else frozenset(holidays)),
     }
     for name,rows in report_rows.items():
         rows=tuple(rows)
@@ -66,7 +67,7 @@ def export_package(target,inputs,profile,blocks,events,*,proofs=(),holidays=None
         files[name]=_csv(('revision_id',)+tuple(map(column,header)),[(revision,)+tuple(cell(r,key) for key in header) for r in rows])
     invalid=not core.hard_ok or not calendar.hard_ok
     unknown_credits=any(not r.credits_known for r in report_rows['stunden.csv'])
-    manifest=dict(manual_override=inputs.manual_override,override_notes=list(inputs.override_notes),revision_id=revision,scope=inputs.profile_label,input_fingerprint=inputs.fingerprint,
+    manifest=dict(month_booking_profile=profile.month_profile,month_booking_rule=month_booking_description(profile.month_profile),physical_quantities='Tatsächliche Arbeit nach lokalem Kalendertag; unabhängig von der Monatsbuchung',manual_override=inputs.manual_override,override_notes=list(inputs.override_notes),revision_id=revision,scope=inputs.profile_label,input_fingerprint=inputs.fingerprint,
                   versions=saved['snapshot']['versions'],objective_profile=plain(profile),objectives=[] if unknown_credits or invalid else plain(evaluate(inputs,blocks,events,profile)),
                   objective_status='Regelabweichung; keine Optimierungsbewertung' if invalid else 'Urlaubsgutschrifttage ungeklärt' if unknown_credits else 'bewertet',
                   proofs=[] if unknown_credits or invalid else plain(proofs),issues=plain(core.issues+calendar.issues),open_slots=plain(core.open_slots),

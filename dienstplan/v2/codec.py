@@ -8,6 +8,7 @@ from .catalog import Event,template
 from .contracts import Contract,Contracts,DateRange,Employment
 from .entries import Entry
 from .errors import DomainError
+from .fallback import FallbackGroup
 from .objectives import ObjectiveProfile
 from .pauses import CoverageRule
 from .people import Eligibility,Person
@@ -42,7 +43,7 @@ def planning_input(v):
             frozenset((pid,date.fromisoformat(d)) for pid,d in v['known_days']),WeekendPolicy(**v['weekend_policy']) if v['weekend_policy'] else None,
             v['profile_label'],absences,tuple(map(block,v['boundary'])),tuple(v['unchecked']),frozenset(v['optional_ids']),
             tuple(WeekQuota(q['id'],q['code'],date_range(q['dates']),q['required'],q['owner_month']) for q in v['quotas']),
-            WeekPolicy(**v['week_policy']) if v['week_policy'] else None,tuple(CoverageRule(**r) for r in v['coverage']),tuple(map(block,v.get('locked',()))),v.get('manual_override',False),tuple(v.get('override_notes',())))
+            WeekPolicy(**v['week_policy']) if v['week_policy'] else None,tuple(CoverageRule(**r) for r in v['coverage']),tuple(map(block,v.get('locked',()))),v.get('manual_override',False),tuple(v.get('override_notes',())),tuple(FallbackGroup(**g) for g in v.get('fallbacks',())))
 
 
 def objective_profile(v):

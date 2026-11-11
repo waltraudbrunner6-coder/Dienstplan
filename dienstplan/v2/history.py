@@ -3,6 +3,7 @@ from datetime import date
 import json
 
 from .errors import DomainError
+from .leave import missing_leave_message
 from .reporting import hours_rows,quantity_rows,shares
 from .serialization import fingerprint,plain
 from .wishes import WishHistory,wish_rows
@@ -54,7 +55,7 @@ def confirmation(inputs,blocks,events,*,accounts,wish_policy,fairness_policy,hol
                unchecked=tuple(dict.fromkeys(inputs.unchecked+calendar.unchecked)),
                quota_reservations={q.id:sorted(e.id for e in events if e.service.code==q.code and q.dates.includes(e.attendance.start_day)) for q in inputs.quotas})
     if any(not r['credits_known'] for r in facts['hours']):
-        raise DomainError('Urlaubsgutschrifttage sind ungeklärt; keine Bestätigung mit angenommener Nullgutschrift.')
+        raise DomainError(missing_leave_message(inputs.people,inputs.absences,inputs.year,inputs.month))
     from .presentation import hours_text
     facts['warnings']+= [f"{r['person_id']}: Abweichung vom Arbeitsziel {hours_text(r['deviation'])} h" for r in facts['hours'] if r['credits_known'] and r['deviation']]
     facts=plain(facts)

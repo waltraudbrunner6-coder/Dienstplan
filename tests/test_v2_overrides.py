@@ -40,7 +40,7 @@ def test_explicit_import_override_keeps_thursday_warning_after_restart_and_expor
         assert 'REGELÜBERSTEUERUNG' in str(list(load_workbook(tmp_path/'export.xlsx')['Regelmeldungen'].values))
 
 
-@pytest.mark.parametrize('bad',[row(pid='unknown'),row(code='KC15'),row(day='not-date'),row(pause_von='bad',pause_bis='bad')])
+@pytest.mark.parametrize('bad',[row(pid='unknown'),row(code='KC99'),row(day='not-date'),row(pause_von='bad',pause_bis='bad')])
 def test_override_never_activates_technically_invalid_partial_import(tmp_path,bad):
     data,profile,_=demonstration_month()
     p=prepare_plan_import(data,[row(),bad],allow_rules=True)

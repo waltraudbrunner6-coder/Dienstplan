@@ -46,6 +46,10 @@ def check_core(people, events, blocks, *, absences=(), boundary=(), check_fixed=
         if getattr(obj,"rule_override",False):
             try:replace(obj,rule_override=False)
             except DomainError as exc:error("overridden_rule",getattr(obj,"person_id",""),obj.id,str(exc))
+    by_day=defaultdict(set)
+    for term in events:by_day[term.attendance.start_day].add(term.service.code)
+    for day,codes in by_day.items():
+        if 'KC15' in codes and codes&{'KC10','KC16'}:error('kc15_exclusion','',str(day),'KC15 ersetzt KC10 und KC16; beide Varianten dürfen nicht gleichzeitig aktiv sein.')
     team_by_day=defaultdict(list)
     for e in events:
         if e.service.code in {'T','TS'}:team_by_day[e.attendance.start_day].append(e)

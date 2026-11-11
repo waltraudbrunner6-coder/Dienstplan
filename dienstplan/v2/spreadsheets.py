@@ -98,9 +98,12 @@ def read_import(path, *, source_kind='plan'):
                     color=cell.fill.fgColor
                     if color.type!='rgb' or str(color.rgb).upper()[-6:]!='FFFF00':continue
                     kind='freiwunschtag';code=''
-                elif code=='U':kind='u_zuordnung_offen'
+                elif code=='U':kind='urlaub'
                 mapping.setdefault(ref,'')
-                rows.append(dict(zip(COLUMNS,(f'{sheet.title}!{cell.coordinate}',ref,'',day.isoformat(),kind,code,'ja','','','','Aus Originaltabelle übernommen'))))
+                if code=='KC10' and day.weekday()==3:
+                    code='KCT10';notes.append(f'{cell.coordinate}: Donnerstag als KCT10 bis 17:30 übernommen.')
+                row=dict(zip(COLUMNS,(f'{sheet.title}!{cell.coordinate}',ref,'',day.isoformat(),kind,code,'ja','','',day.isoformat() if kind=='urlaub' else '', 'Aus Originaltabelle übernommen')))
+                rows.append(row)
         return tuple(rows),mapping,tuple(notes)
     finally:book.close()
 
@@ -153,7 +156,7 @@ def write_import_template(path, rows, mapping, notes=()):
                  'art: dienst (mit Person = Zuteilung, ohne Person = Termin), termin, freiwunschtag, urlaub, ignorieren.',
                  'Fixierte Dienste: fixiert=ja. Pausen werden automatisch gewählt.',
                  'Unbekannte Kürzel, R-Zeitfenster und Regelkonflikte in der Vorschau korrigieren; kein fehlerhafter Teilimport.',
-                 'U bleibt bis zur Bestätigung seiner Bedeutung u_zuordnung_offen. Für bestätigten Urlaub art=urlaub setzen und Gutschrifttage ausdrücklich ergänzen.',
+                 'Jedes U-Datum zählt als ein Urlaubstag mit gültigen Wochenstunden ÷ 5, auch am Wochenende/Feiertag. Mehrtägige Urlaubseinträge benötigen ihre konkret markierten Tage.',
                  'Bisherige Donnerstag-/Wunschbudgetregeln gelten bis zu ihrer ausdrücklichen Änderung.',*notes):hints.append((_safe(line),))
     hints.column_dimensions['A'].width=115
     for tab in book:
