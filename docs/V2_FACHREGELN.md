@@ -1,6 +1,6 @@
 # V2 – Fachregeln
 
-Stand 11.11.2026, konsolidiert für die Änderungen 0.5.0. Diese Fachregeln
+Stand 11.11.2026, konsolidiert für die Änderungen 0.5.1. Diese Fachregeln
 enthalten die seit Etappe A bestätigten Folgeaufträge. V2 ist die normale
 Desktop-Anwendung und kein zusätzlicher Testbereich. Historische Altversionen
 werden nicht als aktueller Parallelbetrieb beschrieben.
@@ -277,6 +277,17 @@ Donnerstags-Freiwünsche erzeugen nach der bestehenden Regel einen Konflikt,
 auch bei einem echten Donnerstagsanteil eines Nachtwunsches. Die Bedienperson
 darf diesen wie andere fachliche Regeln nach Warnung übergehen. Urlaub ist davon
 nicht betroffen. Ende Donnerstag exakt 00:00 enthält keinen Donnerstagsanteil.
+
+Die Korrektur 0.5.1 unterscheidet genehmigte Wunschkonfiguration von einem
+tatsächlichen Dienstkonflikt. Nur die exakt zu einem ausdrücklich genehmigten
+Frei- oder Wochenendwunsch gehörende Konfigurationsabweichung darf die
+Kandidatenprüfung und Optimierung passieren. Dazu müssen sowohl der Eintrag als
+auch der Monatsstand die Genehmigung enthalten. Der unabhängige strenge Prüfer
+meldet die Abweichung weiterhin. Urlaub, Beschäftigung, Berechtigungen, Ruhe,
+Pausen und konkrete Dienstzuweisungen erhalten dadurch keine Ausnahme.
+Ein Ergebnis wird unter den genehmigten Wunschvorgaben bewertet; eine
+unbedingte Optimalität folgt daraus nicht. Export und Anzeige müssen diesen
+Geltungsbereich sowie die genehmigten Wunsch-Ausnahmen sichtbar erhalten.
 
 UI- und CSV-Korrekturen erhalten Originalinhalt und konkrete Zeilenfehler. Eine
 fehlende Zustimmung oder ein technischer Fehler lässt den gesamten Import

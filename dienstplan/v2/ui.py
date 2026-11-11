@@ -23,7 +23,8 @@ from .pauses import PausePolicy,pause_candidates
 from .persistence import V2Store
 from .reporting import hours_rows,shares,required_work_range
 from .serialization import fingerprint
-from .solver import solve_feasibility,verify
+from .solver import solve_feasibility,verify,verify_for_planning
+from .planning_validation import accepted_wish_warnings,blocking_issues,wish_warning_messages
 from .time import Interval,vienna,day_segments
 from .wishes import wish_rows
 
@@ -316,7 +317,7 @@ class Workbench(QDialog):
             mandatory=tuple(e for e in inputs.events if e.id not in inputs.optional_ids)
             messages=tuple(i.message for i in check_core(inputs.people,mandatory,(),check_fixed=False).issues)
         else:
-            core,calendar=verify(inputs,blocks,active_events=events)
+            core,calendar=verify_for_planning(inputs,blocks,active_events=events)
             messages=tuple(i.message for i in core.issues+calendar.issues)
             from .automatic_weekly import check_shared_weeks
             try:check_shared_weeks(inputs,blocks,events,self.store.month_snapshots(inputs.year,inputs.month))
@@ -391,9 +392,14 @@ class Workbench(QDialog):
         self.table(self.wishes,('Person','Relevant','Erfüllt','Übergangen','Historisch','Kumuliert'),[(names.get(r.person_id,r.person_id),len(r.relevant),r.fulfilled_count,len(r.violated),len(r.historical),len(r.cumulative)) for r in wishes])
         if active_events is not None:
             core,calendar=verify(self.inputs,blocks,active_events=active_events)
-            status=('REGELÜBERSTEUERUNG – kein regelkonformer Plan. ' if self.inputs.manual_override else '')+('VORSCHAU – noch nicht übernommen. ' if preview else '')+f'{len(blocks)} Zuteilungen; {sum(n for _,n in core.open_slots)} offene Plätze; {sum(p.proven and not p.conditional for p in proofs)} unbedingt bewiesene Zielstufen. '
+            wish_notes=wish_warning_messages(self.inputs)
+            prefix=('GENEHMIGTE FREIWUNSCH-AUSNAHMEN – Planung unter angepassten Wunschvorgaben. '
+                    if wish_notes and not blocking_issues(self.inputs,core.issues) and not calendar.issues else
+                    'REGELÜBERSTEUERUNG – kein regelkonformer Plan. ' if self.inputs.manual_override else '')
+            status=prefix+('VORSCHAU – noch nicht übernommen. ' if preview else '')+f'{len(blocks)} Zuteilungen; {sum(n for _,n in core.open_slots)} offene Plätze; {sum(p.proven and not p.conditional for p in proofs)} unbedingt bewiesene Zielstufen. '
             status+=' | '.join(dict.fromkeys(tuple(i.message for i in core.issues+calendar.issues)+self.inputs.override_notes))
             status+=' | '+' | '.join(dict.fromkeys(self.inputs.unchecked+calendar.unchecked+self.profile.history.missing))
+            status+=' | '+' | '.join(wish_notes)
         else:status=('REGELÜBERSTEUERUNG – '+' | '.join(self.inputs.override_notes)+'. ' if self.inputs.manual_override else '')+'Noch kein berechneter Entwurf. Offene Planungsangaben siehe „Dienste und Einstellungen“.'
         if active_events is None:status+=' | '+' | '.join(dict.fromkeys(self.inputs.unchecked+self.profile.history.missing))
         from .fallback import fallback_notes
@@ -406,7 +412,7 @@ class Workbench(QDialog):
         required=sum((e.service.staff or 0)*(e.attendance.minutes-(30 if e.attendance.minutes>360 else 0)) for e in events)
         target=sum(max(0,r.goal) for r in hours) if all(r.credits_known for r in hours) else None
         status+=(' | Vorläufige Datumswahl; tatsächliche Dauer kann sich durch Terminwahl an Zeitumstellungstagen ändern.' if provisional_dates else '')
-        lower,upper=required_work_range(events,blocks,self.inputs.year,self.inputs.month,boundary=self.inputs.boundary)
+        lower,upper=required_work_range(events,blocks,self.inputs.year,self.inputs.month,boundary=self.inputs.boundary,include_reserve=True)
         monthly=hours_text(lower) if lower==upper else hours_text(lower)+'–'+hours_text(upper)
         status+=f' | Operativer Bedarf im Planungshorizont: {hours_text(required)} h. Tatsächliche Arbeit im Kalendermonat inkl. Randdienste: {monthly} h; nicht negatives Arbeitsziel im Monat: '+(f'{hours_text(target)} h.' if target is not None else 'ungeklärt.')
         confirmed=self.store.confirmed_month(self.inputs.year,self.inputs.month)
@@ -444,7 +450,7 @@ class Workbench(QDialog):
 
     def reviewed_inputs(self,inputs,blocks,events):
         if events is None:return inputs
-        core,calendar=verify(inputs,blocks,active_events=events)
+        core,calendar=verify_for_planning(inputs,blocks,active_events=events)
         messages=tuple(i.message for i in core.issues+calendar.issues)
         from .automatic_weekly import check_shared_weeks
         try:check_shared_weeks(inputs,blocks,events,self.store.month_snapshots(inputs.year,inputs.month))
@@ -676,8 +682,16 @@ class Workbench(QDialog):
         current=(self.generation,self.store.input_revision,self.inputs.fingerprint,fingerprint(self.profile))
         if current!=token:self.set_status('Eingaben geändert: Ergebnis veraltet und nicht übernommen.');return
         if result.status in {'unknown','cancelled','infeasible','invalid'}:
-            self.set_status('Noch kein gültiges Ergebnis / Vorgabenkonflikt: '+result.status+'; '+'; '.join(i.message for i in result.issues));return
-        core,calendar=verify(self.inputs,result.blocks,active_events=result.events)
+            headings={'unknown':'Innerhalb des Zeitlimits wurde noch kein gültiger neuer Vorschlag gefunden.',
+                      'cancelled':'Die Berechnung wurde abgebrochen.',
+                      'infeasible':'Die fixierten Vorgaben lassen sich so nicht gemeinsam planen.',
+                      'invalid':'Die Planungsvorgaben enthalten einen Fehler.'}
+            details=tuple(dict.fromkeys(self.describe_issue(i) for i in result.issues))
+            message=headings[result.status]+(' '+details[0] if details else '')
+            self.set_status(message+' | Der bisherige Dienstplan bleibt erhalten.'+(' | '+' | '.join(details[1:]) if len(details)>1 else '')+
+                            (' | Betroffene Zuteilung im Dienstplan prüfen, ändern oder deren Fixierung lösen.' if result.issues else '')+
+                            (' | '+' | '.join(result.unchecked) if result.unchecked else ''));return
+        core,calendar=verify_for_planning(self.inputs,result.blocks,active_events=result.events)
         if not core.hard_ok or not calendar.hard_ok:
             self.set_status('Berechneter Vorschlag verletzt verbindliche Regeln und wird nicht angezeigt.');return
         self.pending=(result,token);self.accept.setEnabled(True)
@@ -685,11 +699,30 @@ class Workbench(QDialog):
         self.set_status(self.status_text+' '+('Alle gewählten Zielstufen bewiesen.' if result.global_optimal else 'Kein vollständiger Optimalitätsnachweis.')+
                             (' Noch keine Person zugeteilt; Zeitlimit und Eingaben prüfen.' if not result.blocks else ''))
 
+    def describe_issue(self,issue):
+        """Person und Dienst statt einer pauschalen Fixierungsfehlermeldung."""
+        person=next((p for p in self.inputs.people if p.id==issue.person_id),None)
+        term=next((e for e in self.inputs.events if e.id==issue.event_id),None)
+        scope=[]
+        if person:scope.append(person.name+' ('+person.id+')')
+        elif issue.person_id:scope.append(issue.person_id)
+        if term:
+            scope.append(term.attendance.start_day.strftime('%d.%m.%Y')+' · '+term.service.key)
+        elif issue.event_id:
+            entry=next((e for e in self.inputs.absences if e.id==issue.event_id),None)
+            scope.append(entry.span.start_day.strftime('%d.%m.%Y') if entry else issue.event_id)
+        message=issue.message
+        if issue.rule=='rest':
+            import re
+            match=re.fullmatch(r'Nur (\d+) Minuten Ruhe seit (.+); benötigt (\d+), fehlen (\d+)\.',message)
+            if match:message=f'Nur {hours_text(int(match[1]))} h Ruhe seit {match[2]}; benötigt {hours_text(int(match[3]))} h, fehlen {hours_text(int(match[4]))} h.'
+        return (' · '.join(scope)+': ' if scope else '')+message
+
     def apply_result(self):
         if not self.pending:return
         result,token=self.pending
         if token!=(self.generation,self.store.input_revision,self.inputs.fingerprint,fingerprint(self.profile)):raise ValueError('Ergebnis ist veraltet.')
-        core,calendar=verify(self.inputs,result.blocks,active_events=result.events)
+        core,calendar=verify_for_planning(self.inputs,result.blocks,active_events=result.events)
         if not core.hard_ok or not calendar.hard_ok:raise ValueError('Ergebnis verletzt verbindliche Regeln.')
         self.store.save_workspace(self.inputs,self.profile,result.blocks,result.events,expected_revision=token[1])
         self.blocks,self.events,self.proofs=result.blocks,result.events,result.proofs;self.pending=None;self.accept.setEnabled(False);self.refresh_results()
@@ -736,13 +769,15 @@ class Workbench(QDialog):
         self.ensure_team_saved()
         inputs,events=self.manual_context(blocks,locked)
         core,calendar=verify(inputs,blocks,active_events=events)
-        messages=tuple(i.message for i in core.issues+calendar.issues)
+        allowed=accepted_wish_warnings(inputs,core.issues)
+        messages=tuple(i.message for i in blocking_issues(inputs,core.issues)+calendar.issues)
         from .automatic_weekly import check_shared_weeks
         try:check_shared_weeks(inputs,blocks,events,self.store.month_snapshots(inputs.year,inputs.month))
         except ValueError as exc:messages+=(str(exc),)
         if messages:
             if not self.confirm_override(messages):return
-            inputs=replace(inputs,manual_override=True,override_notes=messages)
+            inputs=replace(inputs,manual_override=True,override_notes=tuple(dict.fromkeys(messages+tuple(i.message for i in allowed))))
+        elif allowed:inputs=replace(inputs,manual_override=True,override_notes=tuple(i.message for i in allowed))
         else:inputs=replace(inputs,manual_override=False,override_notes=())
         self.store.save_workspace(inputs,self.profile,blocks,events,expected_revision=self.store.input_revision)
         self.inputs,self.blocks,self.events=inputs,tuple(blocks),events;self.proofs=();self.dirty();self.refresh_results()
@@ -766,7 +801,7 @@ class Workbench(QDialog):
         for choice in choices:
             locks=remaining_locks+(choice,) if fixed else self.inputs.locked
             inputs,events=self.manual_context(base+(choice,),locks)
-            core,calendar=verify(inputs,base+(choice,),active_events=events)
+            core,calendar=verify_for_planning(inputs,base+(choice,),active_events=events)
             if core.hard_ok and calendar.hard_ok:
                 self.manual(base+(choice,),locks);return
             if calendar.issues or any(i.rule!='working_coverage' for i in core.issues):break
@@ -827,7 +862,7 @@ class Workbench(QDialog):
         merged={e.identity:e for e in tuple(e for e in self.inputs.absences if e.id!=replaces)+entries}
         checked=replace(self.inputs,absences=tuple(merged.values()))
         if self.events is not None:
-            core,calendar=verify(checked,self.blocks,active_events=self.events)
+            core,calendar=verify_for_planning(checked,self.blocks,active_events=self.events)
             messages=tuple(i.message for i in core.issues+calendar.issues)
             if messages and not allow_rules:
                 if not self.confirm_override(messages):return
@@ -939,7 +974,7 @@ class Workbench(QDialog):
         selection=replace(updated,optional_ids=updated.optional_ids-(assigned&weekly))
         events=selected_events(selection,self.events or ()) if self.events is not None else None
         if events is not None:
-            core,calendar=verify(updated,self.blocks,active_events=events)
+            core,calendar=verify_for_planning(updated,self.blocks,active_events=events)
             messages=tuple(i.message for i in core.issues+calendar.issues)
             if messages:
                 if not self.confirm_override(messages):return

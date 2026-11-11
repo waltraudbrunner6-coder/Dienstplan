@@ -4,7 +4,7 @@ from time import monotonic
 
 from .errors import DomainError
 from .objectives import evaluate
-from .solver import verify
+from .solver import verify_for_planning
 
 
 def improve(inputs,blocks,events,profile,*,deadline,cancel=None):
@@ -14,7 +14,7 @@ def improve(inputs,blocks,events,profile,*,deadline,cancel=None):
     def accept(proposal):
         nonlocal best,value
         if not running():return False
-        core,calendar=verify(inputs,proposal,active_events=events)
+        core,calendar=verify_for_planning(inputs,proposal,active_events=events)
         if not core.hard_ok or not calendar.hard_ok:return False
         score=tuple(v for _,v in evaluate(inputs,proposal,events,profile))
         if score>=value:return False

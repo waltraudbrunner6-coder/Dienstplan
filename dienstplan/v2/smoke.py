@@ -63,6 +63,48 @@ def check_leave_controls(window):
     assert values[0].credits_known and values[0].credits==300
 
 
+def check_approved_wish_planning(directory):
+    """Dezember-Fehlerklasse im gebauten Solver und tatsächlicher Qt-Vorschau."""
+    from dataclasses import replace
+    from .application import service_candidates
+    from .catalog import event
+    from .demo import technical_demo
+    from .entries import Entry
+    from .exporting import export_package
+    from .serialization import fingerprint
+    from .solver import solve_feasibility,verify,verify_for_planning
+    from .time import Interval
+    from .ui import Workbench
+    from datetime import date
+    inputs,profile,old=technical_demo()
+    team=event('T',date(2026,11,12))
+    wish=Entry('selftest-genehmigter-wunsch','A','freiwunschtag',
+               Interval.local('2026-11-12T00:00','2026-11-13T00:00'),rule_override=True)
+    inputs=replace(inputs,events=inputs.events+(team,),candidates=inputs.candidates+service_candidates((team,),inputs.people),
+                   absences=(wish,),locked=(old[0],),manual_override=True)
+    result=solve_feasibility(inputs,time_limit=2,existing=old,existing_events=inputs.events,objective_profile=profile)
+    assert result.status in {'conditional','incomplete'} and old[0] in result.blocks
+    assert not result.open_slots and not result.global_optimal
+    raw,_=verify(inputs,result.blocks,active_events=result.events)
+    checked,calendar=verify_for_planning(inputs,result.blocks,active_events=result.events)
+    assert raw.issues and checked.hard_ok and calendar.hard_ok
+    assert any('Genehmigte' in note and 'Donnerstag' in note for note in result.unchecked)
+    path=Path(directory)/'genehmigter-wunsch.sqlite3'
+    window=Workbench(database=path,initial=(inputs,profile,old),year=2026,month=11)
+    try:
+        token=(window.generation,window.store.input_revision,window.inputs.fingerprint,fingerprint(window.profile))
+        window.on_worker_completed(result,token)
+        assert window.pending and window.accept.isEnabled() and window.blocks==old
+        window.accept.click()
+        assert old[0] in window.blocks and window.inputs.manual_override
+        saved=window.store.load_workspace(2026,11)
+        assert saved[2]==result.blocks and saved[0].absences==(wish,) and saved[0].locked==(old[0],)
+        manifest=export_package(Path(directory)/'genehmigte-wuensche.zip',window.inputs,window.profile,window.blocks,window.events,proofs=window.proofs)
+        assert manifest['accepted_wish_exceptions'] and manifest['objectives']
+        assert 'genehmigten Freiwunschvorgaben' in manifest['objective_status']
+    finally:window.close()
+
+
 def run(report_path=None):
     values={}
     try:
@@ -151,10 +193,11 @@ def run(report_path=None):
             assert not check_quotas(weekly.quotas,selected_events(weekly),policy=weekly.week_policy)
             assert automatic_pause_choices(inputs.events[0],'A')[0].breaks[0].end.astimezone(vienna()).hour<=22
             preview_window.close()
+            check_approved_wish_planning(directory)
         values=dict(selbsttest='bestanden',scope='Hauptoberfläche mit Standardmonat; Rechenkette separat mit synthetischer Fixture',
                     personen=12,zuteilungen=8,tzdata=TZDATA_VERSION,iana=IANA_VERSION,
                     dst=True,solver_pruefer=True,sqlite=True,exportpaket=True,qt=True,
-                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,vorschau_anzeige=True,excel_import_export=True,automatic_pause=True,weekly_configuration=True,manual_assignment=True,leave_calendar=True,build=identity)
+                    hauptoberflaeche=True,standarddienste=True,ausschlussliste=True,stundenanzeige=True,dauerhafte_datei=True,vorschau_anzeige=True,excel_import_export=True,automatic_pause=True,weekly_configuration=True,manual_assignment=True,leave_calendar=True,approved_wish_planning=True,build=identity)
         code=0
     except Exception as exc:
         values=dict(selbsttest='fehlgeschlagen',fehler=str(exc),details=traceback.format_exc());code=1

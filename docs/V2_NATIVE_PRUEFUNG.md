@@ -1,5 +1,9 @@
 # Dienstplan 0.5.0 – Urlaubskonten, Kalenderbedienung und geklärte Dienstregeln
 
+**0.5.1 in Prüfung:** Die Korrektur der Weiterplanung mit bereits genehmigten
+Donnerstags-Freiwünschen ist in den unten verlinkten 0.5.0-Paketen noch nicht
+enthalten. Neue Downloads folgen nach vollständiger Regression und nativer Prüfung.
+
 Stand 11.11.2026. Programm-/Teststand **1361571**. Windows x64, macOS Sequoia
 Apple Silicon und Intel: vollständige Testsuite, Paketbau und Prüfung der
 gebauten Anwendung erfolgreich.

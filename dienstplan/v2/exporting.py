@@ -14,6 +14,7 @@ from .objectives import evaluate
 from .reporting import hours_rows,quantity_rows,shares,month_booking_description
 from .serialization import fingerprint,plain
 from .solver import verify
+from .planning_validation import accepted_wish_warnings,blocking_issues,wish_warning_messages
 from .time import vienna
 from .presentation import hours_text
 from .wishes import wish_rows
@@ -65,13 +66,15 @@ def export_package(target,inputs,profile,blocks,events,*,proofs=(),holidays=None
             value=field(row,key)
             return hours_text(value) if key in time_keys and value is not None else json.dumps(plain(value),ensure_ascii=False)
         files[name]=_csv(('revision_id',)+tuple(map(column,header)),[(revision,)+tuple(cell(r,key) for key in header) for r in rows])
-    invalid=not core.hard_ok or not calendar.hard_ok
+    wish_exceptions=accepted_wish_warnings(inputs,core.issues)
+    invalid=bool(blocking_issues(inputs,core.issues) or calendar.issues)
     unknown_credits=any(not r.credits_known for r in report_rows['stunden.csv'])
     manifest=dict(month_booking_profile=profile.month_profile,month_booking_rule=month_booking_description(profile.month_profile),physical_quantities='Tatsächliche Arbeit nach lokalem Kalendertag; unabhängig von der Monatsbuchung',manual_override=inputs.manual_override,override_notes=list(inputs.override_notes),revision_id=revision,scope=inputs.profile_label,input_fingerprint=inputs.fingerprint,
                   versions=saved['snapshot']['versions'],objective_profile=plain(profile),objectives=[] if unknown_credits or invalid else plain(evaluate(inputs,blocks,events,profile)),
-                  objective_status='Regelabweichung; keine Optimierungsbewertung' if invalid else 'Urlaubsgutschrifttage ungeklärt' if unknown_credits else 'bewertet',
+                  objective_status='Regelabweichung; keine Optimierungsbewertung' if invalid else 'Urlaubsgutschrifttage ungeklärt' if unknown_credits else 'bewertet unter genehmigten Freiwunschvorgaben' if wish_exceptions else 'bewertet',
+                  accepted_wish_exceptions=plain(wish_exceptions),
                   proofs=[] if unknown_credits or invalid else plain(proofs),issues=plain(core.issues+calendar.issues),open_slots=plain(core.open_slots),
-                  unchecked=list(dict.fromkeys(inputs.unchecked+calendar.unchecked+profile.history.missing)),
+                  unchecked=list(dict.fromkeys(inputs.unchecked+calendar.unchecked+profile.history.missing+wish_warning_messages(inputs))),
                   euro_status='ungeklärt – kein freigegebener KV-/BV-Tarif',
                   csv_format_version=2,csv_time_unit='Stunden, Dezimalkomma, zwei Nachkommastellen; Arbeitsstand-JSON weiterhin exakte Minuten',
                   holiday_calendar='ungeklärt' if holidays is None else sorted(d.isoformat() for d in holidays),

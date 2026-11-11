@@ -1,6 +1,6 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
-Aktueller Folgeauftrag: **0.5.0 – Urlaubskonten, verständliche Bedienung und geklärte Dienstregeln**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
+Aktueller Folgeauftrag: **0.5.1 – automatische Weiterplanung mit genehmigten Freiwünschen**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
 die folgenden älteren Etappenberichte bleiben als Verlauf erhalten.
 
 **Geliefert:** Version 0.5.0 auf `feat/v2-implementation`, Programm-/Teststand
@@ -1038,3 +1038,63 @@ automatisiert; Signierung/Notarisierung und vollständige manuelle Plattformabna
 sind nicht nachgewiesen. Keine echte Datenbank geöffnet oder migriert, kein Merge
 nach main. Bei Fortsetzung zuerst diese Datei, Git-Stand und aktuelle Nachweise
 lesen; erledigte Arbeit nicht erneut beginnen.
+
+## Folgeauftrag 0.5.1 – falscher Fixierungskonflikt beim Dezemberimport
+
+Nutzerfehler: Nach Import der bereitgestellten Dezemberwünsche und Termine
+meldete die Berechnung pauschal „infeasible; Manuelle Fixierung ist mit
+Beschäftigung, Rechten, Urlaub, Ruhe oder Pausenregeln unvereinbar“.
+Schreibgeschützte Analyse der vorbereiteten Tabelle: 60 Zeilen, 48 Freiwünsche,
+4 U-Einträge und 8 fixierte Dienste. Mit fiktiven Personen und ausdrücklich
+synthetischer einheitlicher Reservefensterwahl sind die acht Fixierungen physisch
+vereinbar. Zwölf bereits genehmigte Donnerstagwünsche erzeugten jedoch bei jeder
+lokalen Kandidatenprüfung globale `overridden_rule`-Fehler, auch für andere
+Personen und Daten. Dadurch verschwanden gültige Kandidaten. Die Ergebnisprüfung,
+Zielfunktion und UI hätten die gleichen Hinweise anschließend erneut als harte
+Dienstkonflikte behandelt. Keine tatsächlichen Nutzerdaten oder Namen übernommen.
+
+Begrenzte Korrektur: `planning_validation.py` erkennt ausschließlich die exakt
+zugeordneten Konfigurationshinweise ausdrücklich genehmigter Einzel-/Wochenend-
+Freiwünsche; beide gespeicherten Zustimmungsflags sind erforderlich. Der strenge
+unabhängige Prüfer bleibt unverändert und protokolliert die Abweichungen weiter.
+`verify_for_planning` wird konsistent bei Suche, Bewertung, lokaler Verbesserung,
+Vorschau und Übernahme verwendet. Urlaub, Beschäftigung, Rechte, Ruhe, Pausen,
+Kennungen, andere Regeln und neue Zuteilungen werden dadurch nicht übersteuert.
+Nicht genehmigte Wünsche bleiben vor der Suche mit konkretem Hinweis gesperrt.
+
+Gültige importierte Fixierungen bleiben bestehen. Echte einzelne oder gegenseitige
+Fixierungskonflikte liefern konkrete Regeln; die UI ergänzt Namen, Datum, Dienst
+und Ruheabstände in Stunden. Zeitlimit und Abbruch werden nicht als mathematische
+Unmöglichkeit ausgegeben. Bisheriger Plan und Datenbank bleiben bei einem
+gescheiterten Vorschlag erhalten. Manuelles gültiges Bearbeiten und Speichern
+löscht die bestehende Wunschgenehmigung nicht und fragt nicht erneut danach.
+Exporte enthalten strenge Prüfmeldungen und `accepted_wish_exceptions`; Bewertung
+und Nachweise sind ausdrücklich an die genehmigten Vorgaben gebunden. Kein
+uneingeschränkter Optimalitätsnachweis bei dieser Ausnahme.
+
+Neue synthetische Regressionen: eine fremde genehmigte Donnerstagvorgabe mit
+gültigem Lock; acht Locks und zwölf Wünsche; beide Zustimmungsflags; keine
+Ausnahme für Urlaub, Rechte oder echte Ruheverletzungen; konkrete gegenseitige
+Fixierungsdiagnose; echter Qt-Worker, Vorschau, Übernahme, Reopen, manueller
+Wechsel/Save, Export und Zeitlimit ohne Planverlust. Originale Tabellenzeilen
+oder private Namen sind nicht Bestandteil der Tests. Gezielte Solver-/UI-/
+Objective-/Override-Integration: **44 bestanden in 18,06 s**. Weitere neue
+UI-/Diagnose-/Paketprüfungen: **39 bestanden in 4,00 s**.
+
+Quell-Selbsttest `QT_QPA_PLATFORM=offscreen .venv/bin/python -m dienstplan
+--self-test-v2 --self-test-report /tmp/dienstplan-0.5.1-smoke.json` erfolgreich,
+einschließlich echter CP-SAT-Planung, Qt-Vorschau/Übernahme, SQLite und Export mit
+genehmigtem Donnerstagwunsch. `approved_wish_planning=true` ist künftig für
+native Pakete verpflichtend. Vollständige Regression und neue native Matrix
+stehen noch aus; verlinkte bisherige Pakete sind weiterhin 0.5.0 und enthalten
+diese Korrektur noch nicht. Keine Migration oder echter Datenbankeingriff,
+kein Merge nach main. Nächster Schritt: Gesamtprüfung, getesteter Commit/Push,
+native Windows-/macOS-Builds und tatsächliche Nachweise.
+
+Vollständige aktuelle Regression `QT_QPA_PLATFORM=offscreen .venv/bin/python -m
+pytest -q --disable-warnings --maxfail=3`: **566 bestanden in 289,47 s**.
+`git diff --check` fehlerfrei. Auch der physische Monatsbedarfs-Hinweis in der UI
+berücksichtigt R ausdrücklich als normale Arbeit; Kontobuchung und reale
+Kalenderzeit bleiben getrennt. Keine Abhängigkeit oder Datenschemafassung geändert.
+Programm-/Teststand wird jetzt für die native Gesamtmatrix committed und gepusht;
+0.5.0-Nachweis unverändert unter `examples/v2/native-0-5-0.json` archiviert.

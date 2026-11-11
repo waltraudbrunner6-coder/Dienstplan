@@ -13,6 +13,7 @@ from .serialization import fingerprint
 from .pauses import check_coverage,coverage_segments
 from .time import rest_minutes,TZDATA_VERSION
 from .validation import Issue,check_core
+from .planning_validation import blocking_issues,wish_warning_messages
 
 
 @dataclass(frozen=True, slots=True)
@@ -151,17 +152,23 @@ def verify(inputs,blocks,*,check_fixed=True,active_events=None):
     return core,calendar
 
 
+def verify_for_planning(inputs,blocks,*,check_fixed=True,active_events=None):
+    """Strenge Dienstprüfung mit ausschließlich genehmigten Wunschhinweisen."""
+    core,calendar=verify(inputs,blocks,check_fixed=check_fixed,active_events=active_events)
+    return replace(core,issues=blocking_issues(inputs,core.issues)),calendar
+
+
 def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, existing=(),existing_events=None,objective_profile=None) -> FeasibilityResult:
     started=monotonic()
     if type(time_limit) not in (int,float) or not isfinite(time_limit) or time_limit<=0:raise DomainError('Zeitlimit muss endlich und größer null sein.')
     deadline=started+time_limit;existing=tuple(existing)
     key=inputs.fingerprint
-    best=None;best_events=None;best_open=None;proved=False;last_issues=();last_unchecked=tuple(inputs.unchecked)
+    best=None;best_events=None;best_open=None;proved=False;last_issues=();last_unchecked=tuple(dict.fromkeys(inputs.unchecked+wish_warning_messages(inputs)))
     best_values=None;proofs=[]
 
     def score(blocks,events):
         if objective_profile is None:
-            core,_=verify(inputs,blocks,active_events=events)
+            core,_=verify_for_planning(inputs,blocks,active_events=events)
             from .fallback import with_fallback_objective
             return with_fallback_objective(inputs,events,(('coverage',sum(n for _,n in core.open_slots)),))
         from .objectives import evaluate
@@ -169,9 +176,9 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
 
     def consider(blocks,events=None):
         nonlocal best,best_events,best_open,last_issues,last_unchecked,best_values
-        core,calendar=verify(inputs,blocks,active_events=events)
+        core,calendar=verify_for_planning(inputs,blocks,active_events=events)
         last_issues=core.issues+calendar.issues
-        last_unchecked=tuple(dict.fromkeys(inputs.unchecked+calendar.unchecked))
+        last_unchecked=tuple(dict.fromkeys(inputs.unchecked+calendar.unchecked+wish_warning_messages(inputs)))
         if last_issues:return False
         missing=sum(n for _,n in core.open_slots)
         events=tuple(inputs.events if events is None else events)
@@ -184,39 +191,54 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
     def finish(fallback_status):
         if best is None:
             return FeasibilityResult(fallback_status,(),(),last_issues,last_unchecked,False,monotonic()-started,key,inputs.profile_label)
-        core,calendar=verify(inputs,best,active_events=best_events)
+        core,calendar=verify_for_planning(inputs,best,active_events=best_events)
         if core.issues or calendar.issues:raise DomainError('Der beste Zwischenstand bestand die abschließende Prüfung nicht.')
         from .fallback import fallback_notes
         notes=fallback_notes(inputs,best_events)
-        unchecked=tuple(dict.fromkeys(inputs.unchecked+calendar.unchecked+notes))
+        unchecked=tuple(dict.fromkeys(inputs.unchecked+calendar.unchecked+wish_warning_messages(inputs)+notes))
         status='incomplete' if core.open_slots else 'conditional' if unchecked else 'feasible'
         final_values=score(best,best_events)
         if final_values!=best_values:raise DomainError('Endgültige Zielwerte stimmen nicht mit dem besten Entwurf überein.')
         current_proofs=tuple(p for i,p in enumerate(proofs) if i<len(final_values) and (p.name,p.value)==final_values[i] and p.prefix==final_values[:i])
+        if wish_warning_messages(inputs):current_proofs=tuple(replace(p,conditional=True) for p in current_proofs)
         global_optimal=len(current_proofs)==len(final_values) and all(p.proven and not p.conditional for p in current_proofs)
         return FeasibilityResult(status,best,core.open_slots,(),unchecked,proved or best_open==0,monotonic()-started,key,inputs.profile_label,best_events,final_values,current_proofs,global_optimal)
 
     if existing or existing_events is not None:consider(existing,existing_events)
     if monotonic()>=deadline or (cancel is not None and cancel.is_set()):return finish('cancelled' if cancel is not None and cancel.is_set() else 'unknown')
     # Optionale Datumsalternativen sind keine gleichzeitig aktiven Termine.
-    structural=check_core(inputs.people,tuple(e for e in inputs.events if e.id not in inputs.optional_ids),(),check_fixed=False)
-    if structural.issues:
-        last_issues=structural.issues;return finish('invalid')
+    structural=check_core(inputs.people,tuple(e for e in inputs.events if e.id not in inputs.optional_ids),(),
+                          absences=inputs.absences,check_fixed=False)
+    if blocking_issues(inputs,structural.issues):
+        last_issues=blocking_issues(inputs,structural.issues);return finish('invalid')
     terms={e.id:e for e in inputs.events};persons={p.id:p for p in inputs.people}
+    hard_absences=tuple(e for e in inputs.absences if e.kind=='urlaub')
     candidates=[]
     # Auch ein Altentwurf mit einer anderen gültigen konkreten Pausenlage bleibt
     # Startpunkt; er wird nicht nur wegen begrenzter neuer Kandidaten verworfen.
     for b in dict.fromkeys(inputs.candidates+tuple(existing)+inputs.locked):
         if monotonic()>=deadline or (cancel is not None and cancel.is_set()):return finish('cancelled' if cancel is not None and cancel.is_set() else 'unknown')
         if b.person_id not in persons or b.id not in terms:continue
-        local=check_core((persons[b.person_id],),(terms[b.id],),(b,),absences=inputs.absences,
+        local=check_core((persons[b.person_id],),(terms[b.id],),(b,),absences=hard_absences,
                          boundary=tuple(p for p in inputs.boundary if p.person_id==b.person_id),check_fixed=False)
-        if local.hard_ok:candidates.append(b)
+        if not blocking_issues(inputs,local.issues):candidates.append(b)
+    if inputs.locked:
+        fixed_ids={b.id for b in inputs.locked}
+        fixed_report=check_core(inputs.people,tuple(e for e in inputs.events if e.id in fixed_ids),inputs.locked,
+                                absences=hard_absences,boundary=inputs.boundary,check_fixed=False)
+        fixed_calendar=check_calendar(inputs.people,inputs.locked+inputs.boundary,inputs.year,inputs.month,
+                                      known_days=inputs.known_days,policy=inputs.weekend_policy)
+        fixed_issues=blocking_issues(inputs,fixed_report.issues)+fixed_calendar.issues
+        if fixed_issues:
+            last_issues=fixed_issues;return finish('infeasible')
     candidates=_reduce_pause_choices(inputs,candidates,objective_profile,existing+inputs.locked)
     model=cp_model.CpModel();x=[model.new_bool_var(f'candidate_{i}') for i in range(len(candidates))]
     for fixed in inputs.locked:
         if fixed not in candidates:
-            last_issues=(Issue('manual_fixed',fixed.person_id,fixed.id,'Manuelle Fixierung ist mit Beschäftigung, Rechten, Urlaub, Ruhe oder Pausenregeln unvereinbar.'),)
+            term=terms.get(fixed.id)
+            local=check_core(inputs.people,(term,) if term is not None else (), (fixed,),absences=hard_absences,
+                             boundary=tuple(b for b in inputs.boundary if b.person_id==fixed.person_id),check_fixed=False)
+            last_issues=blocking_issues(inputs,local.issues) or (Issue('manual_fixed',fixed.person_id,fixed.id,'Für den fixierten Dienst fehlt ein gültiger Kandidat; Kennung, Termin und konkrete Pause prüfen.'),)
             return finish('infeasible')
         model.add(x[candidates.index(fixed)]==1)
     y={e.id:model.new_bool_var(f'term_{e.id}') for e in inputs.events}
@@ -249,8 +271,11 @@ def solve_feasibility(inputs: PlanningInput, *, time_limit=5.0, cancel=None, exi
             fixed=[i for i in indices if candidates[i].person_id==person]
             if not fixed and term.id not in inputs.optional_ids:
                 local=tuple(b for b in inputs.candidates+existing if b.id==term.id and b.person_id==person)
-                detail=check_core(inputs.people,(term,),local,absences=inputs.absences,boundary=inputs.boundary,check_fixed=False)
-                last_issues=detail.issues or (Issue('fixed_candidate',person,term.id,'Für die feste Person liegt keine gültige konkrete Zuteilung einschließlich Pause vor.'),)
+                detail=check_core(inputs.people,(term,),local,absences=hard_absences,boundary=inputs.boundary,check_fixed=False)
+                details=blocking_issues(inputs,detail.issues)
+                if not details and person in persons:
+                    details=tuple(Issue('eligibility',person,term.id,message) for message in persons[person].eligibility_errors(term.service.code,term.attendance))
+                last_issues=details or (Issue('fixed_candidate',person,term.id,'Für die feste Person liegt keine gültige konkrete Zuteilung einschließlich Pause vor.'),)
                 return finish('infeasible')
             model.add(sum(x[i] for i in fixed)==y[term.id])
     # Anwesenheit/Starttag/Ruhe hängen nicht von der konkreten Pausenlage ab.

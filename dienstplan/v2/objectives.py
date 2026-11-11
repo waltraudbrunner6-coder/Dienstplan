@@ -58,9 +58,9 @@ def share_targets(inputs,events,profile):
 
 
 def evaluate(inputs,blocks,events,profile):
-    from .solver import verify
+    from .solver import verify_for_planning
     blocks,events=tuple(blocks),tuple(events)
-    core,calendar=verify(inputs,blocks,active_events=events)
+    core,calendar=verify_for_planning(inputs,blocks,active_events=events)
     if not core.hard_ok or not calendar.hard_ok:raise DomainError('Ungültiger Plan kann nicht als besseres Ergebnis bewertet werden.')
     values={'coverage':sum(n for _,n in core.open_slots)}
     values['participation']=sum(state=='fehlt' for _,_,state in core.participation)

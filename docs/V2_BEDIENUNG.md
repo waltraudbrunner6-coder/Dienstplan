@@ -1,9 +1,12 @@
-# Dienstplan – Bedienung ab 0.5.0
+# Dienstplan – Bedienung ab 0.5.1
 
 Die Anwendung plant und speichert vollständig lokal. V2 ist die normale
 Hauptoberfläche, kein zusätzlicher Prüfbereich. Fiktive Personen erscheinen
 nur bei einem ausdrücklich gestarteten Demo. Die tatsächliche Version und
 Buildkennung stehen im Fenster; geprüfte Downloads in `V2_NATIVE_PRUEFUNG.md`.
+Die 0.5.1-Korrektur ist erst mit dem dort ausgewiesenen nativen Paket auch für
+die jeweilige Plattform belegt. Eine vorhandene Datenbank weiter öffnen;
+wegen dieser Korrektur ist kein Neuimport erforderlich.
 
 ## 1. Monat und Personen
 
@@ -168,6 +171,23 @@ wird dabei nicht neu bewertet.
 Ein vorhandener gültiger Plan dient als Startpunkt. Fehlende Randdaten sind
 unbekannt und kein Beleg für Freizeit. Ein Zeitlimit ist kein Beweis der Unlösbarkeit.
 
+Ab 0.5.1 blockiert eine bereits genehmigte Freiwunsch-Ausnahme, etwa ein Wunsch
+mit Donnerstagsanteil, nicht mehr alle Dienstkandidaten. Zuvor konnte deshalb die
+Meldung **Die fixierten Vorgaben lassen sich so nicht gemeinsam planen** erscheinen,
+obwohl die Fixierungen selbst gültig waren. Genehmigte Wünsche bleiben aktiv und
+als Ausnahme sichtbar; ihre Zustimmung bleibt beim Speichern und bei ansonsten
+gültigen manuellen Änderungen erhalten. Das Ergebnis gilt unter diesen
+genehmigten Wunschvorgaben, ohne dadurch einen Optimalitätsnachweis zu erhalten.
+
+Tatsächliche Fixierungskonflikte verschwinden dadurch nicht. Eine Fehlermeldung
+nennt die betroffene Person, Datum und Dienst; bei Ruhekonflikten auch vorhandene
+und fehlende Stunden. Beispielsweise sind zwei
+gleichzeitige fixierte Dienste oder ein fixierter Dienst mit zu kurzer Ruhezeit
+weiterhin kein automatisch gültiger Plan. Betroffene Zuteilung im Dienstplan
+prüfen, ändern oder ihre Fixierung ausdrücklich lösen; die App löst sie nicht
+ungefragt. Urlaub, Beschäftigung, Berechtigungen und Ruhe bleiben für die
+automatische Planung verbindlich.
+
 Der Vorschlag erscheint sofort im **Dienstplan**. **Monatsübersicht** zeigt die
 Personen-/Tagesmatrix; **Stundenprognose**, **Schichtverteilung** und **Freiwünsche**
 beziehen sich auf denselben sichtbaren Stand. **OFFEN** markiert fehlende Plätze.
@@ -225,6 +245,9 @@ Matrix mit Datum und Wochentag sowie Einzelzeilen zum Reimport.
 **Exportpaket** enthält CSVs, exakte Monatsdaten und Prüfmanifest mit gemeinsamer
 Revisions-ID und Hashes. Stundenkonto und physische Zeitmengen sind ausdrücklich
 getrennt. Bestehende Exportdateien werden nicht überschrieben.
+Das Prüfmanifest nennt genehmigte Freiwunsch-Ausnahmen gesondert und kennzeichnet
+die Bewertung als unter diesen Vorgaben erfolgt. Die strengen Prüfhinweise
+bleiben enthalten.
 
 ## 9. Monat bestätigen und Dateien sichern
 

@@ -4,6 +4,15 @@ Lokale, deutschsprachige Desktop-Anwendung für Monatsdienstpläne mit Python/Qt
 OR-Tools CP-SAT und SQLite. Planung und Speicherung funktionieren offline.
 Die Stunden sind Prognosen aus dem Dienstplan, keine erfassten Ist-Arbeitszeiten.
 
+**Korrektur für 0.5.1:** Bereits ausdrücklich genehmigte Freiwünsche, etwa an
+Donnerstagen, verhindern die automatische Planung nicht mehr pauschal. In der
+vorbereiteten Dezemberdatei wurden acht gültige Fixierungen wegen zwölf solcher
+Wünsche fälschlich als gemeinsam unplanbar gemeldet. Die bestehende Datenbank
+kann weiterverwendet werden; ein erneuter Import ist nicht erforderlich.
+Echte Konflikte fixierter Dienste bleiben zu prüfen und werden konkret benannt.
+Native 0.5.1-Pakete und Plattformnachweise sind erst nach ihrem Eintrag im
+[Prüfbericht](docs/V2_NATIVE_PRUEFUNG.md) belegt.
+
 **Änderungen für 0.5.0:** Urlaub mit Kalender, verständlicher Tages-/Stundenübersicht
 und angespartem Urlaubskonto; Termine mit Datum, Uhrzeit und Namensauswahl;
 Reserve als normale Arbeit; KC15 als echte Ersatzwahl; Nachtdienste vollständig
