@@ -3,6 +3,11 @@
 Aktueller Folgeauftrag: **0.5.0 – Urlaubskonten, verständliche Bedienung und geklärte Dienstregeln**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
 die folgenden älteren Etappenberichte bleiben als Verlauf erhalten.
 
+**Geliefert:** Version 0.5.0 auf `feat/v2-implementation`, Programm-/Teststand
+`1361571`, lokale Gesamtsuite 549 Tests bestanden. Native Windows-x64-,
+macOS-Sequoia-ARM64- und Intel-Pakete vollständig erfolgreich gebaut und geprüft.
+Aktuelle Downloads und gemessene Größen: [Native Prüfung](V2_NATIVE_PRUEFUNG.md).
+
 ## Aktueller Folgeauftrag: Excel-Import, Monatsansicht, Pausen und BK/WL (0.4.0)
 
 Implementiert: lokale XLSX-/CSV-Bediengrenze mit openpyxl 3.1.5 und festgelegter
@@ -903,7 +908,7 @@ Paketbuild und Programm-Selbsttests. Rohdaten: `examples/v2/native-pruefung.json
 `V2_NATIVE_PRUEFUNG.md`. Keine echte Datenbank verändert, kein Merge nach main.
 Nachfolgende reine Nachweiscommits ändern den geprüften Programm-/Testcode nicht.
 
-## Laufender Folgeauftrag 0.5.0 – Urlaub und verständliche Bedienung (noch nicht freigegeben)
+## Folgeauftrag 0.5.0 – Urlaub und verständliche Bedienung (Verlauf)
 
 Arbeitsstand nach Unterbrechung: uncommittete Implementierung auf
 `feat/v2-implementation`; letzte veröffentlichte stabile Pakete bleiben 0.4.4.
@@ -1000,3 +1005,36 @@ Gemeinsamer Nachlauf `QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -q
 tests/test_v2_ui.py tests/test_v2_term_dialog.py tests/test_v2_person_dialog.py
 --disable-warnings --maxfail=2`: **46 bestanden in 15,84 s**. Die vollständige
 native Matrix wird mit der geprüften Testkorrektur erneut gestartet.
+
+Finaler Programm-/Teststand **1361571**, kein weiterer Programmcode während der
+nativen Prüfung geändert. Erneute lokale Gesamtkontrolle
+`QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -q --disable-warnings
+--maxfail=3`: **549 bestanden in 334,61 s**. Damit sind auch alle zuletzt
+ergänzten Personen-/Termindialogfälle gemeinsam mit der gesamten Legacy-/V2-Suite
+geprüft. Die früheren Zwischenfehler bleiben oben nachvollziehbar dokumentiert.
+
+### Native Lieferung 0.5.0 abgeschlossen
+
+**Run 43054833208**, Programm-/Testcommit **1361571**: Windows x64, macOS Sequoia
+ARM64 und Intel vollständig erfolgreich. Je Plattform komplette Testsuite,
+nativer Paketbau und Start-/Solver-/SQLite-/Export-/Qt-Selbsttest des gebauten
+Programms, einschließlich verpflichtendem Urlaubskalender und manueller Zuordnung.
+Der langsamere Intel-Lauf endete erfolgreich ohne geänderte Testanforderungen.
+Version, Commit, unveränderter Buildstand, alle Selbsttestflags und drei nicht
+abgelaufene Artefakte unabhängig aus den GitHub-Nachweisen geprüft.
+
+Messwerte für native Archive: Windows **87.506.542 Bytes / 83,45 MiB**,
+Apple Silicon **64.339.067 Bytes / 61,36 MiB**, Intel **71.115.607 Bytes / 67,82 MiB**.
+Entpackte Größen und alle Downloads: `V2_NATIVE_PRUEFUNG.md`. Rohdaten:
+`examples/v2/native-pruefung.json`; 0.4.4 bleibt bytegleich in `native-0-4-4.json`.
+Nachfolgende reine Nachweiscommits ändern diesen Programm-/Teststand nicht.
+
+Aktueller Auftrag umgesetzt und geliefert; Gesamtprojekt nicht pauschal als
+vollständig abgenommen kennzeichnen. Verbleibende Fachentscheidungen zu
+Teilmonats-Wochenendquoten, freiwilliger T-/TS-Zielrangfolge und gegebenenfalls
+Tarif-/Eurodaten sind in `V2_OFFENE_FRAGEN.md` begrenzt benannt. Konkrete feste
+Personen/Sondertermine bleiben normale Anwendungseingaben. Native Prüfung war
+automatisiert; Signierung/Notarisierung und vollständige manuelle Plattformabnahme
+sind nicht nachgewiesen. Keine echte Datenbank geöffnet oder migriert, kein Merge
+nach main. Bei Fortsetzung zuerst diese Datei, Git-Stand und aktuelle Nachweise
+lesen; erledigte Arbeit nicht erneut beginnen.

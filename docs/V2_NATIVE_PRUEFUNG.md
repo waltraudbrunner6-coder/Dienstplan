@@ -1,37 +1,80 @@
-# Dienstplan 0.4.4 – Monatsbestätigung trotz Abweichungen
+# Dienstplan 0.5.0 – Urlaubskonten, Kalenderbedienung und geklärte Dienstregeln
 
-**0.5.0 in Vorbereitung:** Die neuen Urlaubs-, Bedienungs- und Dienstregeln sind
-noch nicht Bestandteil der unten verlinkten 0.4.4-Pakete. Nach abschließenden
-Quelltests werden neue native Builds und deren tatsächliche Nachweise hier ergänzt.
+Stand 11.11.2026. Programm-/Teststand **1361571**. Windows x64, macOS Sequoia
+Apple Silicon und Intel: vollständige Testsuite, Paketbau und Prüfung der
+gebauten Anwendung erfolgreich.
 
-Stand 11.11.2026. Programm-/Testcommit **90a67d6**. Windows x64, macOS Sequoia ARM64 und Intel: Testsuite, Paketbuild und Prüfung des gebauten Programms erfolgreich.
-
-[Prüflauf 42931888956](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42931888956). Rohdaten: `examples/v2/native-pruefung.json`; voriger 0.4.3-Nachweis: `examples/v2/native-0-4-3.json`. Nachfolgende reine Nachweiscommits ändern den geprüften Programm-/Testcode nicht.
+[Prüflauf 43054833208](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/43054833208). Rohdaten:
+`examples/v2/native-pruefung.json`; der unveränderte 0.4.4-Nachweis ist unter
+`examples/v2/native-0-4-4.json` archiviert. Nachfolgende reine Nachweiscommits
+ändern den geprüften Programm-/Testcode nicht.
 
 ## Downloads
 
-- [Dienstplan-macOS-Sequoia-arm64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42931888956/artifacts/13817191611)
-- [Dienstplan-macOS-Sequoia-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42931888956/artifacts/13817142253)
-- [Dienstplan-Windows-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42931888956/artifacts/13816423194)
+- [Dienstplan-macOS-Sequoia-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/43054833208/artifacts/13872581097)
+- [Dienstplan-Windows-x64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/43054833208/artifacts/13870669310)
+- [Dienstplan-macOS-Sequoia-arm64](https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/43054833208/artifacts/13870389354)
 
-Alte App schließen und neue Archive vollständig entpacken. Windows: vollständigen Dienstplan-Ordner behalten und darin die EXE öffnen. macOS: ARM64 für Apple Silicon, x64 für Intel; vollständiges App-Bundle behalten. Im Fenster muss **Version 0.4.4 · Build 90a67d6** stehen. Python und Terminal sind nicht erforderlich. Bestehende Monatsdatei weiterverwenden.
+Alte App schließen und neue Archive vollständig entpacken. Der GitHub-Download
+enthält das eigentliche ZIP/TAR.GZ und `build-report.json`; auch dieses innere
+Archiv entpacken. Windows: den vollständigen Dienstplan-Ordner behalten und die
+EXE darin öffnen. macOS: ARM64 für Apple Silicon, x64 für Intel; vollständiges
+App-Bundle behalten. Im Fenster muss **Version 0.5.0 · Build 1361571** stehen.
+Python und Terminal sind nicht erforderlich. Bestehende Monatsdatei weiterverwenden.
 
-## Bedienung und Nachweise
+## Änderungen und geprüfte Bedienung
 
-- „Monat bestätigen“ zeigt Regelverstöße, offene Plätze, Stundenabweichungen und ungeprüfte Regeln. Mit „Ja“ wird dieser Stand trotz der Hinweise unveränderlich bestätigt; „Nein“ lässt den Monat unverändert.
-- Bestätigungs-Snapshots speichern ausdrückliche Übersteuerung, Regelmeldungen, offene Plätze und weitere Hinweise. Die Oberfläche zeigt „MONAT BESTÄTIGT MIT ABWEICHUNGEN“ auch nach Neustart.
-- Widersprüchliche bestätigte Randwochen dürfen nach ausdrücklicher Zustimmung eingefroren werden; die älteren Bestätigungen bleiben unverändert.
-- Wiederholtes Bestätigen zählt Historie nicht doppelt. Revisionsschutz, Fingerprints, Unveränderlichkeit und Transaktionen bleiben erhalten. Technisch widersprüchliche Kennungen oder undefinierte Rechenwerte werden nicht erfunden.
-- Lokaler Gesamtlauf: **441 bestanden in 284,52 s**. Zusätzlicher Bestätigungsnachlauf einschließlich Qt-Neustart: **4 bestanden in 1,24 s**. Native Jobs führten dieselbe Testsuite, Build und Programm-Selbsttests erfolgreich aus. Keine Testanforderung abgeschwächt.
+- Urlaubskalender mit erstem und letztem eingeschlossenen Tag; jedes markierte
+  U-Datum zählt mit den dann gültigen Wochenstunden ÷ 5, auch am Wochenende/Feiertag.
+  Zwei U-Tage bei 25 Wochenstunden ergeben 10 Stunden Gutschrift.
+- Urlaubskonto mit persönlichem Anfangsbestand und Startmonat. Zwei Tage je
+  Beschäftigungsmonat werden angespart; Teilmonate exakt mit
+  `2 × Beschäftigungskalendertage / Monatskalendertage`. Keine Vorabrundung der
+  Bruchteile; Tagesbestände in der Oberfläche auf zwei Nachkommastellen angezeigt.
+- Fehlende alte Urlaubstage sind über „Urlaubsübersicht → Fehlende Urlaubstage
+  auswählen“ korrigierbar. Speichern, Bearbeiten und Löschen erhält den übrigen
+  Dienstplan. Bestätigte Vergangenheit bleibt unverändert.
+- Personen und Vertragsversionen mit Kalenderfeldern und inklusiven letzten Tagen;
+  Termine mit Kalender, Uhrzeiten und Namensauswahl; vollständige Hinweise separat
+  lesbar. Abgelehnte Änderungen verändern keine Daten oder Zuteilungen.
+- R zählt normale Arbeitszeit; KC15 ist eine echte besetzte Ersatzwahl statt
+  KC10 und KC16. „LB-Termine ergänzen“ fragt zwei Personen und ergänzt nur die
+  fehlende Serie ab 03.12.2026 im 14-Tage-Rhythmus. FK wird einzeln erfasst.
+- Neue/offene normale Monate buchen die volle Schicht im Startmonat (M1), ordnen
+  Wochenenden dem Sonntagsmonat zu und berücksichtigen Freitags-W17 beim
+  Wochenendwunsch als Ausnahme. Alte bestätigte M0-Stände bleiben unverändert.
+- Manuelle Änderungen, Import und Monatsbestätigung dürfen nach Warnung fachliche
+  Regeln übergehen. Technisch ungültige Daten bleiben Fehler; automatische Planung
+  hält die verbindlichen Regeln weiter ein.
+
+Lokale Gesamtkontrolle: **549 Tests bestanden in 334,61 s**. Alle drei nativen
+Jobs führten die vollständige Testsuite, Build und Programm-Selbsttest erfolgreich
+aus. Der Paketnachweis verlangt insbesondere `leave_calendar=true` und
+`manual_assignment=true`. Offline-Zeitzonenfallback wird mit leerem
+`PYTHONTZPATH` geprüft. Rechenkette mit synthetischer Fixture, tatsächliche
+Qt-Hauptoberfläche mit Standardmonat; keine Benutzerdatenbank verändert.
+
+Der erste Lauf 43053041304 wird nicht als erfolgreicher Nachweis verwendet:
+Ein älterer Test erwartete zwingende Ablehnung statt der ausdrücklich gewünschten
+Terminausnahme nach Warnung. Der korrigierte Test prüft Warnung und unveränderte
+Daten bei Ablehnung; technisch ungültige Daten bleiben gesperrt. Die erneute
+vollständige Matrix auf 1361571 ist erfolgreich.
 
 ## Tatsächlich gemessene Paketgrößen
 
-| Plattform | Native Archivgröße | Entpacktes Programm |
+| Plattform | Natives Archiv | Entpacktes Programm |
 | --- | ---: | ---: |
-| Darwin arm64 | 64,248,462 Bytes / 61.27 MiB | 181,316,178 Bytes / 172.92 MiB |
-| Windows AMD64 | 87,415,840 Bytes / 83.37 MiB | 241,352,032 Bytes / 230.17 MiB |
-| Darwin x86_64 | 71,031,964 Bytes / 67.74 MiB | 187,827,125 Bytes / 179.13 MiB |
+| macOS Sequoia / Apple Silicon | 64.339.067 Bytes / 61,36 MiB | 181.426.152 Bytes / 173,02 MiB |
+| macOS Sequoia / Intel | 71.115.607 Bytes / 67,82 MiB | 187.937.099 Bytes / 179,23 MiB |
+| Windows x64 | 87.506.542 Bytes / 83,45 MiB | 241.461.564 Bytes / 230,28 MiB |
 
-Die GitHub-Artifact-Hülle kann durch zusätzliche Kompression eine andere Downloadgröße haben. Plattform-/Pythonversionen und Bytewerte sind im Rohbericht gespeichert.
+Die GitHub-Artifact-Hülle kann wegen zusätzlicher Kompression eine andere
+Downloadgröße haben. Plattform-/Pythonversionen, Bytewerte und Selbsttestdetails
+stehen im Rohbericht. Die Pakete sind nicht signiert/notarisiert. Automatisierte
+native Qt-Prüfung, keine vollständige manuelle Abnahme jeder Eingabekombination.
 
-Automatisierte native Qt-Prüfung, keine vollständige manuelle Bedienabnahme jeder Eingabekombination. Pakete sind nicht signiert/notarisiert. Die Bestätigung eines abweichenden Plans erklärt ihn nicht für regelkonform; offene betriebliche Rechts-/Tarifprofile bleiben offen. Keine echte Benutzerdatenbank geöffnet oder verändert; bestehende Bestätigungsdaten bleiben lesbar.
+Offene betroffene Fachdetails bleiben in [Informationsprüfung](V2_INFO_AUDIT.md)
+und [offenen Fragen](V2_OFFENE_FRAGEN.md) benannt, insbesondere Teilmonatsquoten
+freier Wochenenden und der relative Rang freiwilliger T-/TS-Teilnahme. Eine
+Bestätigung erklärt einen abweichenden Plan nicht für regelkonform. Dies ist kein
+pauschaler Nachweis aller 125 Produktabnahmen oder betrieblicher Rechts-/Tarifprofile.
