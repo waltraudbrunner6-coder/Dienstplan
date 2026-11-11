@@ -3,8 +3,8 @@
 Aktueller Folgeauftrag: **0.5.1 – automatische Weiterplanung mit genehmigten Freiwünschen**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
 die folgenden älteren Etappenberichte bleiben als Verlauf erhalten.
 
-**Geliefert:** Version 0.5.0 auf `feat/v2-implementation`, Programm-/Teststand
-`1361571`, lokale Gesamtsuite 549 Tests bestanden. Native Windows-x64-,
+**Geliefert:** Version 0.5.1 auf `feat/v2-implementation`, Programm-/Teststand
+`bed7df9`, lokale Gesamtsuite 566 Tests bestanden. Native Windows-x64-,
 macOS-Sequoia-ARM64- und Intel-Pakete vollständig erfolgreich gebaut und geprüft.
 Aktuelle Downloads und gemessene Größen: [Native Prüfung](V2_NATIVE_PRUEFUNG.md).
 
@@ -1098,3 +1098,28 @@ berücksichtigt R ausdrücklich als normale Arbeit; Kontobuchung und reale
 Kalenderzeit bleiben getrennt. Keine Abhängigkeit oder Datenschemafassung geändert.
 Programm-/Teststand wird jetzt für die native Gesamtmatrix committed und gepusht;
 0.5.0-Nachweis unverändert unter `examples/v2/native-0-5-0.json` archiviert.
+
+### Native Lieferung 0.5.1 abgeschlossen
+
+**Run 43111660919**, Programm-/Testcommit **bed7df9**: Windows x64, macOS Sequoia
+ARM64 und Intel vollständig erfolgreich. Jede Plattform führte vollständige
+Testsuite, Paketbau und Programm-Selbsttest aus. **`approved_wish_planning=true`**
+ist in allen drei gebauten Programmen nachgewiesen: gültige Fixierung plus
+genehmigter Donnerstagwunsch, echte Berechnung, Qt-Vorschau/Übernahme, SQLite und
+Export. Version 0.5.1, Commit, unveränderter Buildstand, sämtliche übrigen
+Selbsttestflags und drei nicht abgelaufene Artefakte unabhängig geprüft.
+
+Native Archivgrößen: Windows **87.516.917 Bytes / 83,46 MiB**, Apple Silicon
+**64.357.593 Bytes / 61,38 MiB**, Intel **71.136.390 Bytes / 67,84 MiB**.
+Downloads und entpackte Größen in `V2_NATIVE_PRUEFUNG.md`; Rohdaten in
+`examples/v2/native-pruefung.json`, vorheriger Stand bytegleich in
+`examples/v2/native-0-5-0.json`. Nachfolgende reine Nachweiscommits ändern den
+geprüften Programm-/Testcode nicht. Kein Merge nach main, keine echte Datenbank
+geöffnet oder migriert, keine Originaldaten in Regressionen. Bestehende Datenbank
+weiterverwenden; für die Korrektur ist kein erneuter Import erforderlich.
+
+Aktueller Fehler behoben und geliefert. Echte unvereinbare Fixierungen werden
+weiter konkret ausgewiesen; sie werden durch eine Wunschgenehmigung nicht
+automatisch aufgelöst. Übergreifende offene Fachprofile und nicht nachgewiesene
+manuelle Plattformabnahmen bleiben begrenzt offen. Bei Wiederaufnahme zuerst
+Git-Stand, diese Fortschrittsdatei und den aktuellen nativen Nachweis lesen.
