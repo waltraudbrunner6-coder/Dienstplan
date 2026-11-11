@@ -983,3 +983,20 @@ Nächster Schritt: diesen geprüften Programm-/Teststand committen und auf
 `feat/v2-implementation` pushen, native Windows-/macOS-Matrix ausführen und erst
 nach Erfolg die aktuellen Paketlinks und tatsächlich gemessenen Größen eintragen.
 Kein Merge nach main, keine echte Datenbank oder produktive Tarifzuordnung geändert.
+
+Erster nativer Lauf **43053041304** auf **330b762**: Windows meldete einen
+veralteten UI-Test, der für einen Donnerstagsdienst zwingend einen Fehler statt
+der inzwischen gewünschten Warnung mit Übersteuerung erwartete. Die neue
+Terminausnahme war im letzten gezielten Nachlauf geprüft; dieser ältere UI-Test
+war darin nicht enthalten. Erwartung nach bestätigter Nutzerregel korrigiert:
+Warnung muss „Teamvariante“ enthalten; Ablehnung lässt Eingaben, Plan, gewählte
+Termine und Revisionsnummer unverändert. Zusätzlich bleibt eine technisch
+ungültige Datumseingabe ein Fehler ohne Planverlust. Keine Änderung am
+Programmcode oder an automatischen Schutzregeln für diese Testkorrektur.
+Restliche Jobs dieses überholten Laufs abgebrochen; keine Pakete daraus freigegeben.
+Erneuter gemeinsamer UI-Nachlauf und neue native Gesamtmatrix folgen.
+
+Gemeinsamer Nachlauf `QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -q
+tests/test_v2_ui.py tests/test_v2_term_dialog.py tests/test_v2_person_dialog.py
+--disable-warnings --maxfail=2`: **46 bestanden in 15,84 s**. Die vollständige
+native Matrix wird mit der geprüften Testkorrektur erneut gestartet.

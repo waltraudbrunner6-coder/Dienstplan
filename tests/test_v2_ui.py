@@ -83,11 +83,21 @@ def test_thursday_csv_stays_editable_then_atomic_application_after_correction(wo
     assert w.store.load_workspace(2026,11)==(w.inputs,w.profile,before_blocks,before_events) and w.blocks==before_blocks
 
 
-def test_invalid_term_does_not_remove_current_valid_draft(workbench):
-    w=workbench;before=w.blocks
+def test_declined_thursday_override_does_not_change_current_valid_draft(workbench,monkeypatch):
+    w=workbench;before=(w.inputs,w.blocks,w.events,w.store.input_revision);messages=[]
+    monkeypatch.setattr(w,'confirm_override',lambda found:messages.extend(found) or False)
     w.code.setCurrentText('KC10');w.day.setText('2026-11-12')
-    with pytest.raises(ValueError,match='Teamvariante'):w.add_term()
-    assert w.blocks==before
+    w.add_term()
+    assert any('Teamvariante' in message for message in messages)
+    assert (w.inputs,w.blocks,w.events,w.store.input_revision)==before
+    assert w.store.load_workspace(2026,11)==(before[0],w.profile,before[1],before[2])
+
+
+def test_technically_invalid_term_does_not_remove_current_valid_draft(workbench):
+    w=workbench;before=(w.inputs,w.blocks,w.events,w.store.input_revision)
+    w.code.setCurrentText('KC10');w.day.setText('kein Datum')
+    with pytest.raises(ValueError):w.add_term()
+    assert (w.inputs,w.blocks,w.events,w.store.input_revision)==before
 
 
 def test_correction_sql_failure_rolls_back_inputs_and_keeps_staging(workbench):
