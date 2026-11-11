@@ -143,3 +143,7 @@ Ab 0.4.3 öffnet die manuelle Zuordnung direkt die Personenauswahl, auch nach ei
 Import ohne BK/WL-Wochenprofil. Fixierungen werden bei einem bestätigten Wechsel
 korrekt auf die neue Person übertragen. Umfang der erneuten Funktionsprüfung:
 [Bedienprüfung 0.4.3](docs/V2_BEDIENPRUEFUNG_0_4_3.md).
+
+Ab 0.4.4 darf ein Monat nach Warnung auch mit Regelverstößen oder offenen Plätzen
+bestätigt werden. Die Abweichungen bleiben im bestätigten Stand dokumentiert und
+nach Neustart sichtbar. Bereits bestätigte Monate bleiben unveränderlich.

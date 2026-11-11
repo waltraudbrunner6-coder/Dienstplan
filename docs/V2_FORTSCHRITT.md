@@ -895,3 +895,10 @@ gezielter Bestätigungsnachlauf einschließlich tatsächlichem Schließen und
 Wiederöffnen der Qt-Anwendung: **4 bestanden in 1,24 s**. `git diff --check`
 fehlerfrei. Native Pakete werden nach diesem geprüften Programm-/Testcommit
 gebaut; bisherige 0.4.3-Pakete enthalten die neue Bestätigung noch nicht.
+
+Native Lieferung 0.4.4: **Run 42931888956**, Programm-/Testcommit **90a67d6**.
+Windows x64, macOS Sequoia ARM64 und Intel vollständig erfolgreich: Testsuite,
+Paketbuild und Programm-Selbsttests. Rohdaten: `examples/v2/native-pruefung.json`;
+0.4.3 unter `native-0-4-3.json` archiviert. Aktuelle Links und Paketgrößen in
+`V2_NATIVE_PRUEFUNG.md`. Keine echte Datenbank verändert, kein Merge nach main.
+Nachfolgende reine Nachweiscommits ändern den geprüften Programm-/Testcode nicht.

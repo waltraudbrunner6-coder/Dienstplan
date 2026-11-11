@@ -258,3 +258,13 @@ einen solchen Entwurf. Technisch ungültige Eingaben bleiben atomar gesperrt.
 Synthetische Regressionen: `test_v2_overrides.py` und `test_v2_ui.py`.
 Dies erklärt die neue Erwartung bei den bisherigen Ablehnungsprüfungen; die
 Regeln des automatischen Solvers und unveränderliche Historie bleiben erhalten.
+
+### Nutzerergänzung 11.11.2026 – Bestätigung mit Abweichungen
+
+Ab 0.4.4 können Regelverletzungen und offene Plätze ausdrücklich bestätigt werden.
+Die unabhängige Prüfung bleibt streng; die Bestätigung friert die gemeldeten
+Abweichungen ein und stellt keinen bestandenen Konformitätstest dar. Neue
+Regressionen prüfen Ablehnen/Zustimmen, Speicher-Rundlauf und Qt-Neustart,
+Unveränderlichkeit, Idempotenz, Transaktionsfehler und bestätigte Randwochen.
+Gesamtlauf: 441 Tests bestanden. Dies erklärt die neue Ausnahme zu früheren
+Ablehnungsfällen und erklärt nicht den vollständigen V2-Abnahmekatalog für bestanden.

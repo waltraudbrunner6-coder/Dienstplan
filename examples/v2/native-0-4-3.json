@@ -1,0 +1,198 @@
+{
+  "run_id": 42924260302,
+  "commit": "1ef36fe4f4787750a63d49d2d450cf32722fbaf7",
+  "url": "https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42924260302",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "native (macos-15-intel, macOS-Sequoia-x64)",
+      "job_id": 130206588664,
+      "conclusion": "success",
+      "v2_self_test": {
+        "selbsttest": "bestanden",
+        "scope": "Hauptoberfläche mit Standardmonat; Rechenkette separat mit synthetischer Fixture",
+        "personen": 12,
+        "zuteilungen": 8,
+        "tzdata": "2026.6",
+        "iana": "2026f",
+        "dst": true,
+        "solver_pruefer": true,
+        "sqlite": true,
+        "exportpaket": true,
+        "qt": true,
+        "hauptoberflaeche": true,
+        "standarddienste": true,
+        "ausschlussliste": true,
+        "stundenanzeige": true,
+        "dauerhafte_datei": true,
+        "vorschau_anzeige": true,
+        "excel_import_export": true,
+        "automatic_pause": true,
+        "weekly_configuration": true,
+        "manual_assignment": true,
+        "build": {
+          "version": "0.4.3",
+          "commit": "1ef36fe4f4787750a63d49d2d450cf32722fbaf7",
+          "dirty": false,
+          "build_time_utc": "2026-11-10T23:45:23.534354+00:00",
+          "platform": "Darwin",
+          "architecture": "x86_64"
+        }
+      },
+      "build": {
+        "version": "0.4.3",
+        "commit": "1ef36fe4f4787750a63d49d2d450cf32722fbaf7",
+        "dirty": false,
+        "build_time_utc": "2026-11-10T23:45:23.534354+00:00",
+        "platform": "Darwin",
+        "architecture": "x86_64",
+        "os_version": "15.7.9",
+        "python": "3.12.10",
+        "artifact": "/Users/runner/work/Dienstplan/Dienstplan/dist/Dienstplan.app",
+        "bytes": 187820588,
+        "mib": 179.12,
+        "archive": "/Users/runner/work/Dienstplan/Dienstplan/dist/Dienstplan-Darwin-x86_64-1ef36fe.tar.gz",
+        "archive_bytes": 71024978,
+        "archive_mib": 67.73,
+        "signed": false,
+        "stripped": false
+      }
+    },
+    {
+      "name": "native (macos-15, macOS-Sequoia-arm64)",
+      "job_id": 130206588965,
+      "conclusion": "success",
+      "v2_self_test": {
+        "selbsttest": "bestanden",
+        "scope": "Hauptoberfläche mit Standardmonat; Rechenkette separat mit synthetischer Fixture",
+        "personen": 12,
+        "zuteilungen": 8,
+        "tzdata": "2026.6",
+        "iana": "2026f",
+        "dst": true,
+        "solver_pruefer": true,
+        "sqlite": true,
+        "exportpaket": true,
+        "qt": true,
+        "hauptoberflaeche": true,
+        "standarddienste": true,
+        "ausschlussliste": true,
+        "stundenanzeige": true,
+        "dauerhafte_datei": true,
+        "vorschau_anzeige": true,
+        "excel_import_export": true,
+        "automatic_pause": true,
+        "weekly_configuration": true,
+        "manual_assignment": true,
+        "build": {
+          "version": "0.4.3",
+          "commit": "1ef36fe4f4787750a63d49d2d450cf32722fbaf7",
+          "dirty": false,
+          "build_time_utc": "2026-11-10T23:37:08.705974+00:00",
+          "platform": "Darwin",
+          "architecture": "arm64"
+        }
+      },
+      "build": {
+        "version": "0.4.3",
+        "commit": "1ef36fe4f4787750a63d49d2d450cf32722fbaf7",
+        "dirty": false,
+        "build_time_utc": "2026-11-10T23:37:08.705974+00:00",
+        "platform": "Darwin",
+        "architecture": "arm64",
+        "os_version": "15.8.2",
+        "python": "3.12.10",
+        "artifact": "/Users/runner/work/Dienstplan/Dienstplan/dist/Dienstplan.app",
+        "bytes": 181309641,
+        "mib": 172.91,
+        "archive": "/Users/runner/work/Dienstplan/Dienstplan/dist/Dienstplan-Darwin-arm64-1ef36fe.tar.gz",
+        "archive_bytes": 64246490,
+        "archive_mib": 61.27,
+        "signed": false,
+        "stripped": false
+      }
+    },
+    {
+      "name": "native (windows-latest, Windows-x64)",
+      "job_id": 130206589087,
+      "conclusion": "success",
+      "v2_self_test": {
+        "selbsttest": "bestanden",
+        "scope": "Hauptoberfl�che mit Standardmonat; Rechenkette separat mit synthetischer Fixture",
+        "personen": 12,
+        "zuteilungen": 8,
+        "tzdata": "2026.6",
+        "iana": "2026f",
+        "dst": true,
+        "solver_pruefer": true,
+        "sqlite": true,
+        "exportpaket": true,
+        "qt": true,
+        "hauptoberflaeche": true,
+        "standarddienste": true,
+        "ausschlussliste": true,
+        "stundenanzeige": true,
+        "dauerhafte_datei": true,
+        "vorschau_anzeige": true,
+        "excel_import_export": true,
+        "automatic_pause": true,
+        "weekly_configuration": true,
+        "manual_assignment": true,
+        "build": {
+          "version": "0.4.3",
+          "commit": "1ef36fe4f4787750a63d49d2d450cf32722fbaf7",
+          "dirty": false,
+          "build_time_utc": "2026-11-10T23:38:55.816880+00:00",
+          "platform": "Windows",
+          "architecture": "AMD64"
+        }
+      },
+      "build": {
+        "version": "0.4.3",
+        "commit": "1ef36fe4f4787750a63d49d2d450cf32722fbaf7",
+        "dirty": false,
+        "build_time_utc": "2026-11-10T23:38:55.816880+00:00",
+        "platform": "Windows",
+        "architecture": "AMD64",
+        "os_version": "10.0.26100",
+        "python": "3.12.10",
+        "artifact": "D:\\a\\Dienstplan\\Dienstplan\\dist\\Dienstplan",
+        "bytes": 241345464,
+        "mib": 230.16,
+        "archive": "D:\\a\\Dienstplan\\Dienstplan\\dist\\Dienstplan-Windows-AMD64-1ef36fe.zip",
+        "archive_bytes": 87412044,
+        "archive_mib": 83.36,
+        "signed": false,
+        "stripped": false
+      }
+    }
+  ],
+  "limits": [
+    "Automatisierte native Qt-Prüfung; keine vollständige manuelle Bedienabnahme.",
+    "Keine OS-weite Netzabschaltung, Signierung oder Notarisierung nachgewiesen.",
+    "Hauptoberfläche geprüft; Rechenkette mit synthetischer Fixture, keine Rechts-/Tariffreigabe."
+  ],
+  "artifacts": [
+    {
+      "id": 13813586611,
+      "name": "Dienstplan-Windows-x64",
+      "bytes": 86978087,
+      "expired": false,
+      "url": "https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42924260302/artifacts/13813586611"
+    },
+    {
+      "id": 13813493122,
+      "name": "Dienstplan-macOS-Sequoia-x64",
+      "bytes": 70801475,
+      "expired": false,
+      "url": "https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42924260302/artifacts/13813493122"
+    },
+    {
+      "id": 13812938898,
+      "name": "Dienstplan-macOS-Sequoia-arm64",
+      "bytes": 63981485,
+      "expired": false,
+      "url": "https://github.com/waltraudbrunner6-coder/Dienstplan/actions/runs/42924260302/artifacts/13812938898"
+    }
+  ]
+}

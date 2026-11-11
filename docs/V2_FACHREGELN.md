@@ -403,3 +403,16 @@ Prüfer und automatische Planung behalten ihre Regeln; Abweichungen bleiben
 Abweichungen. Keine Freigabe einer Rechts-/Tarifkonformität. Technisch undefinierte
 Daten können weiter nicht aktiv übernommen werden. Bedienung und Abgrenzung:
 `TABELLENIMPORT.md`, Abschnitt „Ausdrückliche Regelübersteuerung“.
+
+## Nutzerergänzung 11.11.2026: Monatsbestätigung trotz Abweichungen
+
+Monatspläne mit Regelverletzungen, offenen Plätzen und Stundenabweichungen dürfen
+nach ausdrücklicher Warnung bestätigt werden. Das bisherige Verbot der Bestätigung
+solcher Entwürfe entfällt für diesen bestätigten Ausnahmeweg. Die unveränderliche
+Bestätigung speichert Regelmeldungen, offene Plätze und die Zustimmung. Auch
+Widersprüche zu bestätigten Randwochen dürfen als solche eingefroren werden;
+bereits gespeicherte Bestätigungen werden nicht umgedeutet. Die Oberfläche
+kennzeichnet die bestätigten Abweichungen auch nach Neustart. Wiederholte
+Bestätigung darf keine zusätzliche Historie erzeugen. Keine Aussage über
+Regelkonformität, keine erfundenen undefinierten Rechenwerte und keine Änderung
+bestehender historischer Fakten. Fachlich offene Rechen-/Tarifprofile bleiben offen.
