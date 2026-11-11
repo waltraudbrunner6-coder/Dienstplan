@@ -141,6 +141,9 @@ def test_shared_week_reservations_are_atomic_and_cannot_be_changed_in_next_month
         assert saved['quota_reservations']=={'WL':['2026-11-30/WL'],'BK':['2026-12-02/BK']}
         with pytest.raises(DomainError,match='Randwochenbindung'):confirm(store,'dec',december,new_blocks)
         assert len(store.confirmations())==1 and store.input_revision==revision
+        overridden=confirm(store,'dec',december,new_blocks,allow_violations=True)
+        assert overridden['confirmation_override'] and any('Randwochenbindung' in m for m in overridden['warnings'])
+        assert len(store.confirmations())==2
 
 
 def test_exact_leave_credit_union_and_negative_work_goal_without_negative_assignment():

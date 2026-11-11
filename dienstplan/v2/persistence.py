@@ -337,6 +337,11 @@ class V2Store:
             result.append((id,value))
         return tuple(result)
 
+    def confirmed_month(self,year,month):
+        from .history import checked_payload
+        row=self.connection.execute('SELECT r.payload FROM v2_meta m JOIN v2_revisions r ON m.value=r.id WHERE m.key=?',(f'confirmation:{year:04d}-{month:02d}',)).fetchone()
+        return checked_payload(row[0]) if row else None
+
     def wish_history(self,month,*,policy):
         from .history import wish_history
         legacy=self.connection.execute("SELECT value FROM v2_meta WHERE key='legacy_fingerprint'").fetchone()
@@ -344,11 +349,12 @@ class V2Store:
                             legacy_missing=('Legacy-Wunsch-/Zulagenhistorie nicht belegt; keine Umdeutung.',) if legacy else ())
 
     def confirm(self,id,inputs,blocks,events,*,accounts,wish_policy,fairness_policy,holidays=frozenset(),
-                target_profile,month_profile,expected_revision,synthetic=False):
+                target_profile,month_profile,expected_revision,synthetic=False,allow_violations=False):
         from .history import confirmation,request_key
+        from .serialization import fingerprint
         month=f'{inputs.year:04d}-{inputs.month:02d}';key='confirmation:'+month
         blocks,events,accounts=tuple(blocks),tuple(events),tuple(accounts)
-        request=request_key(inputs,blocks,events,accounts,wish_policy,fairness_policy,holidays,target_profile,month_profile)
+        request=request_key(inputs,blocks,events,accounts,wish_policy,fairness_policy,holidays,target_profile,month_profile,allow_violations)
         with self.transaction():
             current=dict((v['month'],(rid,v)) for rid,v in self.confirmations())
             if month in current:
@@ -358,11 +364,16 @@ class V2Store:
             if expected_revision!=self.input_revision:raise DomainError('Eingaben/Historie geändert; vor Bestätigung erneut prüfen.')
             value=confirmation(inputs,blocks,events,accounts=accounts,wish_policy=wish_policy,fairness_policy=fairness_policy,
                                holidays=holidays,history=self.wish_history(month,policy=wish_policy),target_profile=target_profile,
-                               month_profile=month_profile,synthetic=synthetic)
+                               month_profile=month_profile,synthetic=synthetic,allow_violations=allow_violations)
             for _,old in self.confirmations():
                 for quota,choices in value['quota_reservations'].items():
                     prior=old.get('quota_reservations',{}).get(quota)
-                    if prior is not None and prior!=choices:raise DomainError(f'Bestätigte Randwochenbindung {quota} widerspricht der neuen Terminwahl.')
+                    if prior is not None and prior!=choices:
+                        message=f'Bestätigte Randwochenbindung {quota} widerspricht der neuen Terminwahl.'
+                        if not allow_violations:raise DomainError(message)
+                        value['warnings'].append(message)
+            value['warnings']=list(dict.fromkeys(value['warnings']))
+            value['content_fingerprint']=fingerprint({k:v for k,v in value.items() if k!='content_fingerprint'})
             self._immutable('v2_revisions',id,encoded(value))
             self.connection.execute('INSERT INTO v2_meta VALUES(?,?)',(key,id))
             self.connection.execute("UPDATE v2_meta SET value=CAST(value AS INTEGER)+1 WHERE key='input_revision'")

@@ -16,27 +16,32 @@ def month_keys(start,end):
     return tuple(result)
 
 
-def request_key(inputs,blocks,events,accounts,wish_policy,fairness_policy,holidays,target_profile,month_profile):
-    return fingerprint((inputs,tuple(blocks),tuple(events),tuple(accounts),wish_policy,fairness_policy,
-                        frozenset(holidays),target_profile,month_profile))
+def request_key(inputs,blocks,events,accounts,wish_policy,fairness_policy,holidays,target_profile,month_profile,allow_violations=False):
+    base=(inputs,tuple(blocks),tuple(events),tuple(accounts),wish_policy,fairness_policy,
+                        frozenset(holidays),target_profile,month_profile)
+    return fingerprint((base,"confirmation_override",True) if allow_violations else base)
 
 
 def confirmation(inputs,blocks,events,*,accounts,wish_policy,fairness_policy,holidays,
-                 history,target_profile,month_profile,synthetic):
+                 history,target_profile,month_profile,synthetic,allow_violations=False):
     # F01/F02/F04/F14 sind nicht durch technische Rechenbeispiele entschieden.
     if synthetic is not True or not wish_policy.synthetic or not fairness_policy.synthetic:
         raise DomainError('Produktive V2-Bestätigung ist noch nicht freigegeben; nur ausdrückliche Testbestätigung.')
     from .solver import verify
     blocks=tuple(blocks);events=tuple(events);accounts=tuple(accounts);holidays=frozenset(holidays)
     core,calendar=verify(inputs,blocks,active_events=events)
-    if core.issues or calendar.issues:raise DomainError('Bestätigung wegen verbindlicher Konflikte abgelehnt: '+ '; '.join(i.message for i in core.issues+calendar.issues))
-    if core.open_slots:raise DomainError('Offene Plätze können hier nur als Entwurf gespeichert werden.')
+    if any(i.rule in {'identity','reference','duplicate','template'} for i in core.issues):raise DomainError('Technisch widersprüchliche Kennungen oder Zuteilungen können nicht bestätigt werden.')
+    if not allow_violations and (core.issues or calendar.issues):raise DomainError('Bestätigung wegen verbindlicher Konflikte abgelehnt: '+ '; '.join(i.message for i in core.issues+calendar.issues))
+    if not allow_violations and core.open_slots:raise DomainError('Offene Plätze können hier nur als Entwurf gespeichert werden.')
     year,month=inputs.year,inputs.month;month_key=f'{year:04d}-{month:02d}'
     current_events=tuple(e for e in events if (e.attendance.start_day.year,e.attendance.start_day.month)==(year,month))
     current_ids={e.id for e in current_events};current_blocks=tuple(b for b in blocks if b.id in current_ids)
     all_blocks=tuple({(b.id,b.person_id):b for b in inputs.boundary+blocks}.values())
     facts=dict(format='v2-confirmation-1',month=month_key,scope='Synthetischer Teststand; keine produktive V2-Umschaltung',
-               request_fingerprint=request_key(inputs,blocks,events,accounts,wish_policy,fairness_policy,holidays,target_profile,month_profile),
+               request_fingerprint=request_key(inputs,blocks,events,accounts,wish_policy,fairness_policy,holidays,target_profile,month_profile,allow_violations),
+               confirmation_override=allow_violations,
+               warnings=list(dict.fromkeys(tuple(i.message for i in core.issues+calendar.issues)+tuple(f'{id}: {count} offene Plätze' for id,count in core.open_slots)+inputs.unchecked+calendar.unchecked+inputs.override_notes)),
+               issues=plain(core.issues+calendar.issues),open_slots=plain(core.open_slots),
                input_fingerprint=inputs.fingerprint,inputs=plain(inputs),events=plain(current_events),blocks=plain(current_blocks),
                accounts=plain(accounts),wish_policy=plain(wish_policy),fairness_policy=plain(fairness_policy),
                target_profile=target_profile,month_profile=month_profile,
@@ -50,6 +55,8 @@ def confirmation(inputs,blocks,events,*,accounts,wish_policy,fairness_policy,hol
                quota_reservations={q.id:sorted(e.id for e in events if e.service.code==q.code and q.dates.includes(e.attendance.start_day)) for q in inputs.quotas})
     if any(not r['credits_known'] for r in facts['hours']):
         raise DomainError('Urlaubsgutschrifttage sind ungeklärt; keine Bestätigung mit angenommener Nullgutschrift.')
+    from .presentation import hours_text
+    facts['warnings']+= [f"{r['person_id']}: Abweichung vom Arbeitsziel {hours_text(r['deviation'])} h" for r in facts['hours'] if r['credits_known'] and r['deviation']]
     facts=plain(facts)
     facts['content_fingerprint']=fingerprint(facts)
     return facts

@@ -171,3 +171,20 @@ Die Wochenregel wird über „BK/WL automatisch: 2 WL + 1 BK“ oder vor einer
 entsprechenden automatischen Planung eingerichtet. Auch das ausdrückliche
 Einrichten erhält die bereits zugeteilten Dienste; zusätzliche benötigte Termine
 erscheinen mit offenen Plätzen. Manuelle Regelübersteuerungen bleiben möglich.
+
+### Monat trotz Abweichungen bestätigen (ab 0.4.4)
+
+„Monat bestätigen“ zeigt bei Regelverletzungen, offenen Besetzungsplätzen,
+Stundenabweichungen oder ungeprüften Regeln eine Warnung. Mit „Ja“ wird der
+angezeigte Monatsstand trotzdem unveränderlich bestätigt. „Nein“ lässt ihn
+unverändert und bearbeitbar. Hinweise, Regelmeldungen und offene Plätze werden
+mit dem bestätigten Stand gespeichert; die Oberfläche kennzeichnet ihn auch
+nach erneutem Öffnen als „MONAT BESTÄTIGT MIT ABWEICHUNGEN“.
+
+Eine wiederholte Bestätigung erzeugt keine zusätzliche Historie. Bereits
+bestätigte Monate bleiben unveränderlich. Auch Widersprüche zu bestätigten
+Randwochen können ausdrücklich bestätigt werden; die widersprüchlichen Fakten
+werden dokumentiert und bestehende Bestätigungen nicht umgeschrieben. Die
+Bestätigung erklärt einen abweichenden Plan nicht für regelkonform. Technisch
+ungültige Kennungen oder undefinierte Rechengrundlagen werden weiterhin nicht
+erfunden (beispielsweise ungeklärte Urlaubsgutschrifttage).

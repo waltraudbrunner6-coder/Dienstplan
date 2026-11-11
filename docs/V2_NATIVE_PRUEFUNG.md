@@ -1,3 +1,7 @@
+> Folgeversion 0.4.4 ergänzt die Monatsbestätigung trotz Abweichungen.
+> Die folgenden Downloads dokumentieren noch 0.4.3; neue Nachweise folgen
+> nach erfolgreichem nativem Prüflauf.
+
 # Dienstplan 0.4.3 – direkte manuelle Zuordnung und Bedienprüfung
 
 Stand 11.11.2026. Geprüfter Programm-/Testcommit **1ef36fe**. Windows x64, macOS Sequoia ARM64 und Intel: Testsuite, Paketbuild und die Prüfung des gebauten Programms erfolgreich.

@@ -1,7 +1,6 @@
 # V2 – Implementierungsstand und Wiederaufnahme
 
-Aktueller Folgeauftrag: **0.4.3 – direkte manuelle Zuordnung und erneute
-Funktionsprüfung der Bedienwege**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
+Aktueller Folgeauftrag: **0.4.4 – ausdrückliche Monatsbestätigung trotz Abweichungen**. Der jüngste Prüf-/Lieferstand steht am Dateiende;
 die folgenden älteren Etappenberichte bleiben als Verlauf erhalten.
 
 ## Aktueller Folgeauftrag: Excel-Import, Monatsansicht, Pausen und BK/WL (0.4.0)
@@ -871,3 +870,28 @@ Wiederholung. Rohdaten: `examples/v2/native-pruefung.json`; 0.4.2 unter
 `native-0-4-2.json` archiviert. Aktuelle Links und Paketgrößen:
 `V2_NATIVE_PRUEFUNG.md`. Keine Datenmigration, kein Merge nach main. Reine spätere
 Nachweiscommits ändern diesen geprüften Programm-/Teststand nicht.
+
+## Bestätigung mit Abweichungen 0.4.4
+
+Neue Nutzerregel: Monatsbestätigung darf trotz Verfehlungen nach ausdrücklicher
+Warnung erfolgen. UI prüft Regeln, offene Plätze, Stundenabweichungen und
+ungeprüfte Regeln; Zustimmung separat von der bisherigen manuellen
+Regelübersteuerung, standardmäßig Nein. Speicher prüft unabhängig erneut;
+`allow_violations=True` ist erforderlich für harte Konflikte/offene Plätze und
+abweichende bestätigte Randwochen. Bestätigungs-Snapshot friert Hinweise,
+Regelmeldungen, offene Plätze und ausdrückliche Übersteuerung ein. Sichtbarer
+Status nach Neustart. Bestehende Hashes/Reader bleiben kompatibel; unveränderliche
+Historie, Revisionsprüfung, Transaktionen und Idempotenz bleiben erhalten.
+Technisch widersprüchliche Kennungen und ungeklärte Rechengrundlagen bleiben
+Fehler, keine erfundenen Werte. Keine echte Benutzerdatenbank verändert.
+
+Gezielte Prüfung: neue Bestätigungs-, bestehende Historien- und Qt-Tests:
+40 bestanden in 12,71 s. Zusätzliche Randwochen-Override-Regression ergänzt.
+Gesamtprüfung und native Nachweise folgen nach Abschluss.
+
+Abschließender Gesamtlauf `QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest
+-q --disable-warnings --maxfail=1`: **441 bestanden in 284,52 s**. Erweiterter
+gezielter Bestätigungsnachlauf einschließlich tatsächlichem Schließen und
+Wiederöffnen der Qt-Anwendung: **4 bestanden in 1,24 s**. `git diff --check`
+fehlerfrei. Native Pakete werden nach diesem geprüften Programm-/Testcommit
+gebaut; bisherige 0.4.3-Pakete enthalten die neue Bestätigung noch nicht.

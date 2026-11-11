@@ -99,7 +99,7 @@ def test_correction_sql_failure_rolls_back_inputs_and_keeps_staging(workbench):
 
 
 def test_person_contract_editor_and_following_month_use_confirmed_facts(workbench,monkeypatch):
-    w=workbench;w.save();w.confirm()
+    w=workbench;w.save();monkeypatch.setattr(w,'confirm_override',lambda messages,**kw:True);w.confirm()
     monkeypatch.setattr(QInputDialog,'getText',lambda *a:('2026-12',True))
     w.new_month()
     assert w.inputs.month==12 and len(w.profile.history.confirmation_ids)==1

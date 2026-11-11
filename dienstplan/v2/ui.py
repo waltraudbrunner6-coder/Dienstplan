@@ -340,6 +340,10 @@ class Workbench(QDialog):
         lower,upper=required_work_range(events,blocks,self.inputs.year,self.inputs.month,boundary=self.inputs.boundary)
         monthly=hours_text(lower) if lower==upper else hours_text(lower)+'–'+hours_text(upper)
         status+=f' | Operativer Bedarf im Planungshorizont ohne ungeklärte R-Bewertung: {hours_text(required)} h. Im Kalendermonat inkl. bekannter Randdienste: {monthly} h; nicht negatives Arbeitsziel im Monat: '+(f'{hours_text(target)} h.' if target is not None else 'ungeklärt.')
+        confirmed=self.store.confirmed_month(self.inputs.year,self.inputs.month)
+        if confirmed:
+            status=('MONAT BESTÄTIGT MIT ABWEICHUNGEN. ' if confirmed.get('confirmation_override') else 'MONAT BESTÄTIGT. ')+status
+            status+=' | '+' | '.join(confirmed.get('warnings',()))
         self.status.setText(status)
 
     def save(self):
@@ -552,11 +556,11 @@ class Workbench(QDialog):
         else:events=inputs.events
         return inputs,events
 
-    def confirm_override(self,messages):
+    def confirm_override(self,messages,*,confirmation=False):
         box=QMessageBox(self)
-        box.setWindowTitle('Regeln ausdrücklich übergehen')
+        box.setWindowTitle('Monat trotz Abweichungen bestätigen' if confirmation else 'Regeln ausdrücklich übergehen')
         box.setIcon(QMessageBox.Icon.Warning)
-        box.setText('Trotz Regelverstößen übernehmen? Der Plan bleibt als Regelabweichung gekennzeichnet; der automatische Solver erhält dadurch keine Erlaubnis, Regeln zu verletzen.')
+        box.setText('Diesen Monat trotz der aufgeführten Abweichungen unveränderlich bestätigen? Die Hinweise bleiben gespeichert; die Bestätigung ist kein Nachweis der Regelkonformität.' if confirmation else 'Trotz Regelverstößen übernehmen? Der Plan bleibt als Regelabweichung gekennzeichnet; der automatische Solver erhält dadurch keine Erlaubnis, Regeln zu verletzen.')
         box.setInformativeText('\n'.join(messages[:5]))
         box.setDetailedText('\n'.join(messages) or 'Ausdrücklich gewählte Regelübersteuerung.')
         box.setStandardButtons(QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No)
@@ -765,10 +769,23 @@ class Workbench(QDialog):
         self.require_accepted_result()
         self.ensure_team_saved()
         if self.events is None:raise ValueError('Zuerst einen geprüften Entwurf erstellen.')
+        existing=self.store.confirmed_month(self.inputs.year,self.inputs.month)
+        if existing is not None:
+            self.refresh_results();return
+        core,calendar=verify(self.inputs,self.blocks,active_events=self.events)
+        messages=tuple(i.message for i in core.issues+calendar.issues)+tuple(f'{id}: {n} offene Plätze' for id,n in core.open_slots)+self.inputs.unchecked+calendar.unchecked+self.inputs.override_notes
+        from .presentation import hours_text
+        rows=hours_rows(self.inputs.people,self.blocks+self.inputs.boundary,self.inputs.absences,self.inputs.year,self.inputs.month,accounts=self.profile.accounts,target_profile='S0',month_profile='M0')
+        messages+=tuple(f'{r.person_id}: Abweichung vom Arbeitsziel {hours_text(r.deviation)} h' for r in rows if r.credits_known and r.deviation)
+        for _,old in self.store.confirmations():
+            for q in self.inputs.quotas:
+                chosen=sorted(e.id for e in self.events if e.service.code==q.code and q.dates.includes(e.attendance.start_day))
+                if q.id in old.get('quota_reservations',{}) and old['quota_reservations'][q.id]!=chosen:messages+=(f'Bestätigte Randwochenbindung {q.id} widerspricht der neuen Terminwahl.',)
+        if messages and not self.confirm_override(tuple(dict.fromkeys(messages)),confirmation=True):return
         id='calculation-confirmation/'+fingerprint((self.inputs,self.profile,self.blocks,self.events))
         self.store.confirm(id,self.inputs,self.blocks,self.events,accounts=self.profile.accounts,wish_policy=self.profile.wish_policy,
-                           fairness_policy=self.profile.fairness_policy,target_profile='S0',month_profile='M0',expected_revision=self.store.input_revision,synthetic=True)
-        self.status.setText('Rechenstand unveränderlich bestätigt. Grundlage S0/M0/E0; offene Rechts- und Tarifprofile bleiben ungeprüft.')
+                           fairness_policy=self.profile.fairness_policy,target_profile='S0',month_profile='M0',expected_revision=self.store.input_revision,synthetic=True,allow_violations=bool(messages))
+        self.refresh_results()
 
     def closeEvent(self,event):
         if self.worker and self.worker.isRunning():
